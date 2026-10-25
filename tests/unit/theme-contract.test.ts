@@ -24,6 +24,7 @@ const CONTRAST_PAIRS: [string, string, number][] = [
   ["--color-secondary-contrast", "--color-secondary", 4.5],
   ["--color-primary-strong", "--color-surface", 4.5],
   ["--color-danger", "--color-surface", 4.5],
+  ["--color-primary-contrast", "--color-danger", 4.5],
   ["--color-success", "--color-surface", 4.5],
   ["--color-warning", "--color-surface", 4.5],
   ["--color-focus", "--color-bg", 3],
