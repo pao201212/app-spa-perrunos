@@ -26,9 +26,13 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: isCI ? `npm run build && npm run start -- -p ${PORT}` : `npm run dev -- -p ${PORT}`,
+    // Por defecto se prueba el build de producción (lo que se despliega). E2E_DEV=1 usa `next dev`
+    // para iterar rápido; en dev, React tiene un error intermitente de Performance.measure al prefetchear.
+    command: process.env.E2E_DEV
+      ? `npm run dev -- -p ${PORT}`
+      : `npm run build && npm run start -- -p ${PORT}`,
     url: `http://localhost:${PORT}/api/health`,
     reuseExistingServer: !isCI,
-    timeout: 180_000,
+    timeout: 300_000,
   },
 });

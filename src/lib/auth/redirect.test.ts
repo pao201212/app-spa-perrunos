@@ -30,6 +30,12 @@ describe("callbackUrl", () => {
     );
   });
 
+  it("sin destino deja que el callback decida según el rol", () => {
+    expect(callbackUrl("http://demo.localhost:3000", undefined)).toBe(
+      "http://demo.localhost:3000/auth/callback",
+    );
+  });
+
   it("sanea el destino antes de construir la URL", () => {
     expect(callbackUrl("https://spa.prismalab.com.co", "//evil.com")).toBe(
       "https://spa.prismalab.com.co/auth/callback?next=%2F",

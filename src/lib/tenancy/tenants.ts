@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
+import type { Database } from "@/lib/db/types";
 import { getPublicEnv } from "@/lib/env";
 
 export type Tenant = {
@@ -16,7 +17,7 @@ export type Tenant = {
  */
 export async function fetchActiveTenant(slug: string): Promise<Tenant | null> {
   const { supabaseUrl, supabasePublishableKey } = getPublicEnv();
-  const supabase = createClient(supabaseUrl, supabasePublishableKey, {
+  const supabase = createClient<Database>(supabaseUrl, supabasePublishableKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
   const { data, error } = await supabase

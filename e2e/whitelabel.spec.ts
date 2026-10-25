@@ -47,7 +47,8 @@ test.describe("sin scroll horizontal de 320 a 1920px", () => {
 
   const pages = [
     ...TENANTS.map(({ slug }) => `http://${slug}.localhost:${PORT}/`),
-    `http://admin.localhost:${PORT}/`,
+    `http://admin.localhost:${PORT}/ingresar`,
+    `http://demo.localhost:${PORT}/ingresar`,
     `http://noexiste.localhost:${PORT}/`,
   ];
 

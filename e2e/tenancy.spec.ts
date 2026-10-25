@@ -15,9 +15,10 @@ test.describe("enrutamiento por subdominio", () => {
     });
   }
 
-  test("admin.localhost muestra la consola de plataforma", async ({ page }) => {
-    await page.goto(url("admin.localhost"));
-    await expect(page.getByRole("heading", { level: 1, name: "Consola Prisma Lab" })).toBeVisible();
+  test("admin.localhost lleva a la consola (pide ingresar sin sesión)", async ({ page }) => {
+    const response = await page.goto(url("admin.localhost"));
+    expect(response?.status()).toBe(200);
+    await expect(page.getByRole("heading", { level: 1, name: "Ingresar" })).toBeVisible();
   });
 
   for (const [caso, host, path] of [

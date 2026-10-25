@@ -6,6 +6,7 @@ import { copy } from "@/lib/copy";
 
 import { GoogleSignInButton } from "./GoogleSignInButton";
 import styles from "./LoginPanel.module.css";
+import { SignOutButton } from "./SignOutButton";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -31,9 +32,12 @@ async function LoginContent({ next, failed }: { next?: string; failed: boolean }
   const user = await getCurrentUser();
   if (user) {
     return (
-      <p>
-        {copy.auth.signedInAs} <strong>{user.email}</strong>
-      </p>
+      <>
+        <p>
+          {copy.auth.signedInAs} <strong>{user.email}</strong>
+        </p>
+        <SignOutButton />
+      </>
     );
   }
   return (

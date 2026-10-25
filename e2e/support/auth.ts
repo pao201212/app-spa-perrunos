@@ -76,3 +76,23 @@ export async function signInAs(
     })),
   );
 }
+
+/** Da al usuario una membresía de admin en el spa `slug`. */
+export async function grantMembership(user: E2EUser, slug: string): Promise<void> {
+  const client = admin();
+  const { data: tenant, error } = await client
+    .from("tenants")
+    .select("id")
+    .eq("slug", slug)
+    .single();
+  if (error) throw error;
+  const { error: insertError } = await client
+    .from("memberships")
+    .insert({ tenant_id: tenant.id, user_id: user.id, role: "admin" });
+  if (insertError) throw insertError;
+}
+
+export async function grantSuperAdmin(user: E2EUser): Promise<void> {
+  const { error } = await admin().from("platform_admins").insert({ user_id: user.id });
+  if (error) throw error;
+}

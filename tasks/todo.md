@@ -14,7 +14,7 @@
 - [x] T11 [theming] UI base: Button, Input, Select, Card, Sheet, Dialog, Badge, Tabs (44px, focus, axe)
 - [x] T12 [theming] E2E: 2 tenants con marcas distintas, sin scroll horizontal 320–1920px
 - [x] T13 [auth] Google OAuth + callback único con allowlist de redirect + cookie `.prismalab.com.co`
-- [ ] T14 [auth] Redirección por rol + selector multi-tenant + guards `requireTenantStaff`/`requireSuperAdmin`
+- [x] T14 [auth] Redirección por rol + selector multi-tenant + guards `requireTenantStaff`/`requireSuperAdmin`
 - [ ] T15 [auth] Trigger anti-escalada de rol + tests de aislamiento tenant↔tenant (bloqueantes en CI)
 - [ ] T16 [platform-console] CRUD de tenants (slug validado) + asignar admins por correo
 - [ ] T17 [platform-console] Catálogo global de razas: seed ≈150 del legado + CRUD

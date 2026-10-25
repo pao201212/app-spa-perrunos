@@ -4,6 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { connection } from "next/server";
 
+import type { Database } from "@/lib/db/types";
 import { getPublicEnv } from "@/lib/env";
 
 /** Cliente de Supabase con la sesión del usuario actual (RLS aplica). */
@@ -13,7 +14,7 @@ export async function createSupabaseServerClient() {
   const { supabaseUrl, supabasePublishableKey, cookieDomain } = getPublicEnv();
   const cookieStore = await cookies();
 
-  return createServerClient(supabaseUrl, supabasePublishableKey, {
+  return createServerClient<Database>(supabaseUrl, supabasePublishableKey, {
     cookieOptions: cookieDomain ? { domain: cookieDomain } : undefined,
     cookies: {
       getAll() {

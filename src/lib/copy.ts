@@ -18,5 +18,17 @@ export const copy = {
     signedInAs: "Sesión iniciada como",
     error: "No pudimos iniciar sesión. Intenta de nuevo.",
     unexpectedError: "Algo salió mal al conectar con Google. Intenta de nuevo.",
+    signOut: "Cerrar sesión",
+    noAccessTitle: "No tienes acceso a esta sección",
+    noAccessBody:
+      "Tu cuenta no tiene permisos para entrar aquí. Si crees que es un error, pide acceso al administrador.",
+    backHome: "Volver al inicio",
+    chooseTitle: "¿Qué spa quieres administrar?",
+  },
+  admin: {
+    panelTitle: (businessName: string) => `Panel · ${businessName}`,
+  },
+  platform: {
+    title: "Consola Prisma Lab",
   },
 } as const;

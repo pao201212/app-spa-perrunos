@@ -11,9 +11,12 @@ export function safeNextPath(next: string | null | undefined): string {
   return next;
 }
 
-/** URL a la que Google/Supabase devuelve al usuario: /auth/callback del host actual. */
+/**
+ * URL a la que Google/Supabase devuelve al usuario: /auth/callback del host actual.
+ * Sin `next`, el callback decide el destino según el rol del usuario.
+ */
 export function callbackUrl(origin: string, next: string | null | undefined): string {
   const url = new URL(AUTH_CALLBACK_PATH, origin);
-  url.searchParams.set("next", safeNextPath(next));
+  if (next) url.searchParams.set("next", safeNextPath(next));
   return url.toString();
 }
