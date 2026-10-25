@@ -2,7 +2,7 @@
 > Done = lint + typecheck + tests verdes · verificado en Pixel 7 y Desktop 1280 · 1 commit por tarea · ⛔ = checkpoint con Prisma Lab
 
 - [x] T01 [setup] Scaffold Next.js App Router + TS strict + ESLint/Prettier → `npm run build` verde
-- [ ] T02 [setup] Vitest + Testing Library + Playwright (Pixel 7, Desktop) con test humo
+- [x] T02 [setup] Vitest + Testing Library + Playwright (Pixel 7, Desktop) con test humo
 - [ ] T03 [setup] `supabase init` + clientes server/browser + `.env.example` (sin secretos)
 - [ ] T04 [setup] CI GitHub Actions: lint, typecheck, test, test:db, test:e2e
 - [ ] T05 [tenancy] Migración tenants, memberships, platform_admins, `is_super_admin()`, `is_tenant_staff()` + seed 2 tenants
