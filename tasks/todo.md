@@ -8,7 +8,7 @@
 - [x] T05 [tenancy] Migración tenants, memberships, platform_admins, `is_super_admin()`, `is_tenant_staff()` + seed 2 tenants
 - [x] T06 [tenancy] `resolveHost(host)` → slug | platform | 404 (localhost, www, reservados) + tests
 - [x] T07 [tenancy] `middleware.ts` rewrite a `/_t/[slug]` y `/platform` + `getTenant` cacheado + 404 genérica
-- [ ] T08 [theming] `tenants/_template` + spaperrunosygatunos (logos WebP, Fredoka) + demo + copia a `public/tenants/`
+- [x] T08 [theming] `tenants/_template` + spaperrunosygatunos (logos WebP, Fredoka) + demo + copia a `public/tenants/`
 - [ ] T09 [theming] Test de contrato de tokens + contraste AA + stylelint sin colores/fuentes fuera de temas
 - [ ] T10 [theming] `base.css` (reset, espaciado, breakpoints, `clamp()`) + `<link>` del tema en layout
 - [ ] T11 [theming] UI base: Button, Input, Select, Card, Sheet, Dialog, Badge, Tabs (44px, focus, axe)

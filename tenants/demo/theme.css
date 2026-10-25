@@ -1,0 +1,35 @@
+/* Spa Demo — tenant de prueba con una identidad deliberadamente distinta. */
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@400;600;700&display=swap");
+
+:root {
+  --brand-logo: url("./assets/logo.svg");
+  --brand-logo-on-dark: url("./assets/logo-on-dark.svg");
+  --brand-hero: url("./assets/hero.svg");
+  --brand-logo-ratio: 16 / 10;
+
+  --color-primary: #2bb3a3;
+  --color-primary-strong: #12675d;
+  --color-primary-contrast: #ffffff;
+  --color-secondary: #ff8a5b;
+  --color-secondary-contrast: #2b1206;
+  --color-bg: #fffaf3;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f6efe4;
+  --color-text: #1f2a37;
+  --color-text-muted: #4b5563;
+  --color-border: #e6dccd;
+  --color-success: #2e7d32;
+  --color-warning: #8a5a00;
+  --color-danger: #b42318;
+  --color-focus: #12675d;
+
+  --font-brand: "Baloo 2", system-ui, sans-serif;
+  --font-heading: "Baloo 2", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, sans-serif;
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-pill: 999px;
+  --shadow-card: 0 2px 8px rgb(31 42 55 / 0.08);
+}

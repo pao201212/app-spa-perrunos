@@ -18,7 +18,10 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local > src/lib/db/types.ts",
-    "test:db": "vitest run --config vitest.db.config.mts"
+    "test:db": "vitest run --config vitest.db.config.mts",
+    "sync:tenants": "node scripts/sync-tenant-assets.ts",
+    "predev": "npm run sync:tenants",
+    "prebuild": "npm run sync:tenants"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

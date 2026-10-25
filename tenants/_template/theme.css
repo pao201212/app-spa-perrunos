@@ -1,0 +1,45 @@
+/*
+ * CONTRATO WHITE-LABEL — plantilla de tokens obligatorios.
+ *
+ * Para un spa nuevo: copia esta carpeta a tenants/{slug}/, reemplaza los valores y agrega
+ * assets/ (logos y favicon.png de 64×64). Es el ÚNICO archivo de identidad visual del spa.
+ * Cada theme.css debe definir todos los tokens de este archivo (lo verifica `npm test`).
+ * Agregar o renombrar tokens aquí cambia el contrato de todos los tenants: pedir aprobación.
+ */
+
+:root {
+  /* Marca — rutas relativas a este archivo */
+  --brand-logo: url("./assets/logo.svg"); /* sobre fondos claros */
+  --brand-logo-on-dark: url("./assets/logo-on-dark.svg"); /* sobre fondos oscuros */
+  --brand-hero: url("./assets/hero.svg"); /* ilustración de landing / login */
+  --brand-logo-ratio: 16 / 10; /* ancho / alto del logo */
+
+  /* Color — nombres semánticos; nunca usar nombres de color en componentes */
+  --color-primary: #3b6fd8;
+  --color-primary-strong: #234ba3; /* fondos de botones con texto: contraste AA */
+  --color-primary-contrast: #ffffff; /* texto sobre --color-primary-strong */
+  --color-secondary: #f2c94c;
+  --color-secondary-contrast: #241a00; /* texto sobre --color-secondary */
+  --color-bg: #f8fafb;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f2f4f5;
+  --color-text: #191c1d;
+  --color-text-muted: #3e4850;
+  --color-border: #bdc8d1;
+  --color-success: #2e7d32;
+  --color-warning: #8a6d00;
+  --color-danger: #ba1a1a;
+  --color-focus: #234ba3;
+
+  /* Tipografía */
+  --font-brand: system-ui, sans-serif; /* títulos de marca */
+  --font-heading: system-ui, sans-serif;
+  --font-body: system-ui, sans-serif;
+
+  /* Forma y profundidad */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-pill: 999px;
+  --shadow-card: 0 4px 16px rgb(0 0 0 / 0.08);
+}

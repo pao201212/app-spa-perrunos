@@ -1,0 +1,35 @@
+/* Spa Perrunos y Gatunos — identidad tomada del repo legado PetSpa (SPEC §1, D22). */
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Manrope:wght@400;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap");
+
+:root {
+  --brand-logo: url("./assets/logo-claro.png");
+  --brand-logo-on-dark: url("./assets/logo-oscuro.png");
+  --brand-hero: url("./assets/logo-principal.webp");
+  --brand-logo-ratio: 1160 / 727;
+
+  --color-primary: #4daaf8; /* azul del logo */
+  --color-primary-strong: #2744c8; /* azul rey de la ilustración */
+  --color-primary-contrast: #ffffff;
+  --color-secondary: #f8db52; /* amarillo del logo */
+  --color-secondary-contrast: #241a00;
+  --color-bg: #f8fafb;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f2f4f5;
+  --color-text: #191c1d;
+  --color-text-muted: #3e4850;
+  --color-border: #bdc8d1;
+  --color-success: #2e7d32;
+  --color-warning: #8a6d00;
+  --color-danger: #ba1a1a;
+  --color-focus: #2744c8;
+
+  --font-brand: "Fredoka", "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-heading: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-body: "Manrope", system-ui, sans-serif;
+
+  --radius-sm: 0.75rem;
+  --radius-md: 1.5rem;
+  --radius-lg: 2rem;
+  --radius-pill: 999px;
+  --shadow-card: 0 10px 40px rgb(25 28 29 / 0.06);
+}

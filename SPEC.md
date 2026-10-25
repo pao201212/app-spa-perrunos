@@ -214,9 +214,9 @@ Orden de construcción, **Entrega 2:** `agreements`, `self-service`, `payments` 
 @import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Manrope:wght@400;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap");
 
 :root {
-  /* PNG del legado optimizados a WebP (2x) en el build; no hay SVG (D22) */
-  --brand-logo: url("./assets/logo-claro.webp");          /* sobre fondos claros */
-  --brand-logo-on-dark: url("./assets/logo-oscuro.webp"); /* sobre fondos oscuros */
+  /* Logos planos en PNG (pesan menos que en WebP); ilustración en WebP. No hay SVG (D22) */
+  --brand-logo: url("./assets/logo-claro.png");          /* sobre fondos claros */
+  --brand-logo-on-dark: url("./assets/logo-oscuro.png"); /* sobre fondos oscuros */
   --brand-hero: url("./assets/logo-principal.webp");      /* ilustración de landing / login */
   --brand-logo-ratio: 1160 / 727;
 
@@ -425,7 +425,7 @@ src/lib/  supabase/  tenant.ts  auth.ts  money.ts (COP)  copy.ts (es-CO)
 src/styles/base.css             → reset, espaciado, breakpoints, layout — solo var(--…)
 tenants/
   _template/theme.css
-  spaperrunosygatunos/theme.css + assets/ (logos del legado en WebP)
+  spaperrunosygatunos/theme.css + assets/ (logos del legado: PNG + ilustración WebP)
   demo/theme.css + assets/
 supabase/migrations/  supabase/seed.sql (≈150 razas del legado + tallas por defecto)
   …_capacity.sql                → schema `capacity`: única fuente de reglas (D24)
