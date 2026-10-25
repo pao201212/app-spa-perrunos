@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
+import postgres from "postgres";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -52,3 +53,33 @@ export async function deleteTestUsers(users: TestUser[]): Promise<void> {
   const admin = adminClient();
   await Promise.all(users.map((u) => admin.auth.admin.deleteUser(u.id)));
 }
+
+/** Conexión directa a Postgres (rol postgres) para inspeccionar el esquema y simular roles. */
+export function sqlClient() {
+  return postgres(requireEnv("SUPABASE_DB_URL"), { max: 1, onnotice: () => undefined });
+}
+
+/**
+ * Ejecuta `fn` dentro de una transacción con el rol y las claims de un usuario, como lo haría PostgREST.
+ * Siempre hace rollback: nada de lo que pase dentro persiste.
+ */
+export async function asRole<T>(
+  sql: postgres.Sql,
+  claims: { role: "anon" | "authenticated"; sub?: string },
+  fn: (tx: postgres.TransactionSql) => Promise<T>,
+): Promise<T> {
+  let result: T | undefined;
+  await sql
+    .begin(async (tx) => {
+      await tx`select set_config('request.jwt.claims', ${JSON.stringify(claims)}, true)`;
+      await tx.unsafe(`set local role ${claims.role}`);
+      result = await fn(tx);
+      throw new Rollback();
+    })
+    .catch((error) => {
+      if (!(error instanceof Rollback)) throw error;
+    });
+  return result as T;
+}
+
+class Rollback extends Error {}
