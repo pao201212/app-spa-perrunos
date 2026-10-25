@@ -425,6 +425,7 @@ src/lib/  supabase/  tenant.ts  auth.ts  money.ts (COP)  copy.ts (es-CO)
 src/styles/base.css             → reset, espaciado, breakpoints, layout — solo var(--…)
 tenants/
   _template/theme.css
+  platform/theme.css + assets/  → tema de Prisma Lab: consola y páginas sin tenant (404). "platform" es slug reservado
   spaperrunosygatunos/theme.css + assets/ (logos del legado: PNG + ilustración WebP)
   demo/theme.css + assets/
 supabase/migrations/  supabase/seed.sql (≈150 razas del legado + tallas por defecto)

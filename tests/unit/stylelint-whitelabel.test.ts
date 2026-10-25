@@ -25,7 +25,9 @@ describe("regla white-label de stylelint", () => {
       font-family: var(--font-body);
       box-shadow: var(--shadow-card);
       border-radius: var(--radius-md);
-    }`;
+    }
+    input { font: inherit; }
+    .b { font: 600 1rem / 1.2 var(--font-body); }`;
     expect(await lint(code, "src/components/ui/Card.module.css")).toEqual([]);
   });
 

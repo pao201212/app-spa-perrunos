@@ -26,8 +26,8 @@ const config = {
       "/^border(-(top|bottom)-(left|right))?-radius$/": [token("radius-"), "0", "50%", "inherit"],
     },
     "declaration-property-value-disallowed-list": {
-      // El shorthand `font` debe tomar la familia de un token.
-      font: ["/^(?!.*var\\(--font-).*$/"],
+      // El shorthand `font` debe tomar la familia de un token (o heredarla).
+      font: ["/^(?!inherit$)(?!.*var\\(--font-).*$/"],
     },
   },
   overrides: [
