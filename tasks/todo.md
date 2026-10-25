@@ -3,7 +3,7 @@
 
 - [x] T01 [setup] Scaffold Next.js App Router + TS strict + ESLint/Prettier → `npm run build` verde
 - [x] T02 [setup] Vitest + Testing Library + Playwright (Pixel 7, Desktop) con test humo
-- [ ] T03 [setup] `supabase init` + clientes server/browser + `.env.example` (sin secretos)
+- [x] T03 [setup] `supabase init` + clientes server/browser + `.env.example` (sin secretos)
 - [ ] T04 [setup] CI GitHub Actions: lint, typecheck, test, test:db, test:e2e
 - [ ] T05 [tenancy] Migración tenants, memberships, platform_admins, `is_super_admin()`, `is_tenant_staff()` + seed 2 tenants
 - [ ] T06 [tenancy] `resolveHost(host)` → slug | platform | 404 (localhost, www, reservados) + tests
