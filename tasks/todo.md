@@ -1,0 +1,50 @@
+# Tasks — Entrega 1 (ref: SPEC.md v3) · `[módulo]` = id del mapa de capacidades §2
+> Done = lint + typecheck + tests verdes · verificado en Pixel 7 y Desktop 1280 · 1 commit por tarea · ⛔ = checkpoint con Prisma Lab
+
+- [ ] T01 [setup] Scaffold Next.js App Router + TS strict + ESLint/Prettier → `npm run build` verde
+- [ ] T02 [setup] Vitest + Testing Library + Playwright (Pixel 7, Desktop) con test humo
+- [ ] T03 [setup] `supabase init` + clientes server/browser + `.env.example` (sin secretos)
+- [ ] T04 [setup] CI GitHub Actions: lint, typecheck, test, test:db, test:e2e
+- [ ] T05 [tenancy] Migración tenants, memberships, platform_admins, `is_super_admin()`, `is_tenant_staff()` + seed 2 tenants
+- [ ] T06 [tenancy] `resolveHost(host)` → slug | platform | 404 (localhost, www, reservados) + tests
+- [ ] T07 [tenancy] `middleware.ts` rewrite a `/_t/[slug]` y `/platform` + `getTenant` cacheado + 404 genérica
+- [ ] T08 [theming] `tenants/_template` + spaperrunosygatunos (logos WebP, Fredoka) + demo + copia a `public/tenants/`
+- [ ] T09 [theming] Test de contrato de tokens + contraste AA + stylelint sin colores/fuentes fuera de temas
+- [ ] T10 [theming] `base.css` (reset, espaciado, breakpoints, `clamp()`) + `<link>` del tema en layout
+- [ ] T11 [theming] UI base: Button, Input, Select, Card, Sheet, Dialog, Badge, Tabs (44px, focus, axe)
+- [ ] T12 [theming] E2E: 2 tenants con marcas distintas, sin scroll horizontal 320–1920px
+- [ ] T13 [auth] Google OAuth + callback único con allowlist de redirect + cookie `.prismalab.com.co`
+- [ ] T14 [auth] Redirección por rol + selector multi-tenant + guards `requireTenantStaff`/`requireSuperAdmin`
+- [ ] T15 [auth] Trigger anti-escalada de rol + tests de aislamiento tenant↔tenant (bloqueantes en CI)
+- [ ] T16 [platform-console] CRUD de tenants (slug validado) + asignar admins por correo
+- [ ] T17 [platform-console] Catálogo global de razas: seed ≈150 del legado + CRUD
+- [ ] T18 [locations] Migración locations, stations, hours, closures + RLS + tests
+- [ ] T19 [locations] Admin de locales: CRUD, estaciones, horario, cierres, ajustes de reserva
+- [ ] T20 [locations] "Aplicar a todos los locales" con confirmación
+- [ ] T21 [pet-catalog] Migración size_thresholds + tenant_breeds + función talla por peso/raza + tests
+- [ ] T22 [pet-catalog] Admin: override de razas, razas propias y umbrales de talla por especie
+- [ ] T23 [staff] Migración staff, skills, shifts, absences + RLS + tests
+- [ ] T24 [staff] Admin de personal: habilidades, locales, turnos semanales, ausencias
+- [ ] T25 [customers] Migración customers, pets, pet_groups + RLS cliente/staff + tests (cliente X ≠ Y)
+- [ ] T26 [customers] Perfil cliente (nombre, WhatsApp) + CRUD mascotas (raza/criollo, peso, pelo, foto privada)
+- [ ] T27 [customers] Admin: buscar/inscribir clientes y mascotas + vinculación por correo al entrar con Google
+- [ ] T28 [customers] Admin: grupos "se bañan juntas"
+- [ ] T29 [services] Migración categories, services, extras, durations, location_prices + RLS
+- [ ] T30 [services] Admin CRUD de categorías, servicios (bath / special_cut / other) y extras
+- [ ] T31 [services] Matriz de duraciones talla×pelo por etapa: tabla desktop / acordeón móvil
+- [ ] T32 [services] Matriz de precios por local + copiar a otros locales + regla de activación
+- [ ] T33 [services] Landing `/` + catálogo público con precios por local
+- [ ] T34 [capacity] ⛔ `docs/capacidad.md`: reglas + escenarios dado/cuando/entonces → revisar con el spa
+- [ ] T35 [capacity] Migración appointments, appointment_pets/items/segments, daily_quota + overrides + RLS
+- [ ] T36 [capacity] `capacity.available_slots` modo detailed + tests desde los escenarios de T34
+- [ ] T37 [capacity] `capacity.explain` (motivo por hora) + test de paridad con available_slots
+- [ ] T38 [capacity] Modo `daily_quota` (+ overrides por fecha) en la misma interfaz + tests
+- [ ] T39 [capacity] `capacity.book`: advisory lock, asignación greedy, anti-abuso + test concurrencia 10→1
+- [ ] T40 [capacity] `capacity.occupancy` + calendario de ocupación del admin (por talla / estación)
+- [ ] T41 [booking] Wizard cliente: mascota(s) → servicio + extras + corte especial → local → fecha/hora → resumen
+- [ ] T42 [booking] Mis citas: activas, historial y confirmación de recepción
+- [ ] T43 [booking] Cita manual del admin (cliente existente o nuevo) + sobrecupo con confirmación
+- [ ] T44 [booking] Agenda admin: día (móvil), por estación/personal (desktop), estados, reasignar personal
+- [ ] T45 [booking] Vista "¿Por qué no hay cupo?" + selector de modo de capacidad por local
+- [ ] T46 [cierre] E2E completos + axe 0 serias + Lighthouse móvil ≥90/95 + cobertura 90% capacity/booking
+- [ ] T47 [cierre] ⛔ Deploy Vercel (wildcard + admin.) + Google OAuth producción — pedir confirmación
