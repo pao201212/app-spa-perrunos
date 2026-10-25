@@ -1,9 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  // Subdominios locales de los spas: {slug}.localhost y admin.localhost.
+  allowedDevOrigins: ["*.localhost"],
 };
 
 export default nextConfig;

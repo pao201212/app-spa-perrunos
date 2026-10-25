@@ -10,7 +10,8 @@ export default defineConfig({
   retries: isCI ? 2 : 0,
   reporter: isCI ? "github" : "list",
   use: {
-    baseURL: `http://localhost:${PORT}`,
+    // Los spas se resuelven por subdominio; Chromium resuelve *.localhost a 127.0.0.1.
+    baseURL: `http://demo.localhost:${PORT}`,
     trace: "on-first-retry",
   },
   projects: [
@@ -22,7 +23,7 @@ export default defineConfig({
   ],
   webServer: {
     command: isCI ? `npm run build && npm run start -- -p ${PORT}` : `npm run dev -- -p ${PORT}`,
-    url: `http://localhost:${PORT}`,
+    url: `http://localhost:${PORT}/api/health`,
     reuseExistingServer: !isCI,
     timeout: 180_000,
   },

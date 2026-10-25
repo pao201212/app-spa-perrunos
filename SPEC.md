@@ -183,7 +183,7 @@ Orden de construcción, **Entrega 2:** `agreements`, `self-service`, `payments` 
 
 | Capa | Elección | Por qué |
 |---|---|---|
-| Framework | **Next.js (App Router) + TypeScript estricto** | El middleware resuelve el subdominio; Server Components y Server Actions |
+| Framework | **Next.js (App Router) + TypeScript estricto** | El proxy (`src/proxy.ts`) resuelve el subdominio; Server Components y Server Actions |
 | BD, auth y storage | **Supabase** (Postgres, Auth con Google, RLS, Storage privado) — **1 proyecto** | D1; RLS como frontera de aislamiento; RPC transaccionales |
 | Estilos | **CSS nativo**: `tenants/{slug}/theme.css` + `base.css` + CSS Modules | Contrato white-label verificable; sin Tailwind |
 | Íconos | **lucide-react** | Ya se usaba en el legado; SVG que heredan `currentColor` |
@@ -195,8 +195,8 @@ Orden de construcción, **Entrega 2:** `agreements`, `self-service`, `payments` 
 ### Flujo de una petición
 ```
 {slug}.prismalab.com.co/reservar
- └─ middleware.ts: host → slug (admin.* → /platform) · rewrite a /_t/[slug]/… · refresca la sesión
-     └─ app/_t/[slug]/layout.tsx: getTenant(slug) (cache) → 404 si no existe
+ └─ src/proxy.ts (Next 16: antes "middleware"): host → slug (admin.* → /platform) · verifica que el tenant exista (404 real) · rewrite a /s/[slug]/… · refresca la sesión
+     └─ app/s/[slug]/layout.tsx: getTenant(slug) ("use cache") → datos y tema del tenant
          ├─ <link rel="stylesheet" href="/tenants/{slug}/theme.css">   (render-blocking, sin FOUC)
          └─ Server Components / Actions → Supabase con la sesión del usuario → RLS por tenant_id
 ```
@@ -408,11 +408,11 @@ npx supabase gen types typescript --local > src/lib/db/types.ts
 ## 7. Estructura del proyecto
 
 ```
-middleware.ts                   → host → slug / platform, rewrite, sesión
+src/proxy.ts                    → host → slug / platform, 404 de tenant inexistente, rewrite, sesión
 src/app/
   auth/callback/                → callback OAuth único + redirección por rol (con allowlist)
   platform/                     → consola super admin: tenants, admins, razas globales
-  _t/[slug]/
+  s/[slug]/                     → solo accesible vía rewrite del proxy
     layout.tsx                  → tenant + <link> al theme.css
     page.tsx                    → landing del spa (locales, servicios, WhatsApp)
     (cliente)/                  → bottom nav: Agenda · Mascotas · Puntos(E2) · Perfil
