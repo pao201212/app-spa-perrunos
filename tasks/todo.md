@@ -1,7 +1,7 @@
 # Tasks — Entrega 1 (ref: SPEC.md v3) · `[módulo]` = id del mapa de capacidades §2
 > Done = lint + typecheck + tests verdes · verificado en Pixel 7 y Desktop 1280 · 1 commit por tarea · ⛔ = checkpoint con Prisma Lab
 
-- [ ] T01 [setup] Scaffold Next.js App Router + TS strict + ESLint/Prettier → `npm run build` verde
+- [x] T01 [setup] Scaffold Next.js App Router + TS strict + ESLint/Prettier → `npm run build` verde
 - [ ] T02 [setup] Vitest + Testing Library + Playwright (Pixel 7, Desktop) con test humo
 - [ ] T03 [setup] `supabase init` + clientes server/browser + `.env.example` (sin secretos)
 - [ ] T04 [setup] CI GitHub Actions: lint, typecheck, test, test:db, test:e2e
