@@ -3,12 +3,25 @@ import type { ButtonHTMLAttributes } from "react";
 import styles from "./Button.module.css";
 import { cx } from "./cx";
 
-export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+type ButtonStyleProps = {
   variant?: "primary" | "secondary" | "ghost" | "danger";
   size?: "md" | "lg";
   fullWidth?: boolean;
-  loading?: boolean;
 };
+
+export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
+  ButtonStyleProps & {
+    loading?: boolean;
+  };
+
+/** Clases de botón para otros elementos (p. ej. un <Link> que debe verse como botón). */
+export function buttonClassName({
+  variant = "primary",
+  size = "md",
+  fullWidth = false,
+}: ButtonStyleProps = {}): string {
+  return cx(styles.button, styles[variant], styles[size], fullWidth && styles.fullWidth);
+}
 
 export function Button({
   variant = "primary",

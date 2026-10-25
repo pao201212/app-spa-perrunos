@@ -2,9 +2,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@400;600;700&display=swap");
 
 :root {
-  --brand-logo: url("./assets/logo.svg");
-  --brand-logo-on-dark: url("./assets/logo-on-dark.svg");
-  --brand-hero: url("./assets/hero.svg");
+  --brand-logo: url("/tenants/demo/assets/logo.svg");
+  --brand-logo-on-dark: url("/tenants/demo/assets/logo-on-dark.svg");
+  --brand-hero: url("/tenants/demo/assets/hero.svg");
   --brand-logo-ratio: 16 / 10;
 
   --color-primary: #2bb3a3;

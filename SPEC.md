@@ -215,9 +215,9 @@ Orden de construcción, **Entrega 2:** `agreements`, `self-service`, `payments` 
 
 :root {
   /* Logos planos en PNG (pesan menos que en WebP); ilustración en WebP. No hay SVG (D22) */
-  --brand-logo: url("./assets/logo-claro.png");          /* sobre fondos claros */
-  --brand-logo-on-dark: url("./assets/logo-oscuro.png"); /* sobre fondos oscuros */
-  --brand-hero: url("./assets/logo-principal.webp");      /* ilustración de landing / login */
+  --brand-logo: url("/tenants/spaperrunosygatunos/assets/logo-claro.png");          /* sobre fondos claros */
+  --brand-logo-on-dark: url("/tenants/spaperrunosygatunos/assets/logo-oscuro.png"); /* sobre fondos oscuros */
+  --brand-hero: url("/tenants/spaperrunosygatunos/assets/logo-principal.webp");      /* ilustración de landing / login */
   --brand-logo-ratio: 1160 / 727;
 
   --color-primary: #4daaf8;          /* azul del logo */

@@ -1,17 +1,17 @@
 /*
  * CONTRATO WHITE-LABEL — plantilla de tokens obligatorios.
  *
- * Para un spa nuevo: copia esta carpeta a tenants/{slug}/, reemplaza los valores y agrega
+ * Para un spa nuevo: copia esta carpeta a tenants/{slug}/, reemplaza {slug} y los valores, y agrega
  * assets/ (logos y favicon.png de 64×64). Es el ÚNICO archivo de identidad visual del spa.
  * Cada theme.css debe definir todos los tokens de este archivo (lo verifica `npm test`).
  * Agregar o renombrar tokens aquí cambia el contrato de todos los tenants: pedir aprobación.
  */
 
 :root {
-  /* Marca — rutas relativas a este archivo */
-  --brand-logo: url("./assets/logo.svg"); /* sobre fondos claros */
-  --brand-logo-on-dark: url("./assets/logo-on-dark.svg"); /* sobre fondos oscuros */
-  --brand-hero: url("./assets/hero.svg"); /* ilustración de landing / login */
+  /* Marca — rutas ABSOLUTAS: las relativas se resuelven mal dentro de var() */
+  --brand-logo: url("/tenants/{slug}/assets/logo.svg"); /* sobre fondos claros */
+  --brand-logo-on-dark: url("/tenants/{slug}/assets/logo-on-dark.svg"); /* sobre fondos oscuros */
+  --brand-hero: url("/tenants/{slug}/assets/hero.svg"); /* ilustración de landing / login */
   --brand-logo-ratio: 16 / 10; /* ancho / alto del logo */
 
   /* Color — nombres semánticos; nunca usar nombres de color en componentes */

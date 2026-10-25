@@ -2,9 +2,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Manrope:wght@400;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap");
 
 :root {
-  --brand-logo: url("./assets/logo-claro.png");
-  --brand-logo-on-dark: url("./assets/logo-oscuro.png");
-  --brand-hero: url("./assets/logo-principal.webp");
+  --brand-logo: url("/tenants/spaperrunosygatunos/assets/logo-claro.png");
+  --brand-logo-on-dark: url("/tenants/spaperrunosygatunos/assets/logo-oscuro.png");
+  --brand-hero: url("/tenants/spaperrunosygatunos/assets/logo-principal.webp");
   --brand-logo-ratio: 1160 / 727;
 
   --color-primary: #4daaf8; /* azul del logo */

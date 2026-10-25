@@ -50,6 +50,16 @@ describe("contrato de temas", () => {
       expect(missing).toEqual([]);
     });
 
+    it("usa rutas absolutas a sus propios assets (las relativas se rompen dentro de var())", () => {
+      const urls = [...readTheme(slug).matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/g)].map(
+        (m) => m[1],
+      );
+      const invalid = urls.filter(
+        (url) => !url.startsWith(`/tenants/${slug}/assets/`) && !url.startsWith("https://"),
+      );
+      expect(invalid).toEqual([]);
+    });
+
     it.each(CONTRAST_PAIRS)("%s sobre %s cumple el contraste mínimo %d:1", (fg, bg, min) => {
       const ratio = contrastRatio(resolveToken(tokens, fg), resolveToken(tokens, bg));
       expect(ratio).toBeGreaterThanOrEqual(min);
