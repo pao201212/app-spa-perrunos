@@ -200,7 +200,7 @@ Orden de construcción, **Entrega 2:** `agreements`, `self-service`, `payments` 
          ├─ <link rel="stylesheet" href="/tenants/{slug}/theme.css">   (render-blocking, sin FOUC)
          └─ Server Components / Actions → Supabase con la sesión del usuario → RLS por tenant_id
 ```
-- **Sesión compartida entre subdominios:** la cookie de Supabase se emite para `.prismalab.com.co`. El callback OAuth es único (`admin.prismalab.com.co/auth/callback`) y redirige al host de origen. Solo se aceptan destinos de una allowlist (`*.prismalab.com.co`) para evitar open redirects.
+- **Sesión y callback OAuth:** cada host tiene su `/auth/callback` (el verificador PKCE vive en una cookie del host donde empezó el login; en local los navegadores no comparten cookies entre `*.localhost`). Supabase solo acepta redirects de la allowlist (`https://*.prismalab.com.co/auth/callback**`) y `next` solo admite rutas internas (`safeNextPath`), lo que evita open redirects. En producción la cookie de sesión se emite para `.prismalab.com.co` (`NEXT_PUBLIC_COOKIE_DOMAIN`), así que la sesión se comparte entre subdominios. Las credenciales de Google van en `supabase/.env.local`.
 
 ### Contrato white-label
 - `tenants/{slug}/theme.css` es el único archivo visual. Contiene `@font-face`, colores, tipografía, radios, sombras y las URLs del logo.
@@ -410,7 +410,7 @@ npx supabase gen types typescript --local > src/lib/db/types.ts
 ```
 src/proxy.ts                    → host → slug / platform, 404 de tenant inexistente, rewrite, sesión
 src/app/
-  auth/callback/                → callback OAuth único + redirección por rol (con allowlist)
+  s/[slug]/auth/callback, platform/auth/callback → callback OAuth por host (allowlist + safeNextPath)
   platform/                     → consola super admin: tenants, admins, razas globales
   s/[slug]/                     → solo accesible vía rewrite del proxy
     layout.tsx                  → tenant + <link> al theme.css

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { withRefreshedSession } from "@/lib/supabase/proxy";
 import { getRootDomain } from "@/lib/tenancy/config";
 import { routeRequest } from "@/lib/tenancy/routing";
 import { fetchActiveTenant } from "@/lib/tenancy/tenants";
@@ -31,9 +32,13 @@ export async function proxy(request: NextRequest) {
     // Ruta inexistente → app/not-found.tsx con estado 404 antes de empezar a transmitir.
     return NextResponse.rewrite(new URL("/__not-found", request.url), { status: 404 });
   }
-  return NextResponse.rewrite(new URL(decision.path, request.url));
+  const destination = new URL(decision.path, request.url);
+  return withRefreshedSession(request, () =>
+    NextResponse.rewrite(destination, { request: { headers: request.headers } }),
+  );
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|tenants/|api/health).*)"],
+  // Excluye todo /_next (estáticos, imágenes, HMR) y los assets públicos de los temas.
+  matcher: ["/((?!_next/|favicon.ico|tenants/|api/health).*)"],
 };

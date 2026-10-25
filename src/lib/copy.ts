@@ -10,4 +10,13 @@ export const copy = {
   nav: {
     home: "Inicio",
   },
+  auth: {
+    title: "Ingresar",
+    intro: "Usa tu cuenta de Google para agendar y ver tus citas.",
+    google: "Continuar con Google",
+    redirecting: "Abriendo Google…",
+    signedInAs: "Sesión iniciada como",
+    error: "No pudimos iniciar sesión. Intenta de nuevo.",
+    unexpectedError: "Algo salió mal al conectar con Google. Intenta de nuevo.",
+  },
 } as const;

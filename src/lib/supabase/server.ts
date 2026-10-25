@@ -2,11 +2,14 @@ import "server-only";
 
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 
 import { getPublicEnv } from "@/lib/env";
 
 /** Cliente de Supabase con la sesión del usuario actual (RLS aplica). */
 export async function createSupabaseServerClient() {
+  // La sesión es siempre dato de la petición: nunca se prerenderiza ni se prefetchea.
+  await connection();
   const { supabaseUrl, supabasePublishableKey, cookieDomain } = getPublicEnv();
   const cookieStore = await cookies();
 
