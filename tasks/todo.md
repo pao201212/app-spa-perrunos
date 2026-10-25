@@ -5,7 +5,7 @@
 - [x] T02 [setup] Vitest + Testing Library + Playwright (Pixel 7, Desktop) con test humo
 - [x] T03 [setup] `supabase init` + clientes server/browser + `.env.example` (sin secretos)
 - [x] T04 [setup] CI GitHub Actions: lint, typecheck, test, test:db, test:e2e
-- [ ] T05 [tenancy] Migración tenants, memberships, platform_admins, `is_super_admin()`, `is_tenant_staff()` + seed 2 tenants
+- [x] T05 [tenancy] Migración tenants, memberships, platform_admins, `is_super_admin()`, `is_tenant_staff()` + seed 2 tenants
 - [ ] T06 [tenancy] `resolveHost(host)` → slug | platform | 404 (localhost, www, reservados) + tests
 - [ ] T07 [tenancy] `middleware.ts` rewrite a `/_t/[slug]` y `/platform` + `getTenant` cacheado + 404 genérica
 - [ ] T08 [theming] `tenants/_template` + spaperrunosygatunos (logos WebP, Fredoka) + demo + copia a `public/tenants/`
