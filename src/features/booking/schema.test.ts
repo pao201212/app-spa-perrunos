@@ -34,6 +34,14 @@ describe("mensajes de error de la reserva", () => {
     expect(isSlotTaken("SIN_ESPACIO")).toBe(true);
   });
 
+  it("una hora pasada o un error desconocido tienen su propio mensaje", () => {
+    expect(bookingErrorMessage("PASADO", "x")).toBe("Ese horario ya pasó. Elige otra hora.");
+    expect(isSlotTaken("PASADO")).toBe(true);
+    expect(bookingErrorMessage(undefined, "x")).toBe(
+      "No pudimos reservar ese horario. Elige otra hora o intenta de nuevo.",
+    );
+  });
+
   it("los límites usan el mensaje del servidor", () => {
     expect(bookingErrorMessage("LIMITE_RESERVAS", "Ya tienes 10 citas activas")).toBe(
       "Ya tienes 10 citas activas",

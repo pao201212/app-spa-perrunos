@@ -11,6 +11,15 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/**"],
+      // SPEC §9: 90 % en capacity y booking (la reserva incluye las citas y la agenda).
+      thresholds: {
+        "src/features/{capacity,booking,appointments}/**": {
+          statements: 90,
+          branches: 90,
+          functions: 90,
+          lines: 90,
+        },
+      },
     },
   },
 });
