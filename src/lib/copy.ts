@@ -31,6 +31,7 @@ export const copy = {
     nav: {
       home: "Inicio",
       locations: "Locales",
+      breeds: "Razas",
     },
   },
   platform: {

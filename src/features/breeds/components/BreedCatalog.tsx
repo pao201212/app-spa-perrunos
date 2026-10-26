@@ -5,15 +5,10 @@ import { useMemo, useState } from "react";
 
 import { Badge, Input, Select } from "@/components/ui";
 import { coatLabel, sizeLabel, SPECIES, speciesLabel, type Species } from "@/lib/pets/labels";
+import { normalizeForSearch as normalize } from "@/lib/text";
 
 import type { GlobalBreed } from "../queries";
 import styles from "./breeds.module.css";
-
-const normalize = (text: string) =>
-  text
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
 
 export function BreedCatalog({ breeds }: { breeds: GlobalBreed[] }) {
   const [query, setQuery] = useState("");

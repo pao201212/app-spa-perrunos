@@ -418,6 +418,7 @@ export type Database = {
         Returns: number;
       };
       assign_tenant_admin: { Args: { p_email: string; p_tenant_id: string }; Returns: string };
+      reset_tenant_breed: { Args: { p_breed_id: string }; Returns: undefined };
       resolve_pet_size: {
         Args: { p_breed_id: string; p_weight_kg?: number };
         Returns: Database["public"]["Enums"]["pet_size"];

@@ -218,6 +218,32 @@ describe("razas del spa", () => {
   });
 });
 
+describe("reset_tenant_breed", () => {
+  it("devuelve una raza ajustada a los valores del catálogo global", async () => {
+    const id = await breedId(tenantA, "Boxer");
+    await staffA.client.from("tenant_breeds").update({ size: "XS", coat: "long" }).eq("id", id);
+
+    const { error } = await staffA.client.rpc("reset_tenant_breed", { p_breed_id: id });
+    expect(error).toBeNull();
+    const { data } = await admin
+      .from("tenant_breeds")
+      .select("size, coat, is_customized")
+      .eq("id", id)
+      .single();
+    expect(data).toEqual({ size: "L", coat: "short", is_customized: false });
+  });
+
+  it("no aplica a razas propias ni a razas de otro spa", async () => {
+    const own = await breedId(tenantA, "Abbey Refugio");
+    const ownReset = await staffA.client.rpc("reset_tenant_breed", { p_breed_id: own });
+    expect(ownReset.error?.message).toMatch(/catálogo/i);
+
+    const foreign = await breedId(tenantA, "Boxer");
+    const foreignReset = await staffB.client.rpc("reset_tenant_breed", { p_breed_id: foreign });
+    expect(foreignReset.error?.message).toMatch(/raza/i);
+  });
+});
+
 describe("size_thresholds", () => {
   it("el staff ajusta los umbrales de su spa", async () => {
     const { error } = await staffA.client

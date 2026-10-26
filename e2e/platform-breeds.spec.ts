@@ -30,7 +30,7 @@ test.beforeEach(async ({ context }) => {
 
 test("la consola enlaza al catálogo y lista las razas del legado", async ({ page }) => {
   await page.goto(`http://admin.localhost:${PORT}/`);
-  await page.getByRole("link", { name: "Razas" }).click();
+  await page.getByRole("link", { name: "Razas", exact: true }).click();
   await expect(page).toHaveURL(razas());
   await expect(page.getByRole("heading", { level: 1, name: "Catálogo de razas" })).toBeVisible();
   const golden = page.getByRole("listitem").filter({ hasText: "Golden Retriever" });

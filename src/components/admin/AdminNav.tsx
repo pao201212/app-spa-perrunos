@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, MapPin, type LucideIcon } from "lucide-react";
+import { Home, MapPin, PawPrint, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -14,6 +14,7 @@ type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean 
 const ITEMS: NavItem[] = [
   { href: "/admin", label: copy.admin.nav.home, icon: Home, exact: true },
   { href: "/admin/locales", label: copy.admin.nav.locations, icon: MapPin },
+  { href: "/admin/razas", label: copy.admin.nav.breeds, icon: PawPrint },
 ];
 
 /** Barra inferior en móvil (al alcance del pulgar) y lateral desde 1024px. */

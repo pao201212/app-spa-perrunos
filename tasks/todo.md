@@ -22,7 +22,7 @@
 - [x] T19 [locations] Admin de locales: CRUD, estaciones, horario, cierres, ajustes de reserva
 - [x] T20 [locations] "Aplicar a todos los locales" con confirmación
 - [x] T21 [pet-catalog] Migración size_thresholds + tenant_breeds + función talla por peso/raza + tests
-- [ ] T22 [pet-catalog] Admin: override de razas, razas propias y umbrales de talla por especie
+- [x] T22 [pet-catalog] Admin: override de razas, razas propias y umbrales de talla por especie
 - [ ] T23 [staff] Migración staff, skills, shifts, absences + RLS + tests
 - [ ] T24 [staff] Admin de personal: habilidades, locales, turnos semanales, ausencias
 - [ ] T25 [customers] Migración customers, pets, pet_groups + RLS cliente/staff + tests (cliente X ≠ Y)
