@@ -27,6 +27,18 @@ export const REASON_CODES = [
 
 export type ReasonCode = (typeof REASON_CODES)[number];
 
+/** Motivos que el admin puede pasar por alto con sobrecupo (igual que capacity.overridable). */
+export const OVERRIDABLE_CODES: readonly ReasonCode[] = [
+  "PASADO",
+  "SIN_EMPLEADOS",
+  "SIN_CAPACIDAD",
+  "CUPO_LLENO",
+  "SIN_ESPACIO",
+  "FUERA_DE_HORARIO",
+];
+
+export const isOverridable = (code: ReasonCode) => OVERRIDABLE_CODES.includes(code);
+
 export const reasonLabel: Record<ReasonCode, string> = {
   PASADO: "Ya pasó",
   MUY_LEJOS: "Muy lejos",

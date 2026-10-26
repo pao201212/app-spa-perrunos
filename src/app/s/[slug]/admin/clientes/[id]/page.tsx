@@ -40,8 +40,13 @@ async function CustomerDetailContent({ slug, id }: { slug: string; id: string })
 
   return (
     <AdminShell businessName={tenant.name}>
-      <div>
+      <div className={styles.titleRow}>
         <h1>{customer.full_name}</h1>
+        <Link href={`/admin/citas/nueva?cliente=${customer.id}`} className={buttonClassName()}>
+          Crear cita
+        </Link>
+      </div>
+      <div>
         {customer.user_id ? (
           <Badge tone="success">Con cuenta</Badge>
         ) : (

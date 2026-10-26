@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatFraction, reasonMessage } from "./reasons";
+import { formatFraction, isOverridable, reasonMessage } from "./reasons";
 
 const TZ = "America/Bogota";
 
@@ -59,5 +59,14 @@ describe("reasonMessage", () => {
     ],
   ] as const)("%s %o", (code, detail, text) => {
     expect(reasonMessage(code, detail, TZ)).toBe(text);
+  });
+});
+
+describe("isOverridable", () => {
+  it("el sobrecupo pasa por alto cupo y espacio, pero no precio, duración ni cierre", () => {
+    expect(isOverridable("CUPO_LLENO")).toBe(true);
+    expect(isOverridable("SIN_ESPACIO")).toBe(true);
+    expect(isOverridable("SIN_PRECIO")).toBe(false);
+    expect(isOverridable("CERRADO")).toBe(false);
   });
 });

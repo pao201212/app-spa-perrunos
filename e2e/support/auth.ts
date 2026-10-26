@@ -171,6 +171,8 @@ export async function createCustomerWithPets(
   slug: string,
   fullName: string,
   petNames: string[],
+  /** Fija las mascotas como medianas de pelo corto (las combinaciones con precio en los tests). */
+  mediumShort = false,
 ): Promise<string> {
   const client = admin();
   const { data: tenant, error } = await client
@@ -201,6 +203,7 @@ export async function createCustomerWithPets(
       name,
       species: "dog" as const,
       breed_id: breed!.id,
+      ...(mediumShort && { size: "M" as const, coat: "short" as const, size_locked: true }),
     })),
   );
   if (pets.error) throw pets.error;
@@ -413,4 +416,14 @@ export async function setAppointmentsStatus(
     .update({ status })
     .eq("location_id", locationId);
   if (error) throw error;
+}
+
+/** Citas con sobrecupo de un local. */
+export async function countOverbooked(locationId: string): Promise<number> {
+  const { count, error } = await admin()
+    .from("appointments")
+    .select("id", { count: "exact", head: true })
+    .match({ location_id: locationId, overbooked: true });
+  if (error) throw error;
+  return count ?? 0;
 }

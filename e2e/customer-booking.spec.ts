@@ -122,7 +122,7 @@ test("si el horario se ocupa antes de confirmar, vuelve a elegir hora", async ({
 test("sin mascotas, invita a registrar la primera", async ({ page }) => {
   await createOwnCustomer(slug, customer, []);
   await page.goto(at("/reservar"));
-  await expect(page.getByText("Primero registra a tu mascota.")).toBeVisible();
+  await expect(page.getByText("Primero registra a la mascota.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Continuar" })).toBeDisabled();
 });
 

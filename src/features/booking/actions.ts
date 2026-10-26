@@ -15,7 +15,13 @@ import { toBookingPets } from "./pricing";
 
 const PATH = "/reservar";
 
-export type Slot = { startsAt: string; time: string; ready: string };
+export type Slot = {
+  startsAt: string;
+  time: string;
+  ready: string;
+  /** Solo para el admin: la hora no está disponible y se puede tomar con sobrecupo. */
+  overbook?: { label: string; message: string };
+};
 export type SlotsResult = { ok: true; slots: Slot[] } | { ok: false; message: string };
 
 /** Horas disponibles del día con su entrega aproximada (capacity, D29). */
@@ -62,7 +68,12 @@ export type BookResult =
     }
   | { ok: false; message: string; slotTaken: boolean };
 
-export async function bookAction(slug: string, request: BookRequest): Promise<BookResult> {
+export async function bookAction(
+  slug: string,
+  request: BookRequest,
+  // El cliente nunca reserva con sobrecupo; el parámetro existe para compartir el asistente.
+  _overbook = false,
+): Promise<BookResult> {
   const { tenant, supabase } = await requireCustomer(slug, PATH);
   const parsed = bookRequestSchema.safeParse(request);
   if (!parsed.success) return { ok: false, message: "Revisa lo que elegiste.", slotTaken: false };

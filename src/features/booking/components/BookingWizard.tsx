@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 
-import { Button, buttonClassName, Card, Input } from "@/components/ui";
+import { Badge, Button, buttonClassName, Card, Dialog, Input } from "@/components/ui";
 import { cx } from "@/components/ui/cx";
 import { longDate } from "@/lib/dates";
 import { formatCop } from "@/lib/money";
 import { coatLabel, sizeLabel } from "@/lib/pets/labels";
 
-import { bookAction, loadSlotsAction, type BookResult, type Slot } from "../actions";
+import type { BookResult, Slot, SlotsResult } from "../actions";
 import {
   chooseService,
   emptySelection,
@@ -21,11 +21,22 @@ import {
   type BookingPet,
   type PetSelection,
 } from "../pricing";
+import type { BookRequest, SlotsRequest } from "../schema";
 import styles from "./booking.module.css";
 
 const STEPS = ["Mascotas", "Servicios", "Local", "Hora", "Resumen"] as const;
 
-type Props = { slug: string; pets: BookingPet[]; catalog: BookingCatalog; today: string };
+type Props = {
+  pets: BookingPet[];
+  catalog: BookingCatalog;
+  today: string;
+  fetchSlots: (request: SlotsRequest) => Promise<SlotsResult>;
+  submitBooking: (request: BookRequest, overbook: boolean) => Promise<BookResult>;
+  /** Panel del spa (HU-B2): ofrece horas con sobrecupo y pide confirmarlo. */
+  staff?: boolean;
+  addPetHref: string;
+  done: { href: string; label: string };
+};
 
 const addDays = (date: string, days: number) => {
   const d = new Date(`${date}T12:00:00Z`);
@@ -40,7 +51,16 @@ const toggle = (list: string[], id: string) =>
  * Reserva en 5 pasos: mascota(s) → servicios → local → hora con entrega → resumen.
  * Los precios mostrados son orientativos; capacity.book confirma la hora y congela el total.
  */
-export function BookingWizard({ slug, pets, catalog, today }: Props) {
+export function BookingWizard({
+  pets,
+  catalog,
+  today,
+  fetchSlots,
+  submitBooking,
+  staff = false,
+  addPetHref,
+  done,
+}: Props) {
   const [step, setStep] = useState(0);
   const [petIds, setPetIds] = useState<string[]>(pets.length === 1 ? [pets[0].id] : []);
   const [selections, setSelections] = useState<Record<string, PetSelection>>({});
@@ -53,6 +73,7 @@ export function BookingWizard({ slug, pets, catalog, today }: Props) {
   const [startsAt, setStartsAt] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const [bookError, setBookError] = useState<string | null>(null);
+  const [confirmingOverbook, setConfirmingOverbook] = useState(false);
   const [result, setResult] = useState<Extract<BookResult, { ok: true }>["booking"] | null>(null);
   const [loadingSlots, startLoadingSlots] = useTransition();
   const [booking, startBooking] = useTransition();
@@ -82,7 +103,7 @@ export function BookingWizard({ slug, pets, catalog, today }: Props) {
     setStartsAt(null);
     setSlotsMessage(null);
     startLoadingSlots(async () => {
-      const response = await loadSlotsAction(slug, {
+      const response = await fetchSlots({
         locationId,
         date: forDate,
         selections: chosenSelections.map((s) => ({ ...s, serviceId: s.serviceId! })),
@@ -101,16 +122,24 @@ export function BookingWizard({ slug, pets, catalog, today }: Props) {
     setStep(step + 1);
   }
 
-  function confirm() {
+  function confirm(overbook: boolean) {
     if (!locationId || !startsAt) return;
+    if (slot?.overbook && !overbook) {
+      setConfirmingOverbook(true);
+      return;
+    }
+    setConfirmingOverbook(false);
     setBookError(null);
     startBooking(async () => {
-      const response = await bookAction(slug, {
-        locationId,
-        startsAt,
-        selections: chosenSelections.map((s) => ({ ...s, serviceId: s.serviceId! })),
-        notes,
-      });
+      const response = await submitBooking(
+        {
+          locationId,
+          startsAt,
+          selections: chosenSelections.map((s) => ({ ...s, serviceId: s.serviceId! })),
+          notes,
+        },
+        overbook,
+      );
       if (response.ok) {
         setResult(response.booking);
         return;
@@ -133,19 +162,19 @@ export function BookingWizard({ slug, pets, catalog, today }: Props) {
     return (
       <Card className={styles.wizard}>
         <h2 ref={headingRef} tabIndex={-1} className={styles.stepTitle}>
-          {result.pending ? "Reserva enviada" : "¡Reserva confirmada!"}
+          {staff ? "Cita creada" : result.pending ? "Reserva enviada" : "¡Reserva confirmada!"}
         </h2>
         <p role="status">
           {result.pending
             ? "El spa la confirmará pronto. Te avisaremos."
-            : `Te esperamos el ${longDate(date)} a las ${slot?.time}.`}{" "}
+            : `${staff ? "Llegada" : "Te esperamos"} el ${longDate(date)} a las ${slot?.time}.`}{" "}
           Entrega aprox. {result.ready}. Total {formatCop(result.total)}.
         </p>
         <p>
-          Código de tu cita: <span className={styles.code}>{result.code}</span>
+          Código de {staff ? "la" : "tu"} cita: <span className={styles.code}>{result.code}</span>
         </p>
-        <Link href="/citas" className={buttonClassName()}>
-          Ver mis citas
+        <Link href={done.href} className={buttonClassName()}>
+          {done.label}
         </Link>
       </Card>
     );
@@ -166,7 +195,12 @@ export function BookingWizard({ slug, pets, catalog, today }: Props) {
       </h2>
 
       {step === 0 && (
-        <PetsStep pets={pets} petIds={petIds} onToggle={(id) => setPetIds(toggle(petIds, id))} />
+        <PetsStep
+          pets={pets}
+          petIds={petIds}
+          addPetHref={addPetHref}
+          onToggle={(id) => setPetIds(toggle(petIds, id))}
+        />
       )}
 
       {step === 1 &&
@@ -232,7 +266,9 @@ export function BookingWizard({ slug, pets, catalog, today }: Props) {
             <p role="status">Buscando horas…</p>
           ) : slots && slots.length > 0 ? (
             <fieldset className={styles.group}>
-              <legend>Horas disponibles el {longDate(date)}</legend>
+              <legend>
+                {staff ? "Horas" : "Horas disponibles"} el {longDate(date)}
+              </legend>
               <div className={styles.slots}>
                 {slots.map((s) => (
                   <label key={s.startsAt} className={styles.choice}>
@@ -245,6 +281,7 @@ export function BookingWizard({ slug, pets, catalog, today }: Props) {
                     <span className={styles.choiceText}>
                       <strong>{s.time}</strong>
                       <span className={styles.muted}>entrega aprox. {s.ready}</span>
+                      {s.overbook && <Badge tone="warning">Sobrecupo · {s.overbook.label}</Badge>}
                     </span>
                   </label>
                 ))}
@@ -312,9 +349,30 @@ export function BookingWizard({ slug, pets, catalog, today }: Props) {
               onChange={(event) => setNotes(event.target.value)}
             />
           </label>
+          {slot.overbook && (
+            <p className={styles.warning}>Se creará con sobrecupo: {slot.overbook.message}.</p>
+          )}
           {bookError && <p role="alert">{bookError}</p>}
         </Card>
       )}
+
+      <Dialog
+        open={confirmingOverbook}
+        onClose={() => setConfirmingOverbook(false)}
+        title="¿Crear con sobrecupo?"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setConfirmingOverbook(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={() => confirm(true)} loading={booking}>
+              Sí, crear con sobrecupo
+            </Button>
+          </>
+        }
+      >
+        <p>{slot?.overbook?.message}. La cita quedará marcada con sobrecupo.</p>
+      </Dialog>
 
       <div className={styles.actions}>
         {step > 0 ? (
@@ -329,8 +387,8 @@ export function BookingWizard({ slug, pets, catalog, today }: Props) {
             Continuar
           </Button>
         ) : (
-          <Button onClick={confirm} loading={booking} size="lg">
-            Confirmar reserva
+          <Button onClick={() => confirm(false)} loading={booking} size="lg">
+            {staff ? "Crear cita" : "Confirmar reserva"}
           </Button>
         )}
       </div>
@@ -341,17 +399,19 @@ export function BookingWizard({ slug, pets, catalog, today }: Props) {
 function PetsStep({
   pets,
   petIds,
+  addPetHref,
   onToggle,
 }: {
   pets: BookingPet[];
   petIds: string[];
+  addPetHref: string;
   onToggle: (id: string) => void;
 }) {
   if (pets.length === 0) {
     return (
       <Card>
         <p>
-          Primero registra a tu mascota. <Link href="/mascotas/nueva">Agregar mascota</Link>
+          Primero registra a la mascota. <Link href={addPetHref}>Agregar mascota</Link>
         </p>
       </Card>
     );
