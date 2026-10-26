@@ -17,7 +17,7 @@ const admin = adminClient();
 const suffix = uniqueSuffix();
 
 /** Tablas sin tenant_id por diseño: datos de plataforma. Agregar aquí requiere justificarlo. */
-const PLATFORM_TABLES = new Set(["tenants", "platform_admins"]);
+const PLATFORM_TABLES = new Set(["tenants", "platform_admins", "global_breeds"]);
 
 let tenantA: string;
 let tenantB: string;

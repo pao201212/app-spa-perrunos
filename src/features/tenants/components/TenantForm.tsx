@@ -6,7 +6,7 @@ import { initialFormState } from "@/components/forms/form-state";
 import { Button, Input } from "@/components/ui";
 
 import { createTenantAction } from "../actions";
-import styles from "./forms.module.css";
+import styles from "@/components/forms/forms.module.css";
 
 export function TenantForm() {
   const [state, action, pending] = useActionState(createTenantAction, initialFormState);

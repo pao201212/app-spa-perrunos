@@ -105,3 +105,7 @@ export async function deleteTenantBySlug(slug: string): Promise<void> {
 export async function deleteInvite(email: string): Promise<void> {
   await admin().from("tenant_invites").delete().eq("email", email);
 }
+
+export async function deleteGlobalBreedByName(name: string): Promise<void> {
+  await admin().from("global_breeds").delete().eq("name", name);
+}

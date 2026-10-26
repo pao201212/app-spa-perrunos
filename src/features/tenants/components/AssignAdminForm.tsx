@@ -6,7 +6,7 @@ import { initialFormState } from "@/components/forms/form-state";
 import { Button, Input } from "@/components/ui";
 
 import { assignAdminAction } from "../actions";
-import styles from "./forms.module.css";
+import styles from "@/components/forms/forms.module.css";
 
 export function AssignAdminForm({ tenantId }: { tenantId: string }) {
   const [state, action, pending] = useActionState(

@@ -17,7 +17,7 @@
 - [x] T14 [auth] Redirección por rol + selector multi-tenant + guards `requireTenantStaff`/`requireSuperAdmin`
 - [x] T15 [auth] Trigger anti-escalada de rol + tests de aislamiento tenant↔tenant (bloqueantes en CI)
 - [x] T16 [platform-console] CRUD de tenants (slug validado) + asignar admins por correo
-- [ ] T17 [platform-console] Catálogo global de razas: seed ≈150 del legado + CRUD
+- [x] T17 [platform-console] Catálogo global de razas: seed ≈150 del legado + CRUD
 - [ ] T18 [locations] Migración locations, stations, hours, closures + RLS + tests
 - [ ] T19 [locations] Admin de locales: CRUD, estaciones, horario, cierres, ajustes de reserva
 - [ ] T20 [locations] "Aplicar a todos los locales" con confirmación

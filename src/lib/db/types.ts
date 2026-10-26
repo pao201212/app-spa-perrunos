@@ -23,6 +23,37 @@ export type Database = {
   };
   public: {
     Tables: {
+      global_breeds: {
+        Row: {
+          created_at: string;
+          default_coat: Database["public"]["Enums"]["coat_type"];
+          default_size: Database["public"]["Enums"]["pet_size"];
+          id: string;
+          is_mixed: boolean;
+          name: string;
+          species: Database["public"]["Enums"]["pet_species"];
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          default_coat: Database["public"]["Enums"]["coat_type"];
+          default_size: Database["public"]["Enums"]["pet_size"];
+          id?: string;
+          is_mixed?: boolean;
+          name: string;
+          species: Database["public"]["Enums"]["pet_species"];
+        };
+        Update: {
+          created_at?: string;
+          default_coat?: Database["public"]["Enums"]["coat_type"];
+          default_size?: Database["public"]["Enums"]["pet_size"];
+          id?: string;
+          is_mixed?: boolean;
+          name?: string;
+          species?: Database["public"]["Enums"]["pet_species"];
+        };
+        Relationships: [];
+      };
       memberships: {
         Row: {
           created_at: string;
@@ -149,7 +180,10 @@ export type Database = {
       };
     };
     Enums: {
+      coat_type: "short" | "medium" | "long";
       membership_role: "owner" | "admin" | "reception";
+      pet_size: "XS" | "S" | "M" | "L" | "XL" | "XXL";
+      pet_species: "dog" | "cat";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -264,7 +298,10 @@ export const Constants = {
   },
   public: {
     Enums: {
+      coat_type: ["short", "medium", "long"],
       membership_role: ["owner", "admin", "reception"],
+      pet_size: ["XS", "S", "M", "L", "XL", "XXL"],
+      pet_species: ["dog", "cat"],
     },
   },
 } as const;
