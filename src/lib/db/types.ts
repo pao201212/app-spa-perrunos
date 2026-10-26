@@ -1307,6 +1307,24 @@ export type Database = {
           starts_at: string;
         }[];
       };
+      book_appointment: {
+        Args: {
+          p_customer_id?: string;
+          p_location_id: string;
+          p_notes?: string;
+          p_overbook?: boolean;
+          p_pets: Json;
+          p_starts_at: string;
+        };
+        Returns: {
+          code: string;
+          estimated_ready_at: string;
+          id: string;
+          overbooked: boolean;
+          status: Database["public"]["Enums"]["appointment_status"];
+          total_cop: number;
+        }[];
+      };
       claim_customer_profile: { Args: { p_tenant_id: string }; Returns: string };
       copy_service_prices: {
         Args: { p_service_id: string; p_source_location_id: string };

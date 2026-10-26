@@ -39,7 +39,7 @@
 - [x] T36 [capacity] Locales → Capacidad: matriz por empleado, zonas de espera, avanzada "Próximamente" + E2E
 - [x] T37 [capacity] `capacity.available_slots` simple: jornadas del Personal, cupo, espacio, entrega + tests S1–S16
 - [x] T38 [capacity] `capacity.explain` + paridad con available_slots + vista "¿Por qué no hay cupo?"
-- [ ] T39 [capacity] `capacity.book`: advisory lock, anti-abuso + test concurrencia 10→1
+- [x] T39 [capacity] `capacity.book`: advisory lock, anti-abuso + test concurrencia 10→1
 - [ ] T40 [capacity] `capacity.occupancy` + calendario de ocupación del admin (por talla)
 - [ ] T41 [booking] Wizard cliente: mascota(s) → servicio + extras + opcionales + corte especial → local → hora con entrega → resumen
 - [ ] T42 [booking] Mis citas: activas, historial y confirmación de recepción
