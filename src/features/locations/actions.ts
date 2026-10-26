@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { fieldErrorsFrom, formValues, type FormState } from "@/components/forms/form-state";
 import { tenantStaffContext } from "@/lib/auth/tenant-context";
 
+import { parseCapacityMatrix } from "./capacity-matrix";
 import {
   applySectionsSchema,
   bookingSettingsSchema,
@@ -14,6 +15,7 @@ import {
   locationDetailsSchema,
   nextStationName,
   stationSchema,
+  waitingZoneSchema,
 } from "./schema";
 
 const UNIQUE_VIOLATION = "23505";
@@ -233,6 +235,71 @@ export async function removeClosureAction(
 ): Promise<void> {
   const { tenant, supabase } = await tenantStaffContext(slug, detailPath(locationId));
   await supabase.from("location_closures").delete().match({ id: closureId, tenant_id: tenant.id });
+  refresh();
+}
+
+export async function saveCapacityAction(
+  slug: string,
+  locationId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { supabase } = await tenantStaffContext(slug, detailPath(locationId));
+  // React reinicia el formulario tras el envío: se devuelve lo escrito para no perderlo.
+  const values = Object.fromEntries(
+    [...formData.entries()]
+      .filter(([key]) => key.startsWith("c."))
+      .map(([key, value]) => [key, String(value)]),
+  );
+  const { rows, errors } = parseCapacityMatrix(formData);
+  if (Object.keys(errors).length > 0)
+    return { status: "error", message: "Revisa las celdas marcadas.", fieldErrors: errors, values };
+
+  const { error } = await supabase.rpc("replace_location_pet_capacity", {
+    p_location_id: locationId,
+    p_rows: rows,
+  });
+  if (error) return { status: "error", message: "No pudimos guardar la capacidad.", values };
+  refresh();
+  return {
+    status: "success",
+    message: `Capacidad guardada (${rows.length} ${rows.length === 1 ? "combinación" : "combinaciones"})`,
+    values,
+  };
+}
+
+export async function addWaitingZoneAction(
+  slug: string,
+  locationId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { tenant, supabase } = await tenantStaffContext(slug, detailPath(locationId));
+  const values = formValues(formData, ["name", "seats"]);
+  const parsed = waitingZoneSchema.safeParse(values);
+  if (!parsed.success)
+    return { status: "error", fieldErrors: fieldErrorsFrom(parsed.error.issues), values };
+
+  const { error } = await supabase
+    .from("location_waiting_zones")
+    .insert({ ...parsed.data, tenant_id: tenant.id, location_id: locationId });
+  if (error?.code === UNIQUE_VIOLATION)
+    return { status: "error", fieldErrors: { name: "Ya hay una zona con ese nombre" }, values };
+  if (error) return { status: "error", message: "No pudimos agregar la zona.", values };
+  refresh();
+  return { status: "success", message: `${parsed.data.name} agregada` };
+}
+
+export async function removeWaitingZoneAction(
+  slug: string,
+  locationId: string,
+  zoneId: string,
+): Promise<void> {
+  const { tenant, supabase } = await tenantStaffContext(slug, detailPath(locationId));
+  await supabase
+    .from("location_waiting_zones")
+    .delete()
+    .match({ id: zoneId, tenant_id: tenant.id });
   refresh();
 }
 

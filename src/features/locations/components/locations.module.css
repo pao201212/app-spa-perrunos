@@ -140,3 +140,31 @@
 .stationPanel {
   padding-block: var(--space-2) var(--space-4);
 }
+
+.modes {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 768px) {
+  .modes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.mode {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+}
+
+.modeActive {
+  border-color: var(--color-primary-strong);
+  background: var(--color-surface);
+}

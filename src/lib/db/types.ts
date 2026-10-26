@@ -1310,6 +1310,10 @@ export type Database = {
         Args: { p_full_name: string; p_tenant_id: string; p_whatsapp: string };
         Returns: string;
       };
+      replace_location_pet_capacity: {
+        Args: { p_location_id: string; p_rows: Json };
+        Returns: undefined;
+      };
       replace_location_prices: {
         Args: {
           p_extra_rows: Json;

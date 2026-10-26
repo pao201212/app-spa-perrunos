@@ -167,3 +167,25 @@ cross join (
 ) as o (name, stage, sort_order)
 where s.name = 'Baño'
 on conflict do nothing;
+
+-- Capacidad simple de ejemplo (D31, D33): mascotas que atiende un empleado al día y sala de espera.
+with sede as (
+  select l.id as location_id, l.tenant_id
+  from public.locations l
+  join public.tenants t on t.id = l.tenant_id
+  where t.slug in ('spaperrunosygatunos', 'demo') and l.name = 'Sede principal'
+), capacity as (
+  insert into public.location_pet_capacity (tenant_id, location_id, species, size, coat, pets_per_staff)
+  select s.tenant_id, s.location_id, c.species::public.pet_species, c.size::public.pet_size,
+         coat.coat, c.pets
+  from sede s
+  cross join (
+    values ('dog', 'XS', 8), ('dog', 'S', 8), ('dog', 'M', 6), ('dog', 'L', 4), ('dog', 'XL', 3),
+           ('dog', 'XXL', 2), ('cat', 'XS', 6), ('cat', 'S', 6), ('cat', 'M', 5), ('cat', 'L', 4)
+  ) as c (species, size, pets)
+  cross join unnest(enum_range(null::public.coat_type)) as coat (coat)
+  on conflict do nothing
+)
+insert into public.location_waiting_zones (tenant_id, location_id, name, seats)
+select tenant_id, location_id, 'Sala de espera', 4 from sede
+on conflict do nothing;

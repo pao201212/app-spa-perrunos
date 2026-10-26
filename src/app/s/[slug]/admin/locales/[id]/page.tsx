@@ -6,10 +6,12 @@ import { AdminSection } from "@/components/admin/AdminSection";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { ApplyToAllForm } from "@/features/locations/components/ApplyToAllForm";
 import { BookingSettingsForm } from "@/features/locations/components/BookingSettingsForm";
+import { CapacityEditor } from "@/features/locations/components/CapacityEditor";
 import { ClosuresEditor } from "@/features/locations/components/ClosuresEditor";
 import { HoursEditor } from "@/features/locations/components/HoursEditor";
 import { LocationDetailsForm } from "@/features/locations/components/LocationDetailsForm";
 import { StationsEditor } from "@/features/locations/components/StationsEditor";
+import { WaitingZonesEditor } from "@/features/locations/components/WaitingZonesEditor";
 import { countLocations, getLocationDetail } from "@/features/locations/queries";
 import { requireTenantStaff } from "@/lib/auth/guards";
 
@@ -43,6 +45,18 @@ async function LocationDetailContent({ slug, id }: { slug: string; id: string })
         description="Cómo y con cuánta anticipación reservan los clientes en este local."
       >
         <BookingSettingsForm slug={slug} location={location} />
+      </AdminSection>
+      <AdminSection
+        title="Capacidad"
+        description="Cuántas mascotas recibe este local cada día. Los empleados de cada día salen de Personal (turnos y ausencias)."
+      >
+        <CapacityEditor slug={slug} location={location} />
+      </AdminSection>
+      <AdminSection
+        title="Zonas de espera"
+        description="Dónde esperan las mascotas mientras no las atienden (antes del baño o hasta que las recogen)."
+      >
+        <WaitingZonesEditor slug={slug} location={location} />
       </AdminSection>
       <AdminSection
         title="Estaciones"

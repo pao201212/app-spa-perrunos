@@ -87,6 +87,11 @@ export const closureSchema = z.object({
   reason: optionalText,
 });
 
+export const waitingZoneSchema = z.object({
+  name: z.string().trim().min(2, "Escribe el nombre de la zona").max(60, "Máximo 60 caracteres"),
+  seats: intField(1, 100, "Escribe cuántas mascotas caben (1 a 100)"),
+});
+
 export const APPLY_SECTIONS = ["booking", "stations", "hours", "closures"] as const;
 
 export const applySectionsSchema = z.object({

@@ -215,6 +215,25 @@ describe("location_pet_capacity (D31)", () => {
     expect(error?.code).toBe("23514");
   });
 
+  it("replace_location_pet_capacity reemplaza la matriz completa; otro spa no puede", async () => {
+    const rows = [{ species: "dog", size: "M", coat: "short", pets_per_staff: 6 }];
+    const denied = await staffB.client.rpc("replace_location_pet_capacity", {
+      p_location_id: locationA,
+      p_rows: rows,
+    });
+    expect(denied.error?.code).toBe("42501");
+    const { error } = await staffA.client.rpc("replace_location_pet_capacity", {
+      p_location_id: locationA,
+      p_rows: rows,
+    });
+    expect(error).toBeNull();
+    const { data } = await staffA.client
+      .from("location_pet_capacity")
+      .select("species, size, coat, pets_per_staff")
+      .eq("location_id", locationA);
+    expect(data).toEqual(rows);
+  });
+
   it("es interna: ni anon, ni clientes, ni el staff de otro spa la ven o la editan", async () => {
     for (const client of [anonClient(), clientX.client, staffB.client]) {
       const { data } = await client
