@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { PORT } from "./support/env";
 
-const PORT = 3000;
 const url = (host: string, path = "/") => `http://${host}:${PORT}${path}`;
 
 test.describe("enrutamiento por subdominio", () => {

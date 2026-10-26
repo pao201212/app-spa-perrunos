@@ -62,3 +62,9 @@ export const closureSchema = z.object({
   date: z.iso.date("Elige una fecha"),
   reason: optionalText,
 });
+
+export const APPLY_SECTIONS = ["booking", "stations", "hours", "closures"] as const;
+
+export const applySectionsSchema = z.object({
+  sections: z.array(z.enum(APPLY_SECTIONS)).min(1, "Elige al menos una sección para aplicar"),
+});

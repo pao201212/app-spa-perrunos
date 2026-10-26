@@ -10,8 +10,9 @@ import {
   signInAs,
   type E2EUser,
 } from "./support/auth";
+import { PORT } from "./support/env";
 
-const razas = (path = "") => `http://admin.localhost:3000/razas${path}`;
+const razas = (path = "") => `http://admin.localhost:${PORT}/razas${path}`;
 let superAdmin: E2EUser;
 
 test.beforeAll(async () => {
@@ -28,7 +29,7 @@ test.beforeEach(async ({ context }) => {
 });
 
 test("la consola enlaza al catálogo y lista las razas del legado", async ({ page }) => {
-  await page.goto("http://admin.localhost:3000/");
+  await page.goto(`http://admin.localhost:${PORT}/`);
   await page.getByRole("link", { name: "Razas" }).click();
   await expect(page).toHaveURL(razas());
   await expect(page.getByRole("heading", { level: 1, name: "Catálogo de razas" })).toBeVisible();
@@ -101,7 +102,7 @@ test("las páginas de la consola no tienen scroll horizontal en 320px", async ({
   test.skip(isMobile, "el ancho se fija explícitamente desde el proyecto desktop");
   await page.setViewportSize({ width: 320, height: 800 });
   for (const path of ["/", "/razas", "/razas/nueva", "/spas/demo", "/spas/nuevo"]) {
-    await page.goto(`http://admin.localhost:3000${path}`);
+    await page.goto(`http://admin.localhost:${PORT}${path}`);
     await page.locator("h1").waitFor();
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

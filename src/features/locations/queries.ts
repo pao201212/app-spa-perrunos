@@ -13,6 +13,16 @@ export async function listLocations(tenantId: string) {
   return data;
 }
 
+export async function countLocations(tenantId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { count, error } = await supabase
+    .from("locations")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", tenantId);
+  if (error) throw error;
+  return count ?? 0;
+}
+
 export async function getLocationDetail(tenantId: string, locationId: string) {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase

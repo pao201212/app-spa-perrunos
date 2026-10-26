@@ -4,7 +4,7 @@ import { defineConfig, devices } from "@playwright/test";
 // Credenciales de Supabase local para crear usuarios de prueba (e2e/support/auth.ts).
 loadEnvConfig(process.cwd());
 
-const PORT = 3000;
+const PORT = Number(process.env.E2E_PORT ?? 3000);
 const isCI = !!process.env.CI;
 
 export default defineConfig({

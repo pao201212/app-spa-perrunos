@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 
 import { createE2EUser, deleteE2EUser, signInAs, type E2EUser } from "./support/auth";
+import { PORT } from "./support/env";
 
-const PORT = 3000;
 const demo = (path: string) => `http://demo.localhost:${PORT}${path}`;
 
 test.describe("ingreso con Google", () => {

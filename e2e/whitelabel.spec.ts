@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { PORT } from "./support/env";
 
-const PORT = 3000;
 const TENANTS = [
   { slug: "spaperrunosygatunos", name: "Spa Perrunos y Gatunos" },
   { slug: "demo", name: "Spa Demo" },

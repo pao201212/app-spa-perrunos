@@ -8,8 +8,8 @@ import {
   signInAs,
   type E2EUser,
 } from "./support/auth";
+import { PORT } from "./support/env";
 
-const PORT = 3000;
 const at = (host: string, path = "/") => `http://${host}.localhost:${PORT}${path}`;
 
 let client: E2EUser;

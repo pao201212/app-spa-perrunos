@@ -4,12 +4,13 @@ import { z } from "zod";
 
 import { AdminSection } from "@/components/admin/AdminSection";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { ApplyToAllForm } from "@/features/locations/components/ApplyToAllForm";
 import { BookingSettingsForm } from "@/features/locations/components/BookingSettingsForm";
 import { ClosuresEditor } from "@/features/locations/components/ClosuresEditor";
 import { HoursEditor } from "@/features/locations/components/HoursEditor";
 import { LocationDetailsForm } from "@/features/locations/components/LocationDetailsForm";
 import { StationsForm } from "@/features/locations/components/StationsForm";
-import { getLocationDetail } from "@/features/locations/queries";
+import { countLocations, getLocationDetail } from "@/features/locations/queries";
 import { requireTenantStaff } from "@/lib/auth/guards";
 
 export default function LocationDetailPage({ params }: PageProps<"/s/[slug]/admin/locales/[id]">) {
@@ -25,7 +26,10 @@ export default function LocationDetailPage({ params }: PageProps<"/s/[slug]/admi
 async function LocationDetailContent({ slug, id }: { slug: string; id: string }) {
   const { tenant } = await requireTenantStaff(slug, `/admin/locales/${id}`);
   if (!z.uuid().safeParse(id).success) notFound();
-  const location = await getLocationDetail(tenant.id, id);
+  const [location, totalLocations] = await Promise.all([
+    getLocationDetail(tenant.id, id),
+    countLocations(tenant.id),
+  ]);
   if (!location) notFound();
 
   return (
@@ -58,6 +62,18 @@ async function LocationDetailContent({ slug, id }: { slug: string; id: string })
       >
         <ClosuresEditor slug={slug} location={location} />
       </AdminSection>
+      {totalLocations > 1 && (
+        <AdminSection
+          title="Aplicar a otros locales"
+          description="Copia la configuración de este local al resto de locales del spa."
+        >
+          <ApplyToAllForm
+            slug={slug}
+            locationId={location.id}
+            otherLocations={totalLocations - 1}
+          />
+        </AdminSection>
+      )}
     </AdminShell>
   );
 }

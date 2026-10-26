@@ -325,6 +325,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      apply_location_settings: {
+        Args: { p_sections: string[]; p_source_location_id: string };
+        Returns: number;
+      };
       assign_tenant_admin: { Args: { p_email: string; p_tenant_id: string }; Returns: string };
       tenant_staff: {
         Args: { p_tenant_id: string };

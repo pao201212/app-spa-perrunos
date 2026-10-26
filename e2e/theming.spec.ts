@@ -1,6 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-
-const PORT = 3000;
+import { PORT } from "./support/env";
 
 async function computed(page: Page, selector: string, property: string) {
   return page

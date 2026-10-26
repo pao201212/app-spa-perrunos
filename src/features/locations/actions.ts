@@ -7,6 +7,7 @@ import { fieldErrorsFrom, formValues, type FormState } from "@/components/forms/
 import { tenantStaffContext } from "@/lib/auth/tenant-context";
 
 import {
+  applySectionsSchema,
   bookingSettingsSchema,
   closureSchema,
   hourRangeSchema,
@@ -190,4 +191,27 @@ export async function removeClosureAction(
   const { tenant, supabase } = await tenantStaffContext(slug, detailPath(locationId));
   await supabase.from("location_closures").delete().match({ id: closureId, tenant_id: tenant.id });
   refresh();
+}
+
+export async function applyToAllLocationsAction(
+  slug: string,
+  locationId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { supabase } = await tenantStaffContext(slug, detailPath(locationId));
+  const parsed = applySectionsSchema.safeParse({ sections: formData.getAll("sections") });
+  if (!parsed.success) return { status: "error", message: parsed.error.issues[0].message };
+
+  const { data, error } = await supabase.rpc("apply_location_settings", {
+    p_source_location_id: locationId,
+    p_sections: parsed.data.sections,
+  });
+  if (error)
+    return { status: "error", message: "No pudimos aplicar la configuración. Intenta de nuevo." };
+  refresh();
+  return {
+    status: "success",
+    message: `Configuración aplicada a ${data} ${data === 1 ? "local" : "locales"}`,
+  };
 }

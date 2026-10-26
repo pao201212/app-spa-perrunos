@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  applySectionsSchema,
   bookingSettingsSchema,
   closureSchema,
   hourRangeSchema,
@@ -96,5 +97,18 @@ describe("closureSchema", () => {
       reason: null,
     });
     expect(closureSchema.safeParse({ date: "25/12/2026" }).success).toBe(false);
+  });
+});
+
+describe("applySectionsSchema", () => {
+  it("acepta una o más secciones conocidas", () => {
+    expect(applySectionsSchema.parse({ sections: ["booking", "hours"] })).toEqual({
+      sections: ["booking", "hours"],
+    });
+  });
+
+  it("exige al menos una y rechaza secciones desconocidas", () => {
+    expect(applySectionsSchema.safeParse({ sections: [] }).success).toBe(false);
+    expect(applySectionsSchema.safeParse({ sections: ["todo"] }).success).toBe(false);
   });
 });

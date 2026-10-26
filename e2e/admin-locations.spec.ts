@@ -10,8 +10,9 @@ import {
   signInAs,
   type E2EUser,
 } from "./support/auth";
+import { PORT } from "./support/env";
 
-const demo = (path: string) => `http://demo.localhost:3000${path}`;
+const demo = (path: string) => `http://demo.localhost:${PORT}${path}`;
 let staff: E2EUser;
 
 test.beforeAll(async () => {

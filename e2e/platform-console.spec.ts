@@ -11,8 +11,8 @@ import {
   signInAs,
   type E2EUser,
 } from "./support/auth";
+import { PORT } from "./support/env";
 
-const PORT = 3000;
 const console_ = (path = "/") => `http://admin.localhost:${PORT}${path}`;
 
 let superAdmin: E2EUser;

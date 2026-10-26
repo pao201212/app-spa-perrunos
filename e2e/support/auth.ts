@@ -113,3 +113,54 @@ export async function deleteGlobalBreedByName(name: string): Promise<void> {
 export async function deleteLocationByName(name: string): Promise<void> {
   await admin().from("locations").delete().eq("name", name);
 }
+
+/** Crea un local mínimo en el spa `slug` y devuelve su id. */
+export async function createLocation(slug: string, name: string): Promise<string> {
+  const client = admin();
+  const { data: tenant, error } = await client
+    .from("tenants")
+    .select("id")
+    .eq("slug", slug)
+    .single();
+  if (error) throw error;
+  const { data, error: insertError } = await client
+    .from("locations")
+    .insert({ tenant_id: tenant.id, name })
+    .select("id")
+    .single();
+  if (insertError) throw insertError;
+  return data.id;
+}
+
+/** Spa temporal y aislado para tests que modifican varios locales a la vez. */
+export async function createTenant(slug: string, name: string): Promise<string> {
+  const { data, error } = await admin()
+    .from("tenants")
+    .insert({ slug, name })
+    .select("id")
+    .single();
+  if (error) throw error;
+  return data.id;
+}
+
+/** Estaciones (2/2/1) y horario de lunes 08:00-12:30 en un local. */
+export async function seedLocationConfig(slug: string, locationId: string): Promise<void> {
+  const client = admin();
+  const { data: tenant, error } = await client
+    .from("tenants")
+    .select("id")
+    .eq("slug", slug)
+    .single();
+  if (error) throw error;
+  const base = { tenant_id: tenant.id, location_id: locationId };
+  const stations = await client.from("location_stations").insert([
+    { ...base, station: "bath", count: 2 },
+    { ...base, station: "dry", count: 2 },
+    { ...base, station: "finish", count: 1 },
+  ]);
+  if (stations.error) throw stations.error;
+  const hours = await client
+    .from("location_hours")
+    .insert({ ...base, weekday: 1, opens_at: "08:00", closes_at: "12:30" });
+  if (hours.error) throw hours.error;
+}
