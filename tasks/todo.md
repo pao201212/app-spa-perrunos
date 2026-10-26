@@ -44,6 +44,6 @@
 - [x] T41 [booking] Wizard cliente: mascota(s) → servicio + extras + opcionales + corte especial → local → hora con entrega → resumen
 - [x] T42 [booking] Mis citas: activas, historial y confirmación de recepción
 - [x] T43 [booking] Cita manual del admin (cliente existente o nuevo) + sobrecupo con confirmación
-- [ ] T44 [booking] Agenda admin: día (móvil) y semana (desktop), estados, ajustar hora de entrega
+- [x] T44 [booking] Agenda admin: día (móvil) y semana (desktop), estados, ajustar hora de entrega
 - [ ] T45 [cierre] E2E completos + axe 0 serias + Lighthouse móvil ≥90/95 + cobertura 90% capacity/booking
 - [ ] T46 [cierre] ⛔ Deploy Vercel (wildcard + admin.) + Google OAuth producción — pedir confirmación

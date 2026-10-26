@@ -420,3 +420,20 @@ describe("confirm_reception (HU-B5)", () => {
     }
   });
 });
+
+describe("flujo de estados (T44)", () => {
+  it("el staff avanza paso a paso y no salta ni retrocede", async () => {
+    await admin.from("appointments").update({ status: "scheduled" }).eq("id", appointmentY);
+    const update = (status: string) =>
+      staffA.client
+        .from("appointments")
+        .update({ status: status as never })
+        .eq("id", appointmentY);
+    expect((await update("ready")).error?.code).toBe("23514");
+    for (const status of ["received", "in_progress", "ready", "delivered"]) {
+      expect((await update(status)).error, status).toBeNull();
+    }
+    expect((await update("scheduled")).error?.code).toBe("23514");
+    expect((await update("cancelled")).error?.code).toBe("23514");
+  });
+});

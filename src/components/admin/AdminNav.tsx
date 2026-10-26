@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  CalendarClock,
   CalendarDays,
   Contact,
   Home,
@@ -32,8 +33,9 @@ type NavItem = {
 
 const ITEMS: NavItem[] = [
   { href: "/admin", label: copy.admin.nav.home, icon: Home, exact: true, primary: true },
+  { href: "/admin/agenda", label: copy.admin.nav.agenda, icon: CalendarClock, primary: true },
   { href: "/admin/clientes", label: copy.admin.nav.customers, icon: Contact, primary: true },
-  { href: "/admin/servicios", label: copy.admin.nav.services, icon: Scissors, primary: true },
+  { href: "/admin/servicios", label: copy.admin.nav.services, icon: Scissors },
   { href: "/admin/ocupacion", label: copy.admin.nav.occupancy, icon: CalendarDays },
   { href: "/admin/locales", label: copy.admin.nav.locations, icon: MapPin },
   { href: "/admin/personal", label: copy.admin.nav.staff, icon: Users },

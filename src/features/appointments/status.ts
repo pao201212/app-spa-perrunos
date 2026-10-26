@@ -42,3 +42,30 @@ export const isActive = (status: AppointmentStatus) =>
 /** El cliente confirma la recepción cuando el spa ya recibió a la mascota (HU-B5). */
 export const canConfirmReception = (status: AppointmentStatus, confirmedAt: string | null) =>
   !confirmedAt && ["received", "in_progress", "ready", "delivered"].includes(status);
+
+export type StatusAction = { to: AppointmentStatus; label: string; danger?: boolean };
+
+/** Siguientes pasos que el spa puede dar (igual que private.appointment_status_allowed). */
+export const statusActions: Record<AppointmentStatus, StatusAction[]> = {
+  pending: [
+    { to: "scheduled", label: "Confirmar" },
+    { to: "cancelled", label: "Cancelar", danger: true },
+  ],
+  scheduled: [
+    { to: "received", label: "Recibir" },
+    { to: "no_show", label: "No asistió", danger: true },
+    { to: "cancelled", label: "Cancelar", danger: true },
+  ],
+  received: [
+    { to: "in_progress", label: "Empezar" },
+    { to: "cancelled", label: "Cancelar", danger: true },
+  ],
+  in_progress: [{ to: "ready", label: "Marcar lista" }],
+  ready: [{ to: "delivered", label: "Entregar" }],
+  delivered: [],
+  cancelled: [],
+  no_show: [],
+};
+
+export const canChangeStatus = (from: AppointmentStatus, to: AppointmentStatus) =>
+  statusActions[from].some((action) => action.to === to);

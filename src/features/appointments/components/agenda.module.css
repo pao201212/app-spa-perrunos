@@ -1,0 +1,138 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-3);
+}
+
+.toolbar > :not(button) {
+  flex: 1 1 12rem;
+}
+
+.weekNav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+/* Semana compacta: solo desde 1024px. En móvil se navega día por día. */
+.weekGrid {
+  display: none;
+}
+
+.weekDay {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.selectedDay {
+  border-color: var(--color-primary-strong);
+  outline: 1px solid var(--color-primary-strong);
+  outline-offset: -2px;
+}
+
+.weekEntries {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-xs);
+}
+
+.weekEntry {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.day {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+}
+
+.dayNav {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.dayTitle {
+  font-size: var(--text-lg);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.time {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.muted {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.notes {
+  font-size: var(--text-sm);
+  font-style: italic;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.readyForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-2);
+}
+
+@media (min-width: 1024px) {
+  .weekGrid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .dayNav {
+    display: none;
+  }
+}

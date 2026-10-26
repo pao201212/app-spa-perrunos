@@ -30,6 +30,7 @@ export const copy = {
     navLabel: "Panel",
     nav: {
       home: "Inicio",
+      agenda: "Agenda",
       locations: "Locales",
       breeds: "Razas",
       staff: "Personal",
