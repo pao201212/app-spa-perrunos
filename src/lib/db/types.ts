@@ -62,6 +62,42 @@ export type Database = {
           },
         ];
       };
+      extras: {
+        Row: {
+          extra_minutes: number;
+          id: string;
+          is_active: boolean;
+          name: string;
+          service_id: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          extra_minutes?: number;
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          service_id: string;
+          tenant_id: string;
+        };
+        Update: {
+          extra_minutes?: number;
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          service_id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "extras_tenant_id_service_id_fkey";
+            columns: ["tenant_id", "service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
       global_breeds: {
         Row: {
           created_at: string;
@@ -126,6 +162,49 @@ export type Database = {
           },
         ];
       };
+      location_extra_prices: {
+        Row: {
+          coat: Database["public"]["Enums"]["coat_type"];
+          extra_id: string;
+          location_id: string;
+          price_cop: number;
+          size: Database["public"]["Enums"]["pet_size"];
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          coat: Database["public"]["Enums"]["coat_type"];
+          extra_id: string;
+          location_id: string;
+          price_cop: number;
+          size: Database["public"]["Enums"]["pet_size"];
+          tenant_id: string;
+        };
+        Update: {
+          coat?: Database["public"]["Enums"]["coat_type"];
+          extra_id?: string;
+          location_id?: string;
+          price_cop?: number;
+          size?: Database["public"]["Enums"]["pet_size"];
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "location_extra_prices_tenant_id_extra_id_fkey";
+            columns: ["tenant_id", "extra_id"];
+            isOneToOne: false;
+            referencedRelation: "extras";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "location_extra_prices_tenant_id_location_id_fkey";
+            columns: ["tenant_id", "location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
       location_hours: {
         Row: {
           closes_at: string;
@@ -158,6 +237,49 @@ export type Database = {
             columns: ["tenant_id", "location_id"];
             isOneToOne: false;
             referencedRelation: "locations";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      location_service_prices: {
+        Row: {
+          coat: Database["public"]["Enums"]["coat_type"];
+          location_id: string;
+          price_cop: number;
+          service_id: string;
+          size: Database["public"]["Enums"]["pet_size"];
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          coat: Database["public"]["Enums"]["coat_type"];
+          location_id: string;
+          price_cop: number;
+          service_id: string;
+          size: Database["public"]["Enums"]["pet_size"];
+          tenant_id: string;
+        };
+        Update: {
+          coat?: Database["public"]["Enums"]["coat_type"];
+          location_id?: string;
+          price_cop?: number;
+          service_id?: string;
+          size?: Database["public"]["Enums"]["pet_size"];
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "location_service_prices_tenant_id_location_id_fkey";
+            columns: ["tenant_id", "location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "location_service_prices_tenant_id_service_id_fkey";
+            columns: ["tenant_id", "service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
             referencedColumns: ["tenant_id", "id"];
           },
         ];
@@ -428,6 +550,133 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [];
+      };
+      service_categories: {
+        Row: {
+          id: string;
+          name: string;
+          sort_order: number;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          id?: string;
+          name: string;
+          sort_order?: number;
+          tenant_id: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          sort_order?: number;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "service_categories_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      service_durations: {
+        Row: {
+          bath_min: number | null;
+          coat: Database["public"]["Enums"]["coat_type"];
+          cut_min: number | null;
+          dry_min: number | null;
+          finish_min: number | null;
+          service_id: string;
+          size: Database["public"]["Enums"]["pet_size"];
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          bath_min?: number | null;
+          coat: Database["public"]["Enums"]["coat_type"];
+          cut_min?: number | null;
+          dry_min?: number | null;
+          finish_min?: number | null;
+          service_id: string;
+          size: Database["public"]["Enums"]["pet_size"];
+          tenant_id: string;
+        };
+        Update: {
+          bath_min?: number | null;
+          coat?: Database["public"]["Enums"]["coat_type"];
+          cut_min?: number | null;
+          dry_min?: number | null;
+          finish_min?: number | null;
+          service_id?: string;
+          size?: Database["public"]["Enums"]["pet_size"];
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "service_durations_tenant_id_service_id_fkey";
+            columns: ["tenant_id", "service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      services: {
+        Row: {
+          category_id: string | null;
+          created_at: string;
+          description: string | null;
+          id: string;
+          is_active: boolean;
+          kind: Database["public"]["Enums"]["service_kind"];
+          name: string;
+          sort_order: number;
+          species: Database["public"]["Enums"]["service_species"];
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          category_id?: string | null;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          is_active?: boolean;
+          kind: Database["public"]["Enums"]["service_kind"];
+          name: string;
+          sort_order?: number;
+          species?: Database["public"]["Enums"]["service_species"];
+          tenant_id: string;
+        };
+        Update: {
+          category_id?: string | null;
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          is_active?: boolean;
+          kind?: Database["public"]["Enums"]["service_kind"];
+          name?: string;
+          sort_order?: number;
+          species?: Database["public"]["Enums"]["service_species"];
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "services_tenant_id_category_id_fkey";
+            columns: ["tenant_id", "category_id"];
+            isOneToOne: false;
+            referencedRelation: "service_categories";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "services_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       size_thresholds: {
         Row: {
@@ -761,6 +1010,8 @@ export type Database = {
       pet_gender: "female" | "male";
       pet_size: "XS" | "S" | "M" | "L" | "XL" | "XXL";
       pet_species: "dog" | "cat";
+      service_kind: "bath" | "special_cut" | "other";
+      service_species: "dog" | "cat" | "both";
       staff_skill: "bath" | "dry" | "finish" | "special_cut";
       station_type: "bath" | "dry" | "finish";
     };
@@ -884,6 +1135,8 @@ export const Constants = {
       pet_gender: ["female", "male"],
       pet_size: ["XS", "S", "M", "L", "XL", "XXL"],
       pet_species: ["dog", "cat"],
+      service_kind: ["bath", "special_cut", "other"],
+      service_species: ["dog", "cat", "both"],
       staff_skill: ["bath", "dry", "finish", "special_cut"],
       station_type: ["bath", "dry", "finish"],
     },

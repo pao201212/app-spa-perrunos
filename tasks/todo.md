@@ -29,7 +29,7 @@
 - [x] T26 [customers] Perfil cliente (nombre, WhatsApp) + CRUD mascotas (raza/criollo, peso, pelo, foto privada)
 - [x] T27 [customers] Admin: buscar/inscribir clientes y mascotas + vinculación por correo al entrar con Google
 - [x] T28 [customers] Admin: grupos "se bañan juntas"
-- [ ] T29 [services] Migración categories, services, extras, durations, location_prices + RLS
+- [x] T29 [services] Migración categories, services, extras, durations, location_prices + RLS
 - [ ] T30 [services] Admin CRUD de categorías, servicios (bath / special_cut / other) y extras
 - [ ] T31 [services] Matriz de duraciones talla×pelo por etapa: tabla desktop / acordeón móvil
 - [ ] T32 [services] Matriz de precios por local + copiar a otros locales + regla de activación

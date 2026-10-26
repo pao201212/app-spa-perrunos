@@ -1,0 +1,271 @@
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+
+import {
+  adminClient,
+  anonClient,
+  createTestUser,
+  deleteTestUsers,
+  uniqueSuffix,
+  type TestUser,
+} from "./helpers";
+
+const admin = adminClient();
+const suffix = uniqueSuffix();
+
+let tenantA: string;
+let tenantB: string;
+let staffA: TestUser;
+let staffB: TestUser;
+let locationA: string;
+let locationB: string;
+let category: string;
+let bath: string;
+let cut: string;
+let nails: string;
+let extra: string;
+
+beforeAll(async () => {
+  const { data, error } = await admin
+    .from("tenants")
+    .insert([
+      { slug: `srv-a-${suffix}`, name: "Servicios A", is_active: true },
+      { slug: `srv-b-${suffix}`, name: "Servicios B", is_active: true },
+    ])
+    .select("id, slug");
+  if (error) throw error;
+  tenantA = data.find((t) => t.slug.startsWith("srv-a"))!.id;
+  tenantB = data.find((t) => t.slug.startsWith("srv-b"))!.id;
+  [staffA, staffB] = await Promise.all([
+    createTestUser("staff-srv-a"),
+    createTestUser("staff-srv-b"),
+  ]);
+  await admin.from("memberships").insert([
+    { tenant_id: tenantA, user_id: staffA.id, role: "admin" },
+    { tenant_id: tenantB, user_id: staffB.id, role: "admin" },
+  ]);
+  const { data: locations } = await admin
+    .from("locations")
+    .insert([
+      { tenant_id: tenantA, name: "Sede A" },
+      { tenant_id: tenantB, name: "Sede B" },
+    ])
+    .select("id, tenant_id");
+  locationA = locations!.find((l) => l.tenant_id === tenantA)!.id;
+  locationB = locations!.find((l) => l.tenant_id === tenantB)!.id;
+});
+
+afterAll(async () => {
+  await admin.from("tenants").delete().in("id", [tenantA, tenantB]);
+  await deleteTestUsers([staffA, staffB].filter(Boolean));
+});
+
+describe("categorías y servicios", () => {
+  it("el staff crea categorías y servicios de cada tipo", async () => {
+    const cat = await staffA.client
+      .from("service_categories")
+      .insert({ tenant_id: tenantA, name: "Higiene" })
+      .select("id")
+      .single();
+    expect(cat.error).toBeNull();
+    category = cat.data!.id;
+
+    const { data, error } = await staffA.client
+      .from("services")
+      .insert([
+        { tenant_id: tenantA, category_id: category, kind: "bath", name: "Baño", species: "both" },
+        {
+          tenant_id: tenantA,
+          category_id: category,
+          kind: "special_cut",
+          name: "Corte de raza",
+          species: "dog",
+        },
+        { tenant_id: tenantA, kind: "other", name: "Corte de uñas", species: "both" },
+      ])
+      .select("id, kind, is_active");
+    expect(error).toBeNull();
+    expect(data?.every((s) => s.is_active)).toBe(true);
+    bath = data!.find((s) => s.kind === "bath")!.id;
+    cut = data!.find((s) => s.kind === "special_cut")!.id;
+    nails = data!.find((s) => s.kind === "other")!.id;
+  });
+
+  it("no repite nombres de servicio en el spa", async () => {
+    const { error } = await admin
+      .from("services")
+      .insert({ tenant_id: tenantA, kind: "bath", name: "baño", species: "dog" });
+    expect(error?.code).toBe("23505");
+  });
+
+  it("anon ve los servicios activos, no los inactivos", async () => {
+    await staffA.client.from("services").update({ is_active: false }).eq("id", nails);
+    const { data } = await anonClient()
+      .from("services")
+      .select("name")
+      .eq("tenant_id", tenantA)
+      .order("name");
+    expect(data?.map((s) => s.name)).toEqual(["Baño", "Corte de raza"]);
+    await staffA.client.from("services").update({ is_active: true }).eq("id", nails);
+  });
+
+  it("el staff de B no puede tocar los servicios de A", async () => {
+    const { data } = await staffB.client
+      .from("services")
+      .update({ name: "Hackeado" })
+      .eq("id", bath)
+      .select();
+    expect(data ?? []).toEqual([]);
+    const foreignCategory = await admin.from("services").insert({
+      tenant_id: tenantB,
+      category_id: category,
+      kind: "bath",
+      name: "Cruzado",
+      species: "dog",
+    });
+    expect(foreignCategory.error?.code).toBe("23503");
+  });
+});
+
+describe("extras", () => {
+  it("se asocian a un servicio del mismo spa y pueden sumar minutos al terminado", async () => {
+    const { data, error } = await staffA.client
+      .from("extras")
+      .insert({
+        tenant_id: tenantA,
+        service_id: bath,
+        name: "Cepillado profundo",
+        extra_minutes: 10,
+      })
+      .select("id")
+      .single();
+    expect(error).toBeNull();
+    extra = data!.id;
+
+    const notMultiple = await admin
+      .from("extras")
+      .insert({ tenant_id: tenantA, service_id: bath, name: "Raro", extra_minutes: 7 });
+    expect(notMultiple.error).not.toBeNull();
+    const crossTenant = await admin
+      .from("extras")
+      .insert({ tenant_id: tenantB, service_id: bath, name: "Cruzado" });
+    expect(crossTenant.error?.code).toBe("23503");
+  });
+});
+
+describe("service_durations (por spa, talla × pelo; D7)", () => {
+  it("el baño tiene baño, secado y terminado", async () => {
+    const ok = await staffA.client.from("service_durations").insert({
+      tenant_id: tenantA,
+      service_id: bath,
+      size: "M",
+      coat: "long",
+      bath_min: 40,
+      dry_min: 30,
+      finish_min: 20,
+    });
+    expect(ok.error).toBeNull();
+    const missingDry = await admin.from("service_durations").insert({
+      tenant_id: tenantA,
+      service_id: bath,
+      size: "L",
+      coat: "long",
+      bath_min: 40,
+      finish_min: 20,
+    });
+    expect(missingDry.error?.message).toMatch(/baño, secado y terminado/i);
+  });
+
+  it("el corte especial solo tiene minutos de corte; 'otro' solo de terminado", async () => {
+    const cutOk = await admin
+      .from("service_durations")
+      .insert({ tenant_id: tenantA, service_id: cut, size: "M", coat: "long", cut_min: 60 });
+    expect(cutOk.error).toBeNull();
+    const cutWrong = await admin.from("service_durations").insert({
+      tenant_id: tenantA,
+      service_id: cut,
+      size: "S",
+      coat: "long",
+      cut_min: 45,
+      bath_min: 10,
+    });
+    expect(cutWrong.error).not.toBeNull();
+    const nailsOk = await admin
+      .from("service_durations")
+      .insert({ tenant_id: tenantA, service_id: nails, size: "M", coat: "short", finish_min: 15 });
+    expect(nailsOk.error).toBeNull();
+  });
+
+  it("los minutos son múltiplos de 5", async () => {
+    const { error } = await admin.from("service_durations").insert({
+      tenant_id: tenantA,
+      service_id: bath,
+      size: "XS",
+      coat: "short",
+      bath_min: 33,
+      dry_min: 30,
+      finish_min: 20,
+    });
+    expect(error).not.toBeNull();
+  });
+});
+
+describe("precios por local (local × talla × pelo; D8)", () => {
+  it("el staff fija precios de servicios y extras en sus locales", async () => {
+    const service = await staffA.client.from("location_service_prices").insert({
+      tenant_id: tenantA,
+      location_id: locationA,
+      service_id: bath,
+      size: "M",
+      coat: "long",
+      price_cop: 55000,
+    });
+    expect(service.error).toBeNull();
+    const extraPrice = await staffA.client.from("location_extra_prices").insert({
+      tenant_id: tenantA,
+      location_id: locationA,
+      extra_id: extra,
+      size: "M",
+      coat: "long",
+      price_cop: 8000,
+    });
+    expect(extraPrice.error).toBeNull();
+  });
+
+  it("los precios son públicos para el catálogo", async () => {
+    const { data } = await anonClient()
+      .from("location_service_prices")
+      .select("price_cop")
+      .match({ location_id: locationA, service_id: bath, size: "M", coat: "long" });
+    expect(data).toEqual([{ price_cop: 55000 }]);
+  });
+
+  it("no admite precios negativos ni cruzar spas", async () => {
+    const negative = await admin.from("location_service_prices").insert({
+      tenant_id: tenantA,
+      location_id: locationA,
+      service_id: bath,
+      size: "S",
+      coat: "long",
+      price_cop: -1,
+    });
+    expect(negative.error).not.toBeNull();
+    const crossLocation = await admin.from("location_service_prices").insert({
+      tenant_id: tenantA,
+      location_id: locationB,
+      service_id: bath,
+      size: "S",
+      coat: "long",
+      price_cop: 1,
+    });
+    expect(crossLocation.error?.code).toBe("23503");
+  });
+
+  it("el staff de B no puede cambiar precios de A", async () => {
+    const { data } = await staffB.client
+      .from("location_service_prices")
+      .update({ price_cop: 1 })
+      .match({ location_id: locationA, service_id: bath })
+      .select();
+    expect(data ?? []).toEqual([]);
+  });
+});

@@ -29,6 +29,12 @@ const PUBLIC_TENANT_TABLES = new Set([
   "location_closures",
   "tenant_breeds",
   "size_thresholds",
+  "service_categories",
+  "services",
+  "extras",
+  "service_durations",
+  "location_service_prices",
+  "location_extra_prices",
 ]);
 
 let tenantA: string;
@@ -133,6 +139,54 @@ async function seedTenantData(tenantId: string) {
     .from("pet_group_members")
     .insert({ tenant_id: tenantId, group_id: group.id, pet_id: pet.id });
   if (member.error) throw member.error;
+
+  const { data: category } = await admin
+    .from("service_categories")
+    .insert({ tenant_id: tenantId, name: "Categoría aislamiento" })
+    .select("id")
+    .single();
+  const { data: service, error: serviceError } = await admin
+    .from("services")
+    .insert({
+      tenant_id: tenantId,
+      category_id: category!.id,
+      kind: "bath",
+      name: "Baño aislamiento",
+      species: "dog",
+    })
+    .select("id")
+    .single();
+  if (serviceError) throw serviceError;
+  const { data: extra } = await admin
+    .from("extras")
+    .insert({ tenant_id: tenantId, service_id: service.id, name: "Extra aislamiento" })
+    .select("id")
+    .single();
+  const priceBase = {
+    tenant_id: tenantId,
+    location_id: location.id,
+    size: "M" as const,
+    coat: "short" as const,
+  };
+  for (const [table, row] of [
+    [
+      "service_durations",
+      {
+        tenant_id: tenantId,
+        service_id: service.id,
+        size: "M",
+        coat: "short",
+        bath_min: 30,
+        dry_min: 30,
+        finish_min: 15,
+      },
+    ],
+    ["location_service_prices", { ...priceBase, service_id: service.id, price_cop: 50000 }],
+    ["location_extra_prices", { ...priceBase, extra_id: extra!.id, price_cop: 5000 }],
+  ] as const) {
+    const { error: insertError } = await admin.from(table).insert(row);
+    if (insertError) throw insertError;
+  }
 
   const { data: worker, error: staffError } = await admin
     .from("staff")
