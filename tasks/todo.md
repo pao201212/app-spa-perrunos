@@ -25,7 +25,7 @@
 - [x] T22 [pet-catalog] Admin: override de razas, razas propias y umbrales de talla por especie
 - [x] T23 [staff] Migración staff, skills, shifts, absences + RLS + tests
 - [x] T24 [staff] Admin de personal: habilidades, locales, turnos semanales, ausencias
-- [ ] T25 [customers] Migración customers, pets, pet_groups + RLS cliente/staff + tests (cliente X ≠ Y)
+- [x] T25 [customers] Migración customers, pets, pet_groups + RLS cliente/staff + tests (cliente X ≠ Y)
 - [ ] T26 [customers] Perfil cliente (nombre, WhatsApp) + CRUD mascotas (raza/criollo, peso, pelo, foto privada)
 - [ ] T27 [customers] Admin: buscar/inscribir clientes y mascotas + vinculación por correo al entrar con Google
 - [ ] T28 [customers] Admin: grupos "se bañan juntas"

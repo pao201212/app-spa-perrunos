@@ -23,6 +23,45 @@ export type Database = {
   };
   public: {
     Tables: {
+      customers: {
+        Row: {
+          created_at: string;
+          email: string | null;
+          full_name: string;
+          id: string;
+          tenant_id: string;
+          user_id: string | null;
+          whatsapp: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          email?: string | null;
+          full_name: string;
+          id?: string;
+          tenant_id: string;
+          user_id?: string | null;
+          whatsapp?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          email?: string | null;
+          full_name?: string;
+          id?: string;
+          tenant_id?: string;
+          user_id?: string | null;
+          whatsapp?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "customers_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       global_breeds: {
         Row: {
           created_at: string;
@@ -237,6 +276,140 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "tenants";
             referencedColumns: ["id"];
+          },
+        ];
+      };
+      pet_group_members: {
+        Row: {
+          group_id: string;
+          pet_id: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          group_id: string;
+          pet_id: string;
+          tenant_id: string;
+        };
+        Update: {
+          group_id?: string;
+          pet_id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "pet_group_members_tenant_id_group_id_fkey";
+            columns: ["tenant_id", "group_id"];
+            isOneToOne: false;
+            referencedRelation: "pet_groups";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "pet_group_members_tenant_id_pet_id_fkey";
+            columns: ["tenant_id", "pet_id"];
+            isOneToOne: false;
+            referencedRelation: "pets";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      pet_groups: {
+        Row: {
+          created_at: string;
+          customer_id: string;
+          id: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          customer_id: string;
+          id?: string;
+          tenant_id: string;
+        };
+        Update: {
+          created_at?: string;
+          customer_id?: string;
+          id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "pet_groups_tenant_id_customer_id_fkey";
+            columns: ["tenant_id", "customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      pets: {
+        Row: {
+          breed_id: string;
+          coat: Database["public"]["Enums"]["coat_type"];
+          created_at: string;
+          customer_id: string;
+          gender: Database["public"]["Enums"]["pet_gender"] | null;
+          id: string;
+          is_active: boolean;
+          name: string;
+          notes: string | null;
+          photo_path: string | null;
+          size: Database["public"]["Enums"]["pet_size"];
+          size_locked: boolean;
+          species: Database["public"]["Enums"]["pet_species"];
+          tenant_id: string;
+          weight_kg: number | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          breed_id: string;
+          coat: Database["public"]["Enums"]["coat_type"];
+          created_at?: string;
+          customer_id: string;
+          gender?: Database["public"]["Enums"]["pet_gender"] | null;
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          notes?: string | null;
+          photo_path?: string | null;
+          size: Database["public"]["Enums"]["pet_size"];
+          size_locked?: boolean;
+          species: Database["public"]["Enums"]["pet_species"];
+          tenant_id: string;
+          weight_kg?: number | null;
+        };
+        Update: {
+          breed_id?: string;
+          coat?: Database["public"]["Enums"]["coat_type"];
+          created_at?: string;
+          customer_id?: string;
+          gender?: Database["public"]["Enums"]["pet_gender"] | null;
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          notes?: string | null;
+          photo_path?: string | null;
+          size?: Database["public"]["Enums"]["pet_size"];
+          size_locked?: boolean;
+          species?: Database["public"]["Enums"]["pet_species"];
+          tenant_id?: string;
+          weight_kg?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "pets_tenant_id_breed_id_fkey";
+            columns: ["tenant_id", "breed_id"];
+            isOneToOne: false;
+            referencedRelation: "tenant_breeds";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "pets_tenant_id_customer_id_fkey";
+            columns: ["tenant_id", "customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["tenant_id", "id"];
           },
         ];
       };
@@ -560,6 +733,10 @@ export type Database = {
         Returns: number;
       };
       assign_tenant_admin: { Args: { p_email: string; p_tenant_id: string }; Returns: string };
+      ensure_customer_profile: {
+        Args: { p_full_name: string; p_tenant_id: string; p_whatsapp: string };
+        Returns: string;
+      };
       reset_tenant_breed: { Args: { p_breed_id: string }; Returns: undefined };
       resolve_pet_size: {
         Args: { p_breed_id: string; p_weight_kg?: number };
@@ -579,6 +756,7 @@ export type Database = {
       coat_type: "short" | "medium" | "long";
       confirmation_mode: "auto" | "manual";
       membership_role: "owner" | "admin" | "reception";
+      pet_gender: "female" | "male";
       pet_size: "XS" | "S" | "M" | "L" | "XL" | "XXL";
       pet_species: "dog" | "cat";
       staff_skill: "bath" | "dry" | "finish" | "special_cut";
@@ -701,6 +879,7 @@ export const Constants = {
       coat_type: ["short", "medium", "long"],
       confirmation_mode: ["auto", "manual"],
       membership_role: ["owner", "admin", "reception"],
+      pet_gender: ["female", "male"],
       pet_size: ["XS", "S", "M", "L", "XL", "XXL"],
       pet_species: ["dog", "cat"],
       staff_skill: ["bath", "dry", "finish", "special_cut"],

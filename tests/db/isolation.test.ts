@@ -90,6 +90,50 @@ async function seedTenantData(tenantId: string) {
     if (insertError) throw insertError;
   }
 
+  const { data: customer, error: customerError } = await admin
+    .from("customers")
+    .insert({
+      tenant_id: tenantId,
+      full_name: "Cliente aislamiento",
+      whatsapp: `+57 ${tenantId.slice(0, 8)}`,
+    })
+    .select("id")
+    .single();
+  if (customerError) throw customerError;
+  const { data: breed } = await admin
+    .from("tenant_breeds")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .limit(1)
+    .single();
+  const { data: species } = await admin
+    .from("tenant_breeds")
+    .select("species")
+    .eq("id", breed!.id)
+    .single();
+  const { data: pet, error: petError } = await admin
+    .from("pets")
+    .insert({
+      tenant_id: tenantId,
+      customer_id: customer.id,
+      name: "Mascota",
+      species: species!.species,
+      breed_id: breed!.id,
+    })
+    .select("id")
+    .single();
+  if (petError) throw petError;
+  const { data: group, error: groupError } = await admin
+    .from("pet_groups")
+    .insert({ tenant_id: tenantId, customer_id: customer.id })
+    .select("id")
+    .single();
+  if (groupError) throw groupError;
+  const member = await admin
+    .from("pet_group_members")
+    .insert({ tenant_id: tenantId, group_id: group.id, pet_id: pet.id });
+  if (member.error) throw member.error;
+
   const { data: worker, error: staffError } = await admin
     .from("staff")
     .insert({ tenant_id: tenantId, name: "Persona aislamiento" })
