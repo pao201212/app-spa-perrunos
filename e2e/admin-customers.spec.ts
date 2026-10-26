@@ -11,6 +11,7 @@ import {
   signInAs,
   type E2EUser,
 } from "./support/auth";
+import { openAdminSection } from "./support/admin-nav";
 import { PORT } from "./support/env";
 
 let staff: E2EUser;
@@ -39,10 +40,7 @@ test("el admin inscribe a un cliente con su mascota y él la ve al entrar con su
   const page = await adminContext.newPage();
 
   await page.goto(at("/admin"));
-  await page
-    .getByRole("navigation", { name: "Panel" })
-    .getByRole("link", { name: "Clientes" })
-    .click();
+  await openAdminSection(page, "Clientes");
   await expect(page).toHaveURL(at("/admin/clientes"));
 
   await page.getByRole("link", { name: "Inscribir cliente" }).click();

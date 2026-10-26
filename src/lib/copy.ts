@@ -34,6 +34,8 @@ export const copy = {
       breeds: "Razas",
       staff: "Personal",
       customers: "Clientes",
+      services: "Servicios",
+      more: "Más",
     },
   },
   platform: {

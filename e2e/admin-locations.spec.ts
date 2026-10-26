@@ -10,6 +10,7 @@ import {
   signInAs,
   type E2EUser,
 } from "./support/auth";
+import { openAdminSection } from "./support/admin-nav";
 import { PORT } from "./support/env";
 
 const demo = (path: string) => `http://demo.localhost:${PORT}${path}`;
@@ -34,10 +35,7 @@ async function expectStatus(page: Page, form: string, text: RegExp | string) {
 
 test("el panel enlaza a Locales y lista la sede del seed", async ({ page }) => {
   await page.goto(demo("/admin"));
-  await page
-    .getByRole("navigation", { name: "Panel" })
-    .getByRole("link", { name: "Locales" })
-    .click();
+  await openAdminSection(page, "Locales");
   await expect(page).toHaveURL(demo("/admin/locales"));
   await expect(page.getByRole("link", { name: "Sede principal" })).toBeVisible();
 });

@@ -11,6 +11,7 @@ import {
   signInAs,
   type E2EUser,
 } from "./support/auth";
+import { openAdminSection } from "./support/admin-nav";
 import { PORT } from "./support/env";
 
 let staff: E2EUser;
@@ -38,10 +39,7 @@ const breedRow = (page: Page, name: string) =>
 
 test("el panel enlaza a Razas y muestra el catálogo heredado", async ({ page }) => {
   await page.goto(at("/admin"));
-  await page
-    .getByRole("navigation", { name: "Panel" })
-    .getByRole("link", { name: "Razas" })
-    .click();
+  await openAdminSection(page, "Razas");
   await expect(page).toHaveURL(at("/admin/razas"));
   await expect(breedRow(page, "Golden Retriever")).toContainText("Grande (L)");
 });

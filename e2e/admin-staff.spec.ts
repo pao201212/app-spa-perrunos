@@ -12,6 +12,7 @@ import {
   signInAs,
   type E2EUser,
 } from "./support/auth";
+import { openAdminSection } from "./support/admin-nav";
 import { PORT } from "./support/env";
 
 let staff: E2EUser;
@@ -34,10 +35,7 @@ test.afterEach(async () => {
 
 test("registra a una persona con habilidades, turnos y ausencias", async ({ page }) => {
   await page.goto(at("/admin"));
-  await page
-    .getByRole("navigation", { name: "Panel" })
-    .getByRole("link", { name: "Personal" })
-    .click();
+  await openAdminSection(page, "Personal");
   await expect(page).toHaveURL(at("/admin/personal"));
 
   await page.getByRole("link", { name: "Nuevo integrante" }).click();
@@ -77,10 +75,7 @@ test("registra a una persona con habilidades, turnos y ausencias", async ({ page
   await details.getByRole("button", { name: "Guardar datos" }).click();
   await expect(details.getByRole("status")).toHaveText("Datos guardados");
 
-  await page
-    .getByRole("navigation", { name: "Panel" })
-    .getByRole("link", { name: "Personal" })
-    .click();
+  await openAdminSection(page, "Personal");
   const row = page.getByRole("listitem").filter({ hasText: "Ana Bañadora" });
   await expect(row).toContainText("Baña");
   await expect(row).toContainText("Terminado");
