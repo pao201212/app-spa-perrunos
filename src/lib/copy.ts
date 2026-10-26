@@ -27,6 +27,11 @@ export const copy = {
   },
   admin: {
     panelTitle: (businessName: string) => `Panel · ${businessName}`,
+    navLabel: "Panel",
+    nav: {
+      home: "Inicio",
+      locations: "Locales",
+    },
   },
   platform: {
     title: "Consola Prisma Lab",

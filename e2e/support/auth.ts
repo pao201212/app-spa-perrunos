@@ -109,3 +109,7 @@ export async function deleteInvite(email: string): Promise<void> {
 export async function deleteGlobalBreedByName(name: string): Promise<void> {
   await admin().from("global_breeds").delete().eq("name", name);
 }
+
+export async function deleteLocationByName(name: string): Promise<void> {
+  await admin().from("locations").delete().eq("name", name);
+}

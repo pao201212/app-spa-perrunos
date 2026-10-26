@@ -1,0 +1,34 @@
+import "server-only";
+
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+export async function listLocations(tenantId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("locations")
+    .select("id, name, address, is_active")
+    .eq("tenant_id", tenantId)
+    .order("name");
+  if (error) throw error;
+  return data;
+}
+
+export async function getLocationDetail(tenantId: string, locationId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("locations")
+    .select(
+      `id, name, address, whatsapp, is_active, confirmation_mode, cancel_window_hours, max_days_ahead,
+       slot_step_min, bather_continues_drying,
+       location_stations (station, count),
+       location_hours (id, weekday, opens_at, closes_at),
+       location_closures (id, date, reason)`,
+    )
+    .eq("tenant_id", tenantId)
+    .eq("id", locationId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export type LocationDetail = NonNullable<Awaited<ReturnType<typeof getLocationDetail>>>;

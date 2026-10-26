@@ -19,7 +19,7 @@
 - [x] T16 [platform-console] CRUD de tenants (slug validado) + asignar admins por correo
 - [x] T17 [platform-console] Catálogo global de razas: seed ≈150 del legado + CRUD
 - [x] T18 [locations] Migración locations, stations, hours, closures + RLS + tests
-- [ ] T19 [locations] Admin de locales: CRUD, estaciones, horario, cierres, ajustes de reserva
+- [x] T19 [locations] Admin de locales: CRUD, estaciones, horario, cierres, ajustes de reserva
 - [ ] T20 [locations] "Aplicar a todos los locales" con confirmación
 - [ ] T21 [pet-catalog] Migración size_thresholds + tenant_breeds + función talla por peso/raza + tests
 - [ ] T22 [pet-catalog] Admin: override de razas, razas propias y umbrales de talla por especie

@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { Suspense } from "react";
 
-import { SignOutButton } from "@/components/auth/SignOutButton";
+import { AdminShell } from "@/components/admin/AdminShell";
+import { Card } from "@/components/ui";
 import { requireTenantStaff } from "@/lib/auth/guards";
 import { ADMIN_PATH } from "@/lib/auth/roles";
 import { copy } from "@/lib/copy";
@@ -18,9 +20,15 @@ export default function AdminHome({ params }: PageProps<"/s/[slug]/admin">) {
 async function AdminHomeContent({ slug }: { slug: string }) {
   const { tenant } = await requireTenantStaff(slug, ADMIN_PATH);
   return (
-    <main className="container">
+    <AdminShell businessName={tenant.name}>
       <h1>{copy.admin.panelTitle(tenant.name)}</h1>
-      <SignOutButton />
-    </main>
+      <Card>
+        <h2>Primeros pasos</h2>
+        <p>
+          Configura tus <Link href="/admin/locales">locales</Link>: estaciones, horario y días de
+          cierre.
+        </p>
+      </Card>
+    </AdminShell>
   );
 }
