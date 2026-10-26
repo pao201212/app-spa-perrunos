@@ -19,6 +19,12 @@ const suffix = uniqueSuffix();
 /** Tablas sin tenant_id por diseño: datos de plataforma. Agregar aquí requiere justificarlo. */
 const PLATFORM_TABLES = new Set(["tenants", "platform_admins", "global_breeds"]);
 
+/**
+ * Tablas por tenant con lectura pública (lo que el cliente ve al reservar). Se excluyen de las pruebas
+ * de lectura, pero siguen sujetas a las de escritura. Agregar aquí requiere justificarlo.
+ */
+const PUBLIC_TENANT_TABLES = new Set(["locations", "location_hours", "location_closures"]);
+
 let tenantA: string;
 let tenantB: string;
 let staffA: TestUser;
@@ -48,6 +54,8 @@ beforeAll(async () => {
     { tenant_id: tenantB, user_id: staffB.id, role: "admin" },
   ]);
   if (mError) throw mError;
+  await seedTenantData(tenantA);
+  await seedTenantData(tenantB);
 
   const rows = await sql<{ table_name: string }[]>`
     select c.table_name from information_schema.columns c
@@ -56,6 +64,26 @@ beforeAll(async () => {
     order by 1`;
   tenantTables = rows.map((r) => r.table_name);
 });
+
+/** Al menos una fila por tabla con tenant_id, para que las pruebas genéricas tengan qué filtrar. */
+async function seedTenantData(tenantId: string) {
+  const { data: location, error } = await admin
+    .from("locations")
+    .insert({ tenant_id: tenantId, name: "Sede aislamiento" })
+    .select("id")
+    .single();
+  if (error) throw error;
+  const base = { tenant_id: tenantId, location_id: location.id };
+  for (const [table, row] of [
+    ["location_stations", { ...base, station: "bath", count: 1 }],
+    ["location_hours", { ...base, weekday: 1, opens_at: "08:00", closes_at: "12:00" }],
+    ["location_closures", { ...base, date: "2026-12-25" }],
+    ["tenant_invites", { tenant_id: tenantId, email: `invitado-${tenantId}@test.prismalab.local` }],
+  ] as const) {
+    const { error: insertError } = await admin.from(table).insert(row);
+    if (insertError) throw insertError;
+  }
+}
 
 afterAll(async () => {
   await admin
@@ -90,10 +118,10 @@ describe("contrato de esquema", () => {
 });
 
 describe("aislamiento por tenant (todas las tablas con tenant_id)", () => {
-  it("el staff de A no ve filas de B en ninguna tabla", async () => {
+  it("el staff de A no ve filas internas de B", async () => {
     const leaks = await asRole(sql, { role: "authenticated", sub: staffA.id }, async (tx) => {
       const found: string[] = [];
-      for (const table of tenantTables) {
+      for (const table of tenantTables.filter((t) => !PUBLIC_TENANT_TABLES.has(t))) {
         const [{ count }] = await tx.unsafe(
           `select count(*)::int as count from public.${table} where tenant_id = $1`,
           [tenantB],
@@ -105,10 +133,42 @@ describe("aislamiento por tenant (todas las tablas con tenant_id)", () => {
     expect(leaks).toEqual([]);
   });
 
+  it("el staff de A no puede modificar ni borrar filas de B en ninguna tabla", async () => {
+    const touched = await asRole(sql, { role: "authenticated", sub: staffA.id }, async (tx) => {
+      const found: string[] = [];
+      for (const table of tenantTables) {
+        const updated = await tx.unsafe(
+          `update public.${table} set tenant_id = tenant_id where tenant_id = $1 returning 1`,
+          [tenantB],
+        );
+        const deleted = await tx.unsafe(
+          `delete from public.${table} where tenant_id = $1 returning 1`,
+          [tenantB],
+        );
+        if (updated.length + deleted.length > 0)
+          found.push(`${table}: ${updated.length}/${deleted.length}`);
+      }
+      return found;
+    }).catch((error: Error) => [`error inesperado: ${error.message}`]);
+    expect(touched).toEqual([]);
+  });
+
+  it("todas las tablas por tenant tienen filas en A y B (la prueba no es trivial)", async () => {
+    const empty: string[] = [];
+    for (const table of tenantTables) {
+      const [{ count }] = await sql.unsafe(
+        `select count(distinct tenant_id)::int as count from public.${table} where tenant_id in ($1, $2)`,
+        [tenantA, tenantB],
+      );
+      if (count < 2) empty.push(table);
+    }
+    expect(empty).toEqual([]);
+  });
+
   it("un cliente sin membresías no ve filas de ningún spa en tablas internas", async () => {
     const leaks = await asRole(sql, { role: "authenticated", sub: customer.id }, async (tx) => {
       const found: string[] = [];
-      for (const table of tenantTables) {
+      for (const table of tenantTables.filter((t) => !PUBLIC_TENANT_TABLES.has(t))) {
         const [{ count }] = await tx.unsafe(
           `select count(*)::int as count from public.${table} where tenant_id in ($1, $2)`,
           [tenantA, tenantB],

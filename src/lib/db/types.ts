@@ -54,6 +54,162 @@ export type Database = {
         };
         Relationships: [];
       };
+      location_closures: {
+        Row: {
+          date: string;
+          id: string;
+          location_id: string;
+          reason: string | null;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          date: string;
+          id?: string;
+          location_id: string;
+          reason?: string | null;
+          tenant_id: string;
+        };
+        Update: {
+          date?: string;
+          id?: string;
+          location_id?: string;
+          reason?: string | null;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "location_closures_tenant_id_location_id_fkey";
+            columns: ["tenant_id", "location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      location_hours: {
+        Row: {
+          closes_at: string;
+          id: string;
+          location_id: string;
+          opens_at: string;
+          tenant_id: string;
+          weekday: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          closes_at: string;
+          id?: string;
+          location_id: string;
+          opens_at: string;
+          tenant_id: string;
+          weekday: number;
+        };
+        Update: {
+          closes_at?: string;
+          id?: string;
+          location_id?: string;
+          opens_at?: string;
+          tenant_id?: string;
+          weekday?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "location_hours_tenant_id_location_id_fkey";
+            columns: ["tenant_id", "location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      location_stations: {
+        Row: {
+          count: number;
+          location_id: string;
+          station: Database["public"]["Enums"]["station_type"];
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          count: number;
+          location_id: string;
+          station: Database["public"]["Enums"]["station_type"];
+          tenant_id: string;
+        };
+        Update: {
+          count?: number;
+          location_id?: string;
+          station?: Database["public"]["Enums"]["station_type"];
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "location_stations_tenant_id_location_id_fkey";
+            columns: ["tenant_id", "location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      locations: {
+        Row: {
+          address: string | null;
+          bather_continues_drying: boolean;
+          cancel_window_hours: number;
+          capacity_mode: Database["public"]["Enums"]["capacity_mode"];
+          confirmation_mode: Database["public"]["Enums"]["confirmation_mode"];
+          created_at: string;
+          id: string;
+          is_active: boolean;
+          max_days_ahead: number;
+          name: string;
+          slot_step_min: number;
+          tenant_id: string;
+          whatsapp: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          address?: string | null;
+          bather_continues_drying?: boolean;
+          cancel_window_hours?: number;
+          capacity_mode?: Database["public"]["Enums"]["capacity_mode"];
+          confirmation_mode?: Database["public"]["Enums"]["confirmation_mode"];
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          max_days_ahead?: number;
+          name: string;
+          slot_step_min?: number;
+          tenant_id: string;
+          whatsapp?: string | null;
+        };
+        Update: {
+          address?: string | null;
+          bather_continues_drying?: boolean;
+          cancel_window_hours?: number;
+          capacity_mode?: Database["public"]["Enums"]["capacity_mode"];
+          confirmation_mode?: Database["public"]["Enums"]["confirmation_mode"];
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          max_days_ahead?: number;
+          name?: string;
+          slot_step_min?: number;
+          tenant_id?: string;
+          whatsapp?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "locations_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       memberships: {
         Row: {
           created_at: string;
@@ -180,10 +336,13 @@ export type Database = {
       };
     };
     Enums: {
+      capacity_mode: "detailed" | "daily_quota";
       coat_type: "short" | "medium" | "long";
+      confirmation_mode: "auto" | "manual";
       membership_role: "owner" | "admin" | "reception";
       pet_size: "XS" | "S" | "M" | "L" | "XL" | "XXL";
       pet_species: "dog" | "cat";
+      station_type: "bath" | "dry" | "finish";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -298,10 +457,13 @@ export const Constants = {
   },
   public: {
     Enums: {
+      capacity_mode: ["detailed", "daily_quota"],
       coat_type: ["short", "medium", "long"],
+      confirmation_mode: ["auto", "manual"],
       membership_role: ["owner", "admin", "reception"],
       pet_size: ["XS", "S", "M", "L", "XL", "XXL"],
       pet_species: ["dog", "cat"],
+      station_type: ["bath", "dry", "finish"],
     },
   },
 } as const;
