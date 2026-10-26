@@ -304,3 +304,50 @@ export async function seedSimpleCapacity(locationId: string, serviceId: string):
     if (insert.error) throw insert.error;
   }
 }
+
+/** Cita de baño ya tomada (directa, sin capacity.book) con las mascotas medianas cortas del cliente. */
+export async function seedBathAppointment(
+  locationId: string,
+  customerId: string,
+  startsAt: string,
+  readyAt: string,
+): Promise<void> {
+  const client = admin();
+  const { data: location, error } = await client
+    .from("locations")
+    .select("tenant_id")
+    .eq("id", locationId)
+    .single();
+  if (error) throw error;
+  const { data: pets, error: petsError } = await client
+    .from("pets")
+    .select("id")
+    .eq("customer_id", customerId);
+  if (petsError) throw petsError;
+  const { data: appointment, error: insertError } = await client
+    .from("appointments")
+    .insert({
+      tenant_id: location.tenant_id,
+      location_id: locationId,
+      customer_id: customerId,
+      status: "scheduled",
+      starts_at: startsAt,
+      estimated_ready_at: readyAt,
+      total_cop: 0,
+      source: "admin",
+    })
+    .select("id")
+    .single();
+  if (insertError) throw insertError;
+  const rows = pets.map((pet) => ({
+    tenant_id: location.tenant_id,
+    appointment_id: appointment.id,
+    pet_id: pet.id,
+    species: "dog" as const,
+    size: "M" as const,
+    coat: "short" as const,
+    quota_divisor: 6,
+  }));
+  const insertPets = await client.from("appointment_pets").insert(rows);
+  if (insertPets.error) throw insertPets.error;
+}

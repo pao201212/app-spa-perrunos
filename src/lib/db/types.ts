@@ -1344,6 +1344,17 @@ export type Database = {
           starts_at: string;
         }[];
       };
+      location_occupancy: {
+        Args: { p_from: string; p_location_id: string; p_to: string };
+        Returns: {
+          by_size: Json;
+          closed: boolean;
+          day: string;
+          jornadas: Json;
+          percent: number;
+          used: Json;
+        }[];
+      };
       replace_location_pet_capacity: {
         Args: { p_location_id: string; p_rows: Json };
         Returns: undefined;

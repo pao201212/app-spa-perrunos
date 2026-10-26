@@ -35,6 +35,7 @@ export const copy = {
       staff: "Personal",
       customers: "Clientes",
       services: "Servicios",
+      occupancy: "Ocupación",
       more: "Más",
     },
   },
