@@ -104,12 +104,12 @@ export async function updateStationsAction(
   formData: FormData,
 ): Promise<FormState> {
   const { tenant, supabase } = await tenantStaffContext(slug, detailPath(locationId));
-  const values = formValues(formData, ["bath", "dry", "finish"]);
+  const values = formValues(formData, ["bath", "dry", "cut"]);
   const parsed = stationsSchema.safeParse(values);
   if (!parsed.success)
     return { status: "error", fieldErrors: fieldErrorsFrom(parsed.error.issues), values };
 
-  const rows = (["bath", "dry", "finish"] as const).map((station) => ({
+  const rows = (["bath", "dry", "cut"] as const).map((station) => ({
     tenant_id: tenant.id,
     location_id: locationId,
     station,

@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-export const STAFF_SKILLS = ["bath", "dry", "finish", "special_cut"] as const;
+export const STAFF_SKILLS = ["bath", "dry", "details", "special_cut"] as const;
 export type StaffSkill = (typeof STAFF_SKILLS)[number];
 
 export const skillLabel: Record<StaffSkill, string> = {
   bath: "Baña",
   dry: "Seca",
-  finish: "Terminado",
+  details: "Detalles",
   special_cut: "Corte especial",
 };
 

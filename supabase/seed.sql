@@ -19,7 +19,7 @@ with spa as (
   insert into public.location_stations (tenant_id, location_id, station, count)
   select s.tenant_id, s.id, st.station::public.station_type, st.count
   from sede s
-  cross join (values ('bath', 2), ('dry', 2), ('finish', 1)) as st (station, count)
+  cross join (values ('bath', 2), ('dry', 2), ('cut', 1)) as st (station, count)
 )
 insert into public.location_hours (tenant_id, location_id, weekday, opens_at, closes_at)
 select s.tenant_id, s.id, h.weekday, h.opens_at::time, h.closes_at::time
@@ -52,9 +52,9 @@ with sede as (
   select p.tenant_id, p.id, k.skill::public.staff_skill
   from people p
   join (
-    values ('Bañador 1', 'bath'), ('Bañador 1', 'dry'), ('Bañador 1', 'finish'),
+    values ('Bañador 1', 'bath'), ('Bañador 1', 'dry'), ('Bañador 1', 'details'),
            ('Bañador 2', 'bath'), ('Bañador 2', 'dry'),
-           ('Groomer', 'finish'), ('Groomer', 'special_cut')
+           ('Groomer', 'details'), ('Groomer', 'special_cut')
   ) as k (name, skill) on k.name = p.name
 )
 insert into public.staff_shifts (tenant_id, staff_id, location_id, weekday, starts_at, ends_at)
@@ -88,7 +88,7 @@ select c.tenant_id, c.id, s.kind::public.service_kind, s.name, s.description, s.
 from categories c
 join (
   values
-    ('Higiene', 'bath', 'Baño', 'Baño completo con secado y terminado.', 'both', 1),
+    ('Higiene', 'bath', 'Baño', 'Baño completo con secado y detalles.', 'both', 1),
     ('Higiene', 'other', 'Corte de uñas', 'Corte y limado de uñas.', 'both', 3),
     ('Estilo', 'special_cut', 'Corte de raza', 'Corte especial hecho por el groomer.', 'dog', 2)
 ) as s (category, kind, name, description, species, sort_order) on s.category = c.name;
@@ -109,7 +109,7 @@ with combos as (
   select s.* from public.services s
   join public.tenants t on t.id = s.tenant_id and t.slug in ('spaperrunosygatunos', 'demo')
 )
-insert into public.service_durations (tenant_id, service_id, size, coat, bath_min, dry_min, finish_min, cut_min)
+insert into public.service_durations (tenant_id, service_id, size, coat, bath_min, dry_min, details_min, cut_min)
 select svc.tenant_id, svc.id, combos.size, combos.coat,
   case when svc.kind = 'bath' then 25 + 5 * combos.size_idx::int + 5 * (combos.coat_idx::int - 1) end,
   case when svc.kind = 'bath' then 15 + 5 * combos.size_idx::int + 5 * (combos.coat_idx::int - 1) end,
@@ -151,4 +151,16 @@ from public.extras e
 join public.locations l on l.tenant_id = e.tenant_id and l.name = 'Sede principal'
 join public.tenants t on t.id = e.tenant_id and t.slug in ('spaperrunosygatunos', 'demo')
 cross join combos
+on conflict do nothing;
+
+-- Opcionales sin costo del Baño (D26).
+insert into public.service_options (tenant_id, service_id, name, stage, sort_order)
+select s.tenant_id, s.id, o.name, o.stage::public.option_stage, o.sort_order
+from public.services s
+join public.tenants t on t.id = s.tenant_id and t.slug in ('spaperrunosygatunos', 'demo')
+cross join (
+  values ('Shampoo hipoalergénico', 'bath', 1), ('Corte higiénico', 'details', 2),
+         ('Perfume', 'details', 3), ('Tijera en patas', 'details', 4)
+) as o (name, stage, sort_order)
+where s.name = 'Baño'
 on conflict do nothing;

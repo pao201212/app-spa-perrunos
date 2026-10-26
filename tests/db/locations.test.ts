@@ -135,7 +135,7 @@ describe("location_stations", () => {
     const { error } = await staffA.client.from("location_stations").insert([
       { tenant_id: tenantA, location_id: locationA, station: "bath", count: 2 },
       { tenant_id: tenantA, location_id: locationA, station: "dry", count: 3 },
-      { tenant_id: tenantA, location_id: locationA, station: "finish", count: 1 },
+      { tenant_id: tenantA, location_id: locationA, station: "cut", count: 1 },
     ]);
     expect(error).toBeNull();
   });

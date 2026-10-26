@@ -156,7 +156,7 @@ export async function seedLocationConfig(slug: string, locationId: string): Prom
   const stations = await client.from("location_stations").insert([
     { ...base, station: "bath", count: 2 },
     { ...base, station: "dry", count: 2 },
-    { ...base, station: "finish", count: 1 },
+    { ...base, station: "cut", count: 1 },
   ]);
   if (stations.error) throw stations.error;
   const hours = await client
@@ -247,7 +247,7 @@ export async function seedBathDurations(
     coat: coat as "short",
     bath_min: 40,
     dry_min: 30,
-    finish_min: 20,
+    details_min: 20,
   }));
   const insert = await client.from("service_durations").insert(rows);
   if (insert.error) throw insert.error;

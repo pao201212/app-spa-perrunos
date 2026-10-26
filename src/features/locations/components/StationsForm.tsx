@@ -13,8 +13,8 @@ import styles from "./locations.module.css";
 
 const STATIONS = [
   { key: "bath", label: "Estaciones de baño" },
-  { key: "dry", label: "Mesas de secado" },
-  { key: "finish", label: "Estaciones de terminado" },
+  { key: "dry", label: "Mesas de secado y detalles" },
+  { key: "cut", label: "Estaciones de corte" },
 ] as const;
 
 export function StationsForm({ slug, location }: { slug: string; location: LocationDetail }) {

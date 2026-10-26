@@ -71,7 +71,7 @@ beforeAll(async () => {
   await admin.from("location_stations").insert([
     { ...base(source), station: "bath", count: 3 },
     { ...base(source), station: "dry", count: 4 },
-    { ...base(source), station: "finish", count: 2 },
+    { ...base(source), station: "cut", count: 2 },
     { ...base(targets[0]), station: "bath", count: 1 },
   ]);
   await admin.from("location_hours").insert([
@@ -125,7 +125,7 @@ describe("apply_location_settings", () => {
       expect(stations).toEqual([
         { station: "bath", count: 3 },
         { station: "dry", count: 4 },
-        { station: "finish", count: 2 },
+        { station: "cut", count: 2 },
       ]);
       const { data: hours } = await admin
         .from("location_hours")

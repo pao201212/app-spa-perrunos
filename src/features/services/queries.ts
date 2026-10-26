@@ -34,7 +34,7 @@ export async function getService(tenantId: string, serviceId: string) {
   const { data, error } = await supabase
     .from("services")
     .select(
-      "id, name, kind, species, description, is_active, category_id, extras (id, name, extra_minutes, is_active)",
+      "id, name, kind, species, description, is_active, category_id, extras (id, name, extra_minutes, is_active), service_options (id, name, stage, sort_order)",
     )
     .match({ tenant_id: tenantId, id: serviceId })
     .maybeSingle();
@@ -50,7 +50,7 @@ export async function getServiceDurations(serviceId: string) {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("service_durations")
-    .select("size, coat, bath_min, dry_min, finish_min, cut_min")
+    .select("size, coat, bath_min, dry_min, details_min, cut_min")
     .eq("service_id", serviceId);
   if (error) throw error;
   return data;

@@ -8,6 +8,7 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { buttonClassName } from "@/components/ui";
 import { DurationMatrixForm } from "@/features/services/components/DurationMatrixForm";
 import { ExtrasEditor } from "@/features/services/components/ExtrasEditor";
+import { OptionsEditor } from "@/features/services/components/OptionsEditor";
 import { ServiceForm } from "@/features/services/components/ServiceForm";
 import { getService, getServiceDurations, listCategories } from "@/features/services/queries";
 import { kindDescription } from "@/features/services/schema";
@@ -54,6 +55,14 @@ async function ServiceDetailContent({ slug, id }: { slug: string; id: string }) 
       >
         <ExtrasEditor slug={slug} service={service} />
       </AdminSection>
+      {service.kind === "bath" && (
+        <AdminSection
+          title="Opcionales sin costo"
+          description="El cliente los marca al reservar. Indica si se hacen en el baño o en los detalles."
+        >
+          <OptionsEditor slug={slug} service={service} />
+        </AdminSection>
+      )}
       <AdminSection
         title="Duraciones"
         description="Minutos de cada etapa según talla y tipo de pelo. Son iguales en todos los locales."

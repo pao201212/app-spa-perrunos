@@ -10,9 +10,9 @@ const form = (entries: Record<string, string>) => {
 
 describe("stagesFor", () => {
   it("devuelve las etapas de cada tipo de servicio", () => {
-    expect(stagesFor("bath")).toEqual(["bath_min", "dry_min", "finish_min"]);
+    expect(stagesFor("bath")).toEqual(["bath_min", "dry_min", "details_min"]);
     expect(stagesFor("special_cut")).toEqual(["cut_min"]);
-    expect(stagesFor("other")).toEqual(["finish_min"]);
+    expect(stagesFor("other")).toEqual(["details_min"]);
   });
 });
 
@@ -23,13 +23,13 @@ describe("parseDurationMatrix", () => {
       form({
         [durationFieldName("M", "long", "bath_min")]: "40",
         [durationFieldName("M", "long", "dry_min")]: "30",
-        [durationFieldName("M", "long", "finish_min")]: "20",
+        [durationFieldName("M", "long", "details_min")]: "20",
         [durationFieldName("S", "short", "bath_min")]: "",
       }),
     );
     expect(result.errors).toEqual({});
     expect(result.rows).toEqual([
-      { size: "M", coat: "long", bath_min: 40, dry_min: 30, finish_min: 20 },
+      { size: "M", coat: "long", bath_min: 40, dry_min: 30, details_min: 20 },
     ]);
   });
 
@@ -42,7 +42,7 @@ describe("parseDurationMatrix", () => {
       }),
     );
     expect(result.errors).toEqual({
-      [durationFieldName("L", "medium", "finish_min")]:
+      [durationFieldName("L", "medium", "details_min")]:
         "Completa las tres etapas o deja la fila vacía",
     });
   });
@@ -65,10 +65,10 @@ describe("parseDurationMatrix", () => {
     const result = parseDurationMatrix(
       "other",
       form({
-        [durationFieldName("M", "short", "finish_min")]: "15",
+        [durationFieldName("M", "short", "details_min")]: "15",
         [durationFieldName("M", "short", "bath_min")]: "40",
       }),
     );
-    expect(result.rows).toEqual([{ size: "M", coat: "short", finish_min: 15 }]);
+    expect(result.rows).toEqual([{ size: "M", coat: "short", details_min: 15 }]);
   });
 });

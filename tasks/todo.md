@@ -41,7 +41,7 @@
 - [ ] T38 [capacity] Modo `daily_quota` (+ overrides por fecha) en la misma interfaz + tests
 - [ ] T39 [capacity] `capacity.book`: advisory lock, asignación greedy, anti-abuso + test concurrencia 10→1
 - [ ] T40 [capacity] `capacity.occupancy` + calendario de ocupación del admin (por talla / estación)
-- [ ] T41 [booking] Wizard cliente: mascota(s) → servicio + extras + corte especial → local → fecha/hora → resumen
+- [ ] T41 [booking] Wizard cliente: mascota(s) → servicio + extras + opcionales (D26) + corte especial → local → fecha/hora → resumen
 - [ ] T42 [booking] Mis citas: activas, historial y confirmación de recepción
 - [ ] T43 [booking] Cita manual del admin (cliente existente o nuevo) + sobrecupo con confirmación
 - [ ] T44 [booking] Agenda admin: día (móvil), por estación/personal (desktop), estados, reasignar personal

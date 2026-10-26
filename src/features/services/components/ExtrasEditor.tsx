@@ -58,7 +58,7 @@ export function ExtrasEditor({ slug, service }: { slug: string; service: Service
             label="Minutos adicionales"
             name="extra_minutes"
             inputMode="numeric"
-            hint="Se suman al terminado. Déjalo vacío si no añade tiempo."
+            hint="Se suman a los detalles. Déjalo vacío si no añade tiempo."
             defaultValue={state.values?.extra_minutes}
             error={state.fieldErrors?.extra_minutes}
           />

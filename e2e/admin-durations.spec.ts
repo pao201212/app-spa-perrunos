@@ -52,7 +52,7 @@ test("define duraciones por talla y pelo; acordeón en móvil, tabla en escritor
   await matrix.getByRole("button", { name: "Guardar duraciones" }).click();
   await expect(matrix.getByText("Completa las tres etapas o deja la fila vacía")).toBeVisible();
 
-  await matrix.getByRole("textbox", { name: "Mediano (M) · Largo · Terminado" }).fill("20");
+  await matrix.getByRole("textbox", { name: "Mediano (M) · Largo · Detalles" }).fill("20");
   await matrix.getByRole("button", { name: "Guardar duraciones" }).click();
   await expect(matrix.getByRole("status")).toHaveText("Duraciones guardadas (1 combinación)");
 

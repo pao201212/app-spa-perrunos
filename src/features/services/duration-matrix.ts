@@ -2,18 +2,18 @@ import { COAT_TYPES, PET_SIZES, type CoatType, type PetSize } from "@/lib/pets/l
 
 import type { ServiceKind } from "./schema";
 
-export type Stage = "bath_min" | "dry_min" | "finish_min" | "cut_min";
+export type Stage = "bath_min" | "dry_min" | "details_min" | "cut_min";
 
 const STAGES_BY_KIND: Record<ServiceKind, Stage[]> = {
-  bath: ["bath_min", "dry_min", "finish_min"],
+  bath: ["bath_min", "dry_min", "details_min"],
   special_cut: ["cut_min"],
-  other: ["finish_min"],
+  other: ["details_min"],
 };
 
 export const stageLabel: Record<Stage, string> = {
   bath_min: "Baño",
   dry_min: "Secado",
-  finish_min: "Terminado",
+  details_min: "Detalles",
   cut_min: "Corte",
 };
 

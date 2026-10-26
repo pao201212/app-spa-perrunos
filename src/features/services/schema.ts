@@ -19,9 +19,9 @@ export const kindLabel: Record<ServiceKind, string> = {
 };
 
 export const kindDescription: Record<ServiceKind, string> = {
-  bath: "Pasa por baño, secado y terminado.",
-  special_cut: "Lo hace el groomer después del terminado del baño.",
-  other: "Se hace en la estación de terminado (p. ej. corte de uñas).",
+  bath: "Pasa por baño, secado y detalles (orejas, uñas, perfume…).",
+  special_cut: "Lo hace el groomer en la estación de corte, después de los detalles.",
+  other: "Se hace en la mesa, como parte de los detalles (p. ej. corte de uñas).",
 };
 
 export const serviceSpeciesLabel: Record<ServiceSpecies, string> = {
@@ -61,4 +61,18 @@ export const extraSchema = z.object({
       .max(240, "Máximo 240 minutos")
       .refine((minutes) => minutes % 5 === 0, "Usa múltiplos de 5"),
   ),
+});
+
+export const OPTION_STAGES = ["bath", "details"] as const;
+export type OptionStage = (typeof OPTION_STAGES)[number];
+
+export const optionStageLabel: Record<OptionStage, string> = {
+  bath: "En el baño",
+  details: "En los detalles",
+};
+
+/** Opcional sin costo del baño (D26), p. ej. "Corte higiénico" en la etapa de detalles. */
+export const optionSchema = z.object({
+  name: z.string().trim().min(2, "Escribe el nombre del opcional").max(60, "Máximo 60 caracteres"),
+  stage: z.enum(OPTION_STAGES, "Elige en qué etapa se hace"),
 });

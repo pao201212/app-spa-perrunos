@@ -8,7 +8,13 @@ import { tenantStaffContext } from "@/lib/auth/tenant-context";
 
 import { parseDurationMatrix } from "./duration-matrix";
 import { parsePriceMatrix, priceFieldName } from "./price-matrix";
-import { categorySchema, extraSchema, serviceSchema, type ServiceKind } from "./schema";
+import {
+  categorySchema,
+  extraSchema,
+  optionSchema,
+  serviceSchema,
+  type ServiceKind,
+} from "./schema";
 
 const LIST_PATH = "/admin/servicios";
 const detailPath = (serviceId: string) => `${LIST_PATH}/${serviceId}`;
@@ -248,4 +254,37 @@ export async function copyServicePricesAction(
     status: "success",
     message: `Precios copiados a ${data} ${data === 1 ? "local" : "locales"}`,
   };
+}
+
+export async function addOptionAction(
+  slug: string,
+  serviceId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { tenant, supabase } = await tenantStaffContext(slug, detailPath(serviceId));
+  const values = formValues(formData, ["name", "stage"]);
+  const parsed = optionSchema.safeParse(values);
+  if (!parsed.success)
+    return { status: "error", fieldErrors: fieldErrorsFrom(parsed.error.issues), values };
+
+  const { error } = await supabase
+    .from("service_options")
+    .insert({ ...parsed.data, tenant_id: tenant.id, service_id: serviceId });
+  if (error?.code === UNIQUE_VIOLATION)
+    return { status: "error", fieldErrors: { name: "Ese opcional ya existe" }, values };
+  if (error) return { status: "error", message: "No pudimos agregar el opcional.", values };
+  refresh();
+  // Se conserva la etapa elegida para agregar varios seguidos.
+  return { status: "success", message: "Opcional agregado", values: { stage: values.stage } };
+}
+
+export async function deleteOptionAction(
+  slug: string,
+  serviceId: string,
+  optionId: string,
+): Promise<void> {
+  const { tenant, supabase } = await tenantStaffContext(slug, detailPath(serviceId));
+  await supabase.from("service_options").delete().match({ id: optionId, tenant_id: tenant.id });
+  refresh();
 }

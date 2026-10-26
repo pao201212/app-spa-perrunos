@@ -17,7 +17,7 @@
 | D3 | Tenant → **Locales** (1..N) → **Estaciones** por tipo (baño, secado, corte), configurables por local |
 | D4 | Cada local configura su horario, estaciones, modo de confirmación (por defecto **confirmada**), ventana de cancelación (por defecto **4 h**) y reserva máxima (por defecto **30 días**, sin anticipación mínima). Hay un botón **"aplicar a todos los locales"** |
 | D5 | **Personal** con habilidades (baña, seca, corta, corte especial), locales asignados y horario semanal propio. El cliente **no** elige al personal |
-| D6 | El **Baño** es el servicio principal, con 3 etapas: **baño → secado → corte/terminado**. El secado empieza **justo** al terminar el baño; el corte **puede esperar**. El **corte especial** lo hace el groomer y es un servicio adicional. Hay **extras** (subservicios) |
+| D6 | El **Baño** es el servicio principal, con 3 etapas: **baño → secado → detalles** (D25). El secado empieza **justo** al terminar el baño; los detalles **pueden esperar** (la mascota sigue en su mesa). El **corte especial** lo hace el groomer y es un servicio adicional. Hay **extras** (subservicios) |
 | D7 | La **duración** depende de **tamaño × pelo**, es igual en todos los locales y es **por tenant** |
 | D8 | El **precio** depende de **local × servicio × tamaño × pelo** |
 | D9 | **Razas:** hay un catálogo global de Prisma Lab y cada spa ajusta el tamaño o el pelo. Se pide **raza + peso**; el peso puede reasignar el tamaño. Para criollos, el cliente elige pelo y peso |
@@ -29,19 +29,21 @@
 | D15 | **Pagos (sin cobro en línea):** se registra el método (efectivo, Nequi, Daviplata, Bre-B o datáfono) y, si es digital, una **evidencia** adjunta. **Sin pagos parciales.** Apple Pay y otros, en la v2 |
 | D16 | Roles internos del spa (dueño, recepción) en la v2, pero el esquema de roles queda listo desde la v1 |
 | D17 | Temas en el **repo** (`tenants/{slug}/`) |
-| D18 | El **corte especial es un servicio adicional** al baño: se hace **después** del terminado, no lo reemplaza |
+| D18 | El **corte especial es un servicio adicional** al baño: se hace **después** de los detalles, en la estación de corte; no los reemplaza |
 | D19 | **Convenio = precio fijo por servicio**, y puede cubrir **varias mascotas** del cliente juntas (p. ej., 3 mascotas → $X en total) |
 | D20 | Las **mascotas que se bañan juntas** necesitan **1 persona por mascota** en baño y en secado (2 mascotas = 2 personas en cada etapa) |
 | D21 | **No se migran** datos del legado |
 | D22 | **Sin licencia de Achiko:** se reemplaza por **Fredoka** (Google Fonts, licencia OFL; era la fuente de respaldo del legado). Los logos quedan en **PNG** (no hay SVG) |
 | D23 | Las mascotas que se bañan juntas **comparten 1 tina**, pero **cada una tiene su propia mesa de secado**. Al terminar el baño deben estar libres **todas** las mesas que necesita el grupo |
+| D25 | (2026-10-26) **La mesa de secado es la misma de los detalles.** Estaciones: **tina** (baño), **mesa** (secado → detalles, sin cambiar de mesa) y **estación de corte** (corte especial del groomer). La etapa "terminado" se llama **detalles**: limpiar orejas, cortar uñas, corte higiénico, perfume, tijera en patas, etc. |
+| D26 | (2026-10-26) **Opcionales sin costo del baño:** el admin crea y quita opcionales por servicio (p. ej. corte higiénico, shampoo especial) e indica si se hacen en la etapa de **baño** o de **detalles**. Al reservar un baño, el cliente llena el listado de opcionales. No cambian el precio |
 | D24 | **Toda la lógica de capacidad vive en un único lugar**, parametrizada en tablas, explicable y fácil de revisar con los dueños de los spas (§5). Debe permitir cambiar, por local, a un modelo simple de **cupo diario: local × talla × día** |
 
 ### Supuestos (corrígelos antes de aprobar)
 | # | Supuesto |
 |---|---|
-| S1 | El **corte especial** usa la estación de corte y requiere personal con la habilidad `special_cut`. Su duración depende de talla × pelo y puede esperar turno después del terminado |
-| S2 | Los **extras** no añaden tiempo por defecto; opcionalmente pueden sumar minutos a la etapa de terminado |
+| S1 | El **corte especial** usa la estación de corte y requiere personal con la habilidad `special_cut`. Su duración depende de talla × pelo y puede esperar turno después de los detalles |
+| S2 | Los **extras** no añaden tiempo por defecto; opcionalmente pueden sumar minutos a la etapa de detalles |
 | S4 | **Toda etapa requiere personal.** El personal atiende una sola mascota a la vez |
 | S6 | El **cliente es por tenant**: la misma cuenta Google puede ser cliente de dos spas distintos, con perfiles separados |
 | S7 | La **lealtad** (puntos + tarjeta de 10 baños, como en el legado) es **por tenant** y se comparte entre locales |
@@ -147,7 +149,7 @@ Orden de construcción, **Entrega 2:** `agreements`, `self-service`, `payments` 
 **`services`**
 - El admin gestiona categorías y servicios (nombre, descripción, especie, activo).
   - Un servicio de tipo **baño** tiene 3 etapas fijas.
-  - Un servicio de tipo **corte especial** se agrega al baño y se ejecuta después del terminado (D18).
+  - Un servicio de tipo **corte especial** se agrega al baño y se ejecuta después de los detalles (D18).
   - Los **extras** se asocian a servicios.
 - **Matriz de duración** (por tenant): servicio × talla × pelo → minutos de cada etapa.
 - **Matriz de precio** (por local): servicio o extra × talla × pelo → COP. Se puede copiar a otros locales.
@@ -268,12 +270,13 @@ locations            id, tenant_id, name, address, whatsapp, is_active,
                      capacity_mode enum('detailed','daily_quota') default 'detailed'   (D24)
 location_daily_quota tenant_id, location_id, weekday, size, max_pets          -- modo cupo diario
 location_quota_overrides tenant_id, location_id, date, size, max_pets         -- excepciones por fecha
-location_stations    tenant_id, location_id, station enum('bath','dry','finish'), count ≥ 0
+location_stations    tenant_id, location_id, station enum('bath','dry','cut'), count ≥ 0
+                     -- bath = tina · dry = mesa (secado + detalles, D25) · cut = estación de corte
 location_hours       tenant_id, location_id, weekday, opens_at, closes_at
 location_closures    id, tenant_id, location_id, date, reason
 
 staff                id, tenant_id, name, is_active
-staff_skills         tenant_id, staff_id, skill enum('bath','dry','finish','special_cut')
+staff_skills         tenant_id, staff_id, skill enum('bath','dry','details','special_cut')
 staff_shifts         id, tenant_id, staff_id, location_id, weekday, starts_at, ends_at
 staff_absences       id, tenant_id, staff_id, starts_at, ends_at, reason
 
@@ -293,9 +296,11 @@ pet_group_members    tenant_id, group_id, pet_id
 service_categories   id, tenant_id, name, sort_order
 services             id, tenant_id, category_id, kind enum('bath','special_cut','other'),
                      name, description, species enum('dog','cat','both'), is_active, sort_order
-extras               id, tenant_id, service_id, name, extra_minutes default 0, is_active
-service_durations    tenant_id, service_id, size, coat, bath_min, dry_min, finish_min, cut_min
-                     -- kind 'bath' usa bath/dry/finish; kind 'special_cut' usa solo cut_min (D18)
+extras               id, tenant_id, service_id, name, extra_minutes default 0, is_active   -- con precio
+service_options      id, tenant_id, service_id, name, stage enum('bath','details'), is_active, sort_order
+                     -- opcionales sin costo del baño (D26)
+service_durations    tenant_id, service_id, size, coat, bath_min, dry_min, details_min, cut_min
+                     -- kind 'bath' usa bath/dry/details; 'special_cut' solo cut_min; 'other' solo details_min
 location_prices      tenant_id, location_id, item_type enum('service','extra'), item_id,
                      size, coat, price_cop int ≥ 0                       PK compuesta
 
@@ -350,7 +355,7 @@ loyalty_ledger       id, tenant_id, customer_id, appointment_id, kind enum('earn
 ```
 Entrada: local L, fecha F, mascotas P (1, o un grupo "se bañan juntas"), servicio de baño,
          corte especial opcional, extras
-1. Para cada mascota → (talla, pelo) → minutos de bath, dry y finish desde service_durations
+1. Para cada mascota → (talla, pelo) → minutos de bath, dry y details desde service_durations
    + minutos de los extras; cut_min si lleva corte especial.
    En grupo: bath y dry del grupo = el máximo entre sus mascotas.
 2. Para cada hora de inicio t en la malla de slot_step_min dentro de location_hours(L, F):
@@ -361,10 +366,11 @@ Entrada: local L, fecha F, mascotas P (1, o un grupo "se bañan juntas"), servic
                                    si bather_continues_drying → las MISMAS personas de (a)
                                    si no → cualquiera con 'dry', en turno y libre
                                    (empieza exactamente al terminar el baño, D6)
-   c. TERMINADO (por mascota): el primer inicio u ≥ fin del secado, antes del cierre, con
-                 estación finish libre + persona con 'finish'. Puede haber espera.
+   c. DETALLES (por mascota, D25): el primer inicio u ≥ fin del secado, antes del cierre, con
+                 persona con 'details'. Se hacen en la MISMA mesa del secado: la mesa queda ocupada
+                 desde el inicio del secado hasta el fin de los detalles (incluida la espera).
    d. CORTE ESPECIAL (por mascota, si aplica, D18): el primer inicio v ≥ fin de (c), antes del
-                 cierre, con estación finish libre + persona con 'special_cut' (groomer). Puede esperar.
+                 cierre, con estación cut libre + persona con 'special_cut' (groomer). Puede esperar.
    e. t es válido si existen todas las etapas para todas las mascotas.
       estimated_ready_at = el fin más tardío de (c)/(d).
 3. Se descartan t < ahora, t > hoy + max_days_ahead, días de cierre, y personal ausente.
@@ -478,7 +484,7 @@ export async function upsertLocationPrices(input: unknown) {
 |---|---|---|
 | Unit | Vitest | host → slug, talla por peso o raza, malla horaria, esquemas Zod, formato COP |
 | Contrato de temas | Vitest | Tokens obligatorios y contraste AA de los pares texto/fondo |
-| BD | Vitest + Supabase local | **Aislamiento** entre tenants y entre clientes (bloqueante). **Capacidad**, a partir de los escenarios de `docs/capacidad.md`: etapas contiguas baño→secado, espera de terminado, estaciones, turnos, ausencias, `bather_continues_drying`, grupos (1 tina y N mesas de secado), corte especial, cierres, modo `daily_quota` con overrides, y que `explain` coincida con `available_slots`. **Concurrencia:** 10 reservas paralelas al último cupo dan 1 éxito. Vinculación de un cliente invitado al entrar con Google. Triggers anti-abuso |
+| BD | Vitest + Supabase local | **Aislamiento** entre tenants y entre clientes (bloqueante). **Capacidad**, a partir de los escenarios de `docs/capacidad.md`: etapas contiguas baño→secado, espera de detalles en la misma mesa, estaciones, turnos, ausencias, `bather_continues_drying`, grupos (1 tina y N mesas), corte especial en estación de corte, cierres, modo `daily_quota` con overrides, y que `explain` coincida con `available_slots`. **Concurrencia:** 10 reservas paralelas al último cupo dan 1 éxito. Vinculación de un cliente invitado al entrar con Google. Triggers anti-abuso |
 | Componentes | Testing Library | Wizard de reserva, matrices de duración y precio, errores accesibles |
 | E2E | Playwright (Pixel 7 + Desktop) | Login (con OAuth simulado en local), reserva completa, cita del admin, cambio de estados, 2 tenants con temas distintos |
 | A11y | axe | 0 violaciones serias o críticas |
@@ -537,4 +543,4 @@ Cobertura: **90 %** en `capacity` y `booking`, 70 % global.
 
 ## 12. Preguntas abiertas
 
-Todas resueltas el 2026-10-25 (D18–D24). Los supuestos S1, S2, S4, S6 y S7 siguen vigentes y se validarán con Spa Perrunos y Gatunos usando `docs/capacidad.md` y la vista "¿Por qué no hay cupo?".
+Todas resueltas el 2026-10-25 (D18–D24); D25 y D26 agregadas el 2026-10-26. Los supuestos S1, S2, S4, S6 y S7 siguen vigentes y se validarán con Spa Perrunos y Gatunos usando `docs/capacidad.md` y la vista "¿Por qué no hay cupo?".

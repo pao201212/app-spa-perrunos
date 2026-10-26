@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { categorySchema, extraSchema, serviceSchema } from "./schema";
+import { categorySchema, extraSchema, optionSchema, serviceSchema } from "./schema";
 
 describe("serviceSchema", () => {
   it("acepta un servicio y normaliza campos opcionales", () => {
@@ -44,5 +44,16 @@ describe("extraSchema", () => {
     });
     expect(extraSchema.parse({ name: "Perfume", extra_minutes: "" }).extra_minutes).toBe(0);
     expect(extraSchema.safeParse({ name: "Raro", extra_minutes: "7" }).success).toBe(false);
+  });
+});
+
+describe("optionSchema", () => {
+  it("exige nombre y etapa (baño o detalles)", () => {
+    expect(optionSchema.parse({ name: " Corte higiénico ", stage: "details" })).toEqual({
+      name: "Corte higiénico",
+      stage: "details",
+    });
+    expect(optionSchema.safeParse({ name: "Perfume", stage: "secado" }).success).toBe(false);
+    expect(optionSchema.safeParse({ name: "", stage: "bath" }).success).toBe(false);
   });
 });

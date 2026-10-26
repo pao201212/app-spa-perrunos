@@ -62,12 +62,12 @@ describe("bookingSettingsSchema", () => {
 
 describe("stationsSchema", () => {
   it("acepta conteos de 0 a 50", () => {
-    expect(stationsSchema.parse({ bath: "2", dry: "3", finish: "0" })).toEqual({
+    expect(stationsSchema.parse({ bath: "2", dry: "3", cut: "0" })).toEqual({
       bath: 2,
       dry: 3,
-      finish: 0,
+      cut: 0,
     });
-    expect(stationsSchema.safeParse({ bath: "51", dry: "1", finish: "1" }).success).toBe(false);
+    expect(stationsSchema.safeParse({ bath: "51", dry: "1", cut: "1" }).success).toBe(false);
   });
 });
 

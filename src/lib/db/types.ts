@@ -586,8 +586,8 @@ export type Database = {
           bath_min: number | null;
           coat: Database["public"]["Enums"]["coat_type"];
           cut_min: number | null;
+          details_min: number | null;
           dry_min: number | null;
-          finish_min: number | null;
           service_id: string;
           size: Database["public"]["Enums"]["pet_size"];
           tenant_id: string;
@@ -597,8 +597,8 @@ export type Database = {
           bath_min?: number | null;
           coat: Database["public"]["Enums"]["coat_type"];
           cut_min?: number | null;
+          details_min?: number | null;
           dry_min?: number | null;
-          finish_min?: number | null;
           service_id: string;
           size: Database["public"]["Enums"]["pet_size"];
           tenant_id: string;
@@ -607,8 +607,8 @@ export type Database = {
           bath_min?: number | null;
           coat?: Database["public"]["Enums"]["coat_type"];
           cut_min?: number | null;
+          details_min?: number | null;
           dry_min?: number | null;
-          finish_min?: number | null;
           service_id?: string;
           size?: Database["public"]["Enums"]["pet_size"];
           tenant_id?: string;
@@ -616,6 +616,45 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "service_durations_tenant_id_service_id_fkey";
+            columns: ["tenant_id", "service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      service_options: {
+        Row: {
+          id: string;
+          is_active: boolean;
+          name: string;
+          service_id: string;
+          sort_order: number;
+          stage: Database["public"]["Enums"]["option_stage"];
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          service_id: string;
+          sort_order?: number;
+          stage: Database["public"]["Enums"]["option_stage"];
+          tenant_id: string;
+        };
+        Update: {
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          service_id?: string;
+          sort_order?: number;
+          stage?: Database["public"]["Enums"]["option_stage"];
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "service_options_tenant_id_service_id_fkey";
             columns: ["tenant_id", "service_id"];
             isOneToOne: false;
             referencedRelation: "services";
@@ -1024,13 +1063,14 @@ export type Database = {
       coat_type: "short" | "medium" | "long";
       confirmation_mode: "auto" | "manual";
       membership_role: "owner" | "admin" | "reception";
+      option_stage: "bath" | "details";
       pet_gender: "female" | "male";
       pet_size: "XS" | "S" | "M" | "L" | "XL" | "XXL";
       pet_species: "dog" | "cat";
       service_kind: "bath" | "special_cut" | "other";
       service_species: "dog" | "cat" | "both";
-      staff_skill: "bath" | "dry" | "finish" | "special_cut";
-      station_type: "bath" | "dry" | "finish";
+      staff_skill: "bath" | "dry" | "details" | "special_cut";
+      station_type: "bath" | "dry" | "cut";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -1149,13 +1189,14 @@ export const Constants = {
       coat_type: ["short", "medium", "long"],
       confirmation_mode: ["auto", "manual"],
       membership_role: ["owner", "admin", "reception"],
+      option_stage: ["bath", "details"],
       pet_gender: ["female", "male"],
       pet_size: ["XS", "S", "M", "L", "XL", "XXL"],
       pet_species: ["dog", "cat"],
       service_kind: ["bath", "special_cut", "other"],
       service_species: ["dog", "cat", "both"],
-      staff_skill: ["bath", "dry", "finish", "special_cut"],
-      station_type: ["bath", "dry", "finish"],
+      staff_skill: ["bath", "dry", "details", "special_cut"],
+      station_type: ["bath", "dry", "cut"],
     },
   },
 } as const;

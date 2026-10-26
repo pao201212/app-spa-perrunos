@@ -42,7 +42,7 @@ export const bookingSettingsSchema = z.object({
 export const stationsSchema = z.object({
   bath: intField(0, 50, "Entre 0 y 50"),
   dry: intField(0, 50, "Entre 0 y 50"),
-  finish: intField(0, 50, "Entre 0 y 50"),
+  cut: intField(0, 50, "Entre 0 y 50"),
 });
 
 const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Usa el formato HH:MM");

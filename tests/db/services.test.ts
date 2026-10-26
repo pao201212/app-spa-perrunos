@@ -127,7 +127,7 @@ describe("categorías y servicios", () => {
 });
 
 describe("extras", () => {
-  it("se asocian a un servicio del mismo spa y pueden sumar minutos al terminado", async () => {
+  it("se asocian a un servicio del mismo spa y pueden sumar minutos a los detalles", async () => {
     const { data, error } = await staffA.client
       .from("extras")
       .insert({
@@ -153,7 +153,7 @@ describe("extras", () => {
 });
 
 describe("service_durations (por spa, talla × pelo; D7)", () => {
-  it("el baño tiene baño, secado y terminado", async () => {
+  it("el baño tiene baño, secado y detalles", async () => {
     const ok = await staffA.client.from("service_durations").insert({
       tenant_id: tenantA,
       service_id: bath,
@@ -161,7 +161,7 @@ describe("service_durations (por spa, talla × pelo; D7)", () => {
       coat: "long",
       bath_min: 40,
       dry_min: 30,
-      finish_min: 20,
+      details_min: 20,
     });
     expect(ok.error).toBeNull();
     const missingDry = await admin.from("service_durations").insert({
@@ -170,12 +170,12 @@ describe("service_durations (por spa, talla × pelo; D7)", () => {
       size: "L",
       coat: "long",
       bath_min: 40,
-      finish_min: 20,
+      details_min: 20,
     });
-    expect(missingDry.error?.message).toMatch(/baño, secado y terminado/i);
+    expect(missingDry.error?.message).toMatch(/baño, secado y detalles/i);
   });
 
-  it("el corte especial solo tiene minutos de corte; 'otro' solo de terminado", async () => {
+  it("el corte especial solo tiene minutos de corte; 'otro' solo de detalles", async () => {
     const cutOk = await admin
       .from("service_durations")
       .insert({ tenant_id: tenantA, service_id: cut, size: "M", coat: "long", cut_min: 60 });
@@ -191,7 +191,7 @@ describe("service_durations (por spa, talla × pelo; D7)", () => {
     expect(cutWrong.error).not.toBeNull();
     const nailsOk = await admin
       .from("service_durations")
-      .insert({ tenant_id: tenantA, service_id: nails, size: "M", coat: "short", finish_min: 15 });
+      .insert({ tenant_id: tenantA, service_id: nails, size: "M", coat: "short", details_min: 15 });
     expect(nailsOk.error).toBeNull();
   });
 
@@ -203,7 +203,7 @@ describe("service_durations (por spa, talla × pelo; D7)", () => {
       coat: "short",
       bath_min: 33,
       dry_min: 30,
-      finish_min: 20,
+      details_min: 20,
     });
     expect(error).not.toBeNull();
   });
@@ -275,8 +275,8 @@ describe("replace_service_durations", () => {
     const { error } = await staffA.client.rpc("replace_service_durations", {
       p_service_id: bath,
       p_rows: [
-        { size: "S", coat: "short", bath_min: 30, dry_min: 20, finish_min: 15 },
-        { size: "L", coat: "long", bath_min: 60, dry_min: 50, finish_min: 25 },
+        { size: "S", coat: "short", bath_min: 30, dry_min: 20, details_min: 15 },
+        { size: "L", coat: "long", bath_min: 60, dry_min: 50, details_min: 25 },
       ],
     });
     expect(error).toBeNull();
@@ -295,7 +295,7 @@ describe("replace_service_durations", () => {
     const { error } = await staffA.client.rpc("replace_service_durations", {
       p_service_id: bath,
       p_rows: [
-        { size: "XS", coat: "short", bath_min: 30, dry_min: 20, finish_min: 15 },
+        { size: "XS", coat: "short", bath_min: 30, dry_min: 20, details_min: 15 },
         { size: "M", coat: "short", bath_min: 30 },
       ],
     });
@@ -416,5 +416,45 @@ describe("replace_location_prices y copy_service_prices", () => {
       p_source_location_id: locationA,
     });
     expect(copy.error).not.toBeNull();
+  });
+});
+
+describe("service_options (opcionales sin costo, D26)", () => {
+  it("el staff crea opcionales marcados para la etapa de baño o de detalles", async () => {
+    const { data, error } = await staffA.client
+      .from("service_options")
+      .insert([
+        { tenant_id: tenantA, service_id: bath, name: "Shampoo hipoalergénico", stage: "bath" },
+        { tenant_id: tenantA, service_id: bath, name: "Corte higiénico", stage: "details" },
+      ])
+      .select("name, stage, is_active");
+    expect(error).toBeNull();
+    expect(data?.every((o) => o.is_active)).toBe(true);
+  });
+
+  it("no repite nombres en el mismo servicio y no admite etapas desconocidas", async () => {
+    const duplicate = await admin
+      .from("service_options")
+      .insert({ tenant_id: tenantA, service_id: bath, name: "corte higiénico", stage: "details" });
+    expect(duplicate.error?.code).toBe("23505");
+    const badStage = await admin
+      .from("service_options")
+      .insert({ tenant_id: tenantA, service_id: bath, name: "Raro", stage: "drying" as "bath" });
+    expect(badStage.error).not.toBeNull();
+  });
+
+  it("los activos son públicos; el staff de otro spa no los modifica", async () => {
+    const { data } = await anonClient()
+      .from("service_options")
+      .select("name")
+      .eq("service_id", bath)
+      .order("name");
+    expect(data?.map((o) => o.name)).toEqual(["Corte higiénico", "Shampoo hipoalergénico"]);
+    const foreign = await staffB.client
+      .from("service_options")
+      .update({ name: "X" })
+      .eq("service_id", bath)
+      .select();
+    expect(foreign.data ?? []).toEqual([]);
   });
 });

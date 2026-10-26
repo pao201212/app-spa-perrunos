@@ -35,6 +35,7 @@ const PUBLIC_TENANT_TABLES = new Set([
   "service_durations",
   "location_service_prices",
   "location_extra_prices",
+  "service_options",
 ]);
 
 let tenantA: string;
@@ -178,11 +179,20 @@ async function seedTenantData(tenantId: string) {
         coat: "short",
         bath_min: 30,
         dry_min: 30,
-        finish_min: 15,
+        details_min: 15,
       },
     ],
     ["location_service_prices", { ...priceBase, service_id: service.id, price_cop: 50000 }],
     ["location_extra_prices", { ...priceBase, extra_id: extra!.id, price_cop: 5000 }],
+    [
+      "service_options",
+      {
+        tenant_id: tenantId,
+        service_id: service.id,
+        name: "Opcional aislamiento",
+        stage: "details",
+      },
+    ],
   ] as const) {
     const { error: insertError } = await admin.from(table).insert(row);
     if (insertError) throw insertError;

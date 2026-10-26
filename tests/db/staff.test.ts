@@ -70,13 +70,13 @@ describe("staff", () => {
     groomer = data!.id;
 
     const skills = await staffUserA.client.from("staff_skills").insert([
-      { tenant_id: tenantA, staff_id: groomer, skill: "finish" },
+      { tenant_id: tenantA, staff_id: groomer, skill: "details" },
       { tenant_id: tenantA, staff_id: groomer, skill: "special_cut" },
     ]);
     expect(skills.error).toBeNull();
     const duplicate = await admin
       .from("staff_skills")
-      .insert({ tenant_id: tenantA, staff_id: groomer, skill: "finish" });
+      .insert({ tenant_id: tenantA, staff_id: groomer, skill: "details" });
     expect(duplicate.error?.code).toBe("23505");
   });
 

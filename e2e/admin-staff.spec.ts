@@ -71,14 +71,14 @@ test("registra a una persona con habilidades, turnos y ausencias", async ({ page
   await expect(absences.getByRole("listitem").filter({ hasText: "Vacaciones" })).toHaveCount(0);
 
   const details = page.getByRole("region", { name: "Datos" });
-  await details.getByRole("checkbox", { name: "Terminado" }).check();
+  await details.getByRole("checkbox", { name: "Detalles" }).check();
   await details.getByRole("button", { name: "Guardar datos" }).click();
   await expect(details.getByRole("status")).toHaveText("Datos guardados");
 
   await openAdminSection(page, "Personal");
   const row = page.getByRole("listitem").filter({ hasText: "Ana Bañadora" });
   await expect(row).toContainText("Baña");
-  await expect(row).toContainText("Terminado");
+  await expect(row).toContainText("Detalles");
 });
 
 test("no tiene scroll horizontal a 320px", async ({ page, isMobile }) => {
