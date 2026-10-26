@@ -3,6 +3,7 @@
 > **Estado: BORRADOR v4 para validar con Spa Perrunos y Gatunos** (T34, 2026-10-26)
 > v4: el documento se organiza en dos modos, **Capacidad simple** y **Capacidad avanzada**. La
 > capacidad simple se calcula por empleados del día (SPEC D28).
+> v5: en los dos modos el cliente ve las **horas disponibles** y una **hora de entrega**.
 >
 > Cada escenario se convertirá en una prueba automática: si una regla cambia, primero se cambia
 > aquí (SPEC §5, D24).
@@ -16,9 +17,10 @@ Cada local elige uno de dos modos en **Locales → Capacidad**. Se puede cambiar
 | | **Capacidad simple** | **Capacidad avanzada** |
 |---|---|---|
 | **Idea** | "Cada empleado atiende tantas mascotas por día" | Agenda minuto a minuto: tinas, mesas, personas y etapas |
-| **Qué hay que configurar** | Cuántos empleados trabajan cada día y cuántas mascotas atiende un empleado por talla | Tinas y mesas, personal con habilidades y turnos, duraciones por talla y pelo |
-| **Qué decide** | Si **ese día** todavía hay cupo | Si **a esa hora** hay tina, mesa y personas libres |
-| **Hora de entrega** | La confirma el spa | La calcula el sistema |
+| **Qué hay que configurar** | Cuántos empleados trabajan cada día y cuántas mascotas atiende un empleado por talla | Tinas y mesas, personal con habilidades y turnos |
+| **Qué decide** | Si **ese día** todavía hay cupo, y qué horas de llegada permiten entregar antes del cierre | Si **a esa hora** hay tina, mesa y personas libres |
+| **Horas disponibles** | Todas las del horario cuya entrega estimada queda antes del cierre | Solo las horas en que todo está libre |
+| **Hora de entrega** | **Aproximada:** llegada + duración del servicio | **Calculada** con las esperas reales de la agenda |
 | **Recomendado para** | Empezar, o locales pequeños | Locales con mucha demanda que quieren llenar cada hora |
 
 Lo que es igual en los dos modos está en la sección 2. Luego cada modo tiene su propia sección:
@@ -33,7 +35,13 @@ Lo que es igual en los dos modos está en la sección 2. Luego cada modo tiene s
 | `CERRADO` | El local no abre ese día o está marcado como cierre. | "El local cierra el 25 dic (Navidad)" |
 | `SIN_PRECIO` | El local no tiene precio para esa talla y pelo. | "No disponible en Sede Norte" |
 
-- **Horarios ofrecidos:** cada *N* minutos (por defecto 15) dentro del horario del local.
+- **Al reservar, el cliente ve la lista de horas disponibles del día y, en cada una, la hora de
+  entrega**, por ejemplo: "08:00 · entrega aprox. 09:30". Las horas van cada *N* minutos (por
+  defecto 15) dentro del horario del local.
+- **La duración del servicio** sale de **Servicios → Duraciones** (talla × pelo), en los dos modos:
+  baño + secado + detalles, más el corte especial y los extras que sumen minutos.
+- **Si el trabajo cruza el cierre del mediodía**, ese tiempo no cuenta: la mascota espera y se
+  sigue después del almuerzo.
 - **Mascotas que vienen juntas** (hermanas del mismo dueño): se aceptan **todas o ninguna**.
 - **Sobrecupo:** el admin puede crear una cita aunque no haya cupo, confirmándolo; queda marcada.
 - **Dos reservas a la vez por el último cupo:** solo una se confirma; la otra persona ve "Ese
@@ -51,9 +59,10 @@ Lo que es igual en los dos modos está en la sección 2. Luego cada modo tiene s
 | Locales → Capacidad | **Mascotas que atiende un empleado en un día**, por talla | Grande 4 · Mediano 6 · Pequeño 8 |
 | Locales → Capacidad | **Empleados por día de la semana** | L–V: 2 · Sábado: 3 · Domingo: 0 |
 | Locales → Capacidad | **Cambios por fecha** (vacaciones, incapacidad, refuerzo) | 24 dic: 1 empleado |
-| Locales → Horario y Días de cierre | Lo mismo de siempre | L–V 08:00–18:00 |
+| Locales → Horario y Días de cierre | Lo mismo de siempre | L–V 08:00–12:30 y 13:00–18:00 |
+| Servicios → Duraciones | Lo mismo de siempre (solo para estimar la entrega) | Baño mediano corto: 40 / 30 / 20 |
 
-No hace falta registrar tinas, mesas, turnos ni duraciones.
+No hace falta registrar tinas, mesas ni turnos.
 
 ### 3.2 Cómo se calcula
 
@@ -80,16 +89,23 @@ Ejemplo, lunes con 2 empleados (2 jornadas):
 | 2 grandes + 3 medianos | ½ + ½ = 1 jornada | 1 jornada | 4 grandes, o 6 medianos, o 8 pequeños |
 | 4 grandes + 6 medianos | 1 + 1 = 2 jornadas | 0 | Nada: día lleno |
 
+**Horas disponibles y entrega.** Si el día tiene cupo, se ofrecen todas las horas del horario.
+La **entrega aproximada** es la hora de llegada más la duración del servicio. Si esa entrega
+quedaría después del cierre, esa hora no se ofrece. Es aproximada porque este modo no mira las
+demás mascotas del día; el spa puede ajustarla en la cita. ⚠️ Pregunta 8
+
 | Código | Regla | Ejemplo del motivo |
 |---|---|---|
 | `SIN_EMPLEADOS` | Ese día no hay empleados (0). | "No hay empleados el domingo" |
 | `CUPO_LLENO` | Las mascotas nuevas no caben en las jornadas que quedan. | "Quedan ⅙ de jornada: cabe 1 mediano, no 1 grande" |
+| `FUERA_DE_HORARIO` | La entrega aproximada quedaría después del cierre. | "Entregaría 18:30 y el local cierra 18:00" |
 
 ### 3.3 Escenarios
 
 **Local de ejemplo — "Sede principal"**: un empleado atiende al día **Mini 10 · Pequeño 8 ·
 Mediano 6 · Grande 4 · Muy grande 3 · Gigante 2**. Empleados: **L–V 2**, **sábado 3**,
-**domingo 0**.
+**domingo 0**. Horario L–V **08:00–12:30** y **13:00–18:00**. Baño de un Mediano corto:
+40 + 30 + 20 = **90 min**.
 
 | # | Dado | Cuando | Entonces |
 |---|---|---|---|
@@ -102,6 +118,9 @@ Mediano 6 · Grande 4 · Muy grande 3 · Gigante 2**. Empleados: **L–V 2**, **
 | S7 | Domingo | Cualquier reserva | **No disponible:** `SIN_EMPLEADOS` |
 | S8 | Lunes: queda ⅙ de jornada | Lola y Pepa (2 medianos, juntas) piden | **No disponible** ninguna: juntas necesitan ⅓ de jornada |
 | S9 | Lunes: queda ⅙ de jornada y dos clientes piden 1 mediano a la vez | Ambos confirman | Solo una cita se crea |
+| S10 | Lunes con cupo | Max (Mediano corto) mira las horas para Baño | Ve 08:00 · entrega aprox. **09:30**; 08:15 · **09:45**; … hasta 16:30 · **18:00** |
+| S11 | Lunes con cupo | Max quiere llegar a las **17:00** | **No se ofrece:** `FUERA_DE_HORARIO` (entregaría 18:30) |
+| S12 | Lunes con cupo | Max llega a las **11:30** | Disponible. 60 min antes del almuerzo + 30 min después: entrega aprox. **13:30** |
 
 ---
 
@@ -210,22 +229,25 @@ Cada una tiene un **supuesto** que se usará si no hay respuesta.
 7. **¿El número de empleados por día sale del módulo Personal?** ¿O prefieren escribirlo a mano en
    el local?
    *Supuesto: a mano en el local (más simple).*
+8. **¿La entrega aproximada debe sumar un margen?** Por ejemplo, 30 minutos más, porque puede
+   haber otras mascotas antes.
+   *Supuesto: sin margen; el spa ajusta la hora en la cita si hace falta.*
 
 **Capacidad avanzada**
 
-8. **¿El baño o el secado pueden terminar después del cierre de un tramo?**
+9. **¿El baño o el secado pueden terminar después del cierre de un tramo?**
    *Supuesto: no (A10).*
-9. **¿Algún opcional sin costo suma tiempo?**
+10. **¿Algún opcional sin costo suma tiempo?**
    *Supuesto: no; si suma tiempo, se crea como extra.*
-10. **Mientras espera sus detalles, ¿la mascota sigue en su mesa?** ¿O se baja a una jaula?
+11. **Mientras espera sus detalles, ¿la mascota sigue en su mesa?** ¿O se baja a una jaula?
     *Supuesto: sigue en su mesa (A3, A10).*
-11. **¿Hay un tiempo máximo de espera para los detalles?**
+12. **¿Hay un tiempo máximo de espera para los detalles?**
     *Supuesto: sin máximo, mientras terminen antes del cierre.*
-12. **¿Cómo se reparte el trabajo?** ¿Primera persona libre, o equilibrar la carga?
+13. **¿Cómo se reparte el trabajo?** ¿Primera persona libre, o equilibrar la carga?
     *Supuesto: primera persona libre; el admin reasigna.*
-13. **¿Una persona puede vigilar dos mascotas en secado a la vez?**
+14. **¿Una persona puede vigilar dos mascotas en secado a la vez?**
     *Supuesto: no; una persona por mascota.*
-14. **¿El groomer también hace detalles** cuando no está cortando?
+15. **¿El groomer también hace detalles** cuando no está cortando?
     *Supuesto: sí, si tiene esa habilidad.*
-15. **Intervalo de horarios:** ¿cada 15 minutos, o cada 30?
+16. **Intervalo de horarios:** ¿cada 15 minutos, o cada 30?
     *Supuesto: 15 (configurable por local).*

@@ -38,6 +38,7 @@
 | D25 | (2026-10-26) **La mesa de secado es la misma de los detalles.** Estaciones: **tina** (baño), **mesa** (secado → detalles, sin cambiar de mesa) y **estación de corte** (corte especial del groomer). La etapa "terminado" se llama **detalles**: limpiar orejas, cortar uñas, corte higiénico, perfume, tijera en patas, etc. |
 | D27 | (2026-10-26) **Solo hay dos tipos de estación: tina y mesa.** Cada estación se registra una por una (nombre, tipo). La tina sirve para el baño; la mesa para secado y detalles, y el admin marca las mesas que **también sirven para corte especial**. El corte especial se hace **en la misma mesa** de los detalles: una mascota con corte necesita, desde el secado, una mesa marcada para corte. Reemplaza la "estación de corte" de D25 |
 | D28 | (2026-10-26) **Dos modos de capacidad por local: simple y avanzada.** La **simple** (por defecto) reemplaza el cupo fijo por talla de D24: el admin indica cuántas mascotas de cada talla atiende **un empleado** en un día y cuántos empleados hay cada día de la semana (con cambios por fecha). Cada mascota usa 1/N de una jornada; el día tiene tantas jornadas como empleados. La **avanzada** es el motor por etapas (§5.1–5.2) y solo se activa si el local tiene estaciones, personal con habilidades y turnos, y duraciones. `capacity_mode` pasa a `enum('simple','advanced')` default `'simple'` |
+| D29 | (2026-10-26) En **los dos modos** el cliente ve las **horas disponibles** con su **hora de entrega**. En la capacidad simple la entrega es **aproximada** (llegada + duración del servicio según talla y pelo, sin contar el almuerzo) y no se ofrecen horas cuya entrega quedaría después del cierre |
 | D26 | (2026-10-26) **Opcionales sin costo del baño:** el admin crea y quita opcionales por servicio (p. ej. corte higiénico, shampoo especial) e indica si se hacen en la etapa de **baño** o de **detalles**. Al reservar un baño, el cliente llena el listado de opcionales. No cambian el precio |
 | D24 | **Toda la lógica de capacidad vive en un único lugar**, parametrizada en tablas, explicable y fácil de revisar con los dueños de los spas (§5). Debe permitir cambiar, por local, a un modelo simple (ver D28, que reemplaza el cupo fijo local × talla × día) |
 
@@ -397,6 +398,10 @@ Ocupación(F) = Usado / Empleados, también desglosada por talla.
 ```
 - Aritmética exacta con fracciones (sin redondeo): se compara Σ (n_talla × MCM / cap_talla) ≤ Empleados × MCM.
 - Si una talla no tiene capacidad configurada, esa talla no se ofrece en el local.
+- **Horas y entrega (D29):** si el día tiene cupo, se ofrecen las horas t de la malla con
+  `estimated_ready_at = t + duración` ≤ cierre del día, donde duración = Σ etapas de
+  service_durations (talla × pelo) + corte especial + extras, y los cierres entre tramos
+  (almuerzo) no cuentan. Es aproximada: no mira las demás citas; el admin puede ajustarla.
 - `capacity.explain` devuelve `SIN_EMPLEADOS` o `CUPO_LLENO` con lo que queda, p. ej. "quedan ⅙ de jornada".
 
 ---
