@@ -33,3 +33,41 @@ cross join (
     (5, '08:00', '12:30'), (5, '13:00', '18:00'),
     (6, '08:00', '13:00')
 ) as h (weekday, opens_at, closes_at);
+
+-- Personal de ejemplo por spa: dos bañadores y un groomer que solo trabaja los sábados (D5).
+with sede as (
+  select l.id as location_id, l.tenant_id
+  from public.locations l
+  join public.tenants t on t.id = l.tenant_id
+  where t.slug in ('spaperrunosygatunos', 'demo') and l.name = 'Sede principal'
+), people as (
+  insert into public.staff (tenant_id, name)
+  select s.tenant_id, p.name
+  from sede s
+  cross join (values ('Bañador 1'), ('Bañador 2'), ('Groomer')) as p (name)
+  on conflict do nothing
+  returning id, tenant_id, name
+), skills as (
+  insert into public.staff_skills (tenant_id, staff_id, skill)
+  select p.tenant_id, p.id, k.skill::public.staff_skill
+  from people p
+  join (
+    values ('Bañador 1', 'bath'), ('Bañador 1', 'dry'), ('Bañador 1', 'finish'),
+           ('Bañador 2', 'bath'), ('Bañador 2', 'dry'),
+           ('Groomer', 'finish'), ('Groomer', 'special_cut')
+  ) as k (name, skill) on k.name = p.name
+)
+insert into public.staff_shifts (tenant_id, staff_id, location_id, weekday, starts_at, ends_at)
+select p.tenant_id, p.id, s.location_id, h.weekday, h.starts_at::time, h.ends_at::time
+from people p
+join sede s on s.tenant_id = p.tenant_id
+join (
+  values
+    ('Bañador', 1, '08:00', '12:30'), ('Bañador', 1, '13:00', '18:00'),
+    ('Bañador', 2, '08:00', '12:30'), ('Bañador', 2, '13:00', '18:00'),
+    ('Bañador', 3, '08:00', '12:30'), ('Bañador', 3, '13:00', '18:00'),
+    ('Bañador', 4, '08:00', '12:30'), ('Bañador', 4, '13:00', '18:00'),
+    ('Bañador', 5, '08:00', '12:30'), ('Bañador', 5, '13:00', '18:00'),
+    ('Bañador', 6, '08:00', '13:00'),
+    ('Groomer', 6, '08:00', '13:00')
+) as h (who, weekday, starts_at, ends_at) on p.name like h.who || '%';

@@ -286,6 +286,148 @@ export type Database = {
           },
         ];
       };
+      staff: {
+        Row: {
+          created_at: string;
+          id: string;
+          is_active: boolean;
+          name: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          tenant_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      staff_absences: {
+        Row: {
+          ends_at: string;
+          id: string;
+          reason: string | null;
+          staff_id: string;
+          starts_at: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          ends_at: string;
+          id?: string;
+          reason?: string | null;
+          staff_id: string;
+          starts_at: string;
+          tenant_id: string;
+        };
+        Update: {
+          ends_at?: string;
+          id?: string;
+          reason?: string | null;
+          staff_id?: string;
+          starts_at?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_absences_tenant_id_staff_id_fkey";
+            columns: ["tenant_id", "staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      staff_shifts: {
+        Row: {
+          ends_at: string;
+          id: string;
+          location_id: string;
+          staff_id: string;
+          starts_at: string;
+          tenant_id: string;
+          weekday: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          ends_at: string;
+          id?: string;
+          location_id: string;
+          staff_id: string;
+          starts_at: string;
+          tenant_id: string;
+          weekday: number;
+        };
+        Update: {
+          ends_at?: string;
+          id?: string;
+          location_id?: string;
+          staff_id?: string;
+          starts_at?: string;
+          tenant_id?: string;
+          weekday?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_shifts_tenant_id_location_id_fkey";
+            columns: ["tenant_id", "location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "staff_shifts_tenant_id_staff_id_fkey";
+            columns: ["tenant_id", "staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      staff_skills: {
+        Row: {
+          skill: Database["public"]["Enums"]["staff_skill"];
+          staff_id: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          skill: Database["public"]["Enums"]["staff_skill"];
+          staff_id: string;
+          tenant_id: string;
+        };
+        Update: {
+          skill?: Database["public"]["Enums"]["staff_skill"];
+          staff_id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "staff_skills_tenant_id_staff_id_fkey";
+            columns: ["tenant_id", "staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
       tenant_breeds: {
         Row: {
           coat: Database["public"]["Enums"]["coat_type"];
@@ -439,6 +581,7 @@ export type Database = {
       membership_role: "owner" | "admin" | "reception";
       pet_size: "XS" | "S" | "M" | "L" | "XL" | "XXL";
       pet_species: "dog" | "cat";
+      staff_skill: "bath" | "dry" | "finish" | "special_cut";
       station_type: "bath" | "dry" | "finish";
     };
     CompositeTypes: {
@@ -560,6 +703,7 @@ export const Constants = {
       membership_role: ["owner", "admin", "reception"],
       pet_size: ["XS", "S", "M", "L", "XL", "XXL"],
       pet_species: ["dog", "cat"],
+      staff_skill: ["bath", "dry", "finish", "special_cut"],
       station_type: ["bath", "dry", "finish"],
     },
   },

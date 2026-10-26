@@ -89,6 +89,28 @@ async function seedTenantData(tenantId: string) {
     const { error: insertError } = await admin.from(table).insert(row);
     if (insertError) throw insertError;
   }
+
+  const { data: worker, error: staffError } = await admin
+    .from("staff")
+    .insert({ tenant_id: tenantId, name: "Persona aislamiento" })
+    .select("id")
+    .single();
+  if (staffError) throw staffError;
+  const staffBase = { tenant_id: tenantId, staff_id: worker.id };
+  for (const [table, row] of [
+    ["staff_skills", { ...staffBase, skill: "bath" }],
+    [
+      "staff_shifts",
+      { ...staffBase, location_id: location.id, weekday: 1, starts_at: "08:00", ends_at: "12:00" },
+    ],
+    [
+      "staff_absences",
+      { ...staffBase, starts_at: "2026-12-24T00:00:00Z", ends_at: "2026-12-25T00:00:00Z" },
+    ],
+  ] as const) {
+    const { error: insertError } = await admin.from(table).insert(row);
+    if (insertError) throw insertError;
+  }
 }
 
 afterAll(async () => {
