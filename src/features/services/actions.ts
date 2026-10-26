@@ -7,6 +7,7 @@ import { fieldErrorsFrom, formValues, type FormState } from "@/components/forms/
 import { tenantStaffContext } from "@/lib/auth/tenant-context";
 
 import { parseDurationMatrix } from "./duration-matrix";
+import { parsePriceMatrix, priceFieldName } from "./price-matrix";
 import { categorySchema, extraSchema, serviceSchema, type ServiceKind } from "./schema";
 
 const LIST_PATH = "/admin/servicios";
@@ -167,5 +168,84 @@ export async function saveDurationsAction(
     status: "success",
     message: `Duraciones guardadas (${rows.length} ${rows.length === 1 ? "combinación" : "combinaciones"})`,
     values,
+  };
+}
+
+export async function savePricesAction(
+  slug: string,
+  serviceId: string,
+  locationId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { tenant, supabase } = await tenantStaffContext(slug, `${detailPath(serviceId)}/precios`);
+  const values = Object.fromEntries(
+    [...formData.entries()]
+      .filter(([key]) => key.startsWith("p."))
+      .map(([key, value]) => [key, String(value)]),
+  );
+
+  // Las combinaciones ofrecidas y los extras se leen del servidor, no del formulario.
+  const [{ data: durations }, { data: extras }] = await Promise.all([
+    supabase.from("service_durations").select("size, coat").eq("service_id", serviceId),
+    supabase
+      .from("extras")
+      .select("id")
+      .match({ service_id: serviceId, tenant_id: tenant.id, is_active: true }),
+  ]);
+  const offered = durations ?? [];
+
+  const service = parsePriceMatrix("s", formData, offered);
+  const extraResults = (extras ?? []).map((extra) => ({
+    id: extra.id,
+    ...parsePriceMatrix(extra.id, formData, offered),
+  }));
+  const errors = Object.assign({}, service.errors, ...extraResults.map((r) => r.errors));
+  if (service.rows.length === 0) {
+    for (const result of extraResults) {
+      if (result.rows.length > 0) {
+        errors[priceFieldName(result.id, result.rows[0].size, result.rows[0].coat)] =
+          "Sin precio del servicio en este local, el extra no se puede ofrecer";
+      }
+    }
+  }
+  if (Object.keys(errors).length > 0) {
+    return {
+      status: "error",
+      message: "Revisa los precios marcados.",
+      fieldErrors: errors,
+      values,
+    };
+  }
+
+  const { error } = await supabase.rpc("replace_location_prices", {
+    p_location_id: locationId,
+    p_service_id: serviceId,
+    p_service_rows: service.rows,
+    p_extra_rows: extraResults.flatMap((result) =>
+      result.rows.map((row) => ({ ...row, extra_id: result.id })),
+    ),
+  });
+  if (error) return { status: "error", message: "No pudimos guardar los precios.", values };
+  refresh();
+  return { status: "success", message: "Precios guardados", values };
+}
+
+export async function copyServicePricesAction(
+  slug: string,
+  serviceId: string,
+  locationId: string,
+  _prev: FormState,
+): Promise<FormState> {
+  const { supabase } = await tenantStaffContext(slug, `${detailPath(serviceId)}/precios`);
+  const { data, error } = await supabase.rpc("copy_service_prices", {
+    p_service_id: serviceId,
+    p_source_location_id: locationId,
+  });
+  if (error) return { status: "error", message: "No pudimos copiar los precios." };
+  refresh();
+  return {
+    status: "success",
+    message: `Precios copiados a ${data} ${data === 1 ? "local" : "locales"}`,
   };
 }

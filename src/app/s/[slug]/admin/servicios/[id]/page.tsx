@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { z } from "zod";
 
 import { AdminSection } from "@/components/admin/AdminSection";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { buttonClassName } from "@/components/ui";
 import { DurationMatrixForm } from "@/features/services/components/DurationMatrixForm";
 import { ExtrasEditor } from "@/features/services/components/ExtrasEditor";
 import { ServiceForm } from "@/features/services/components/ServiceForm";
@@ -36,6 +38,12 @@ async function ServiceDetailContent({ slug, id }: { slug: string; id: string }) 
       <div>
         <h1>{service.name}</h1>
         <p>{kindDescription[service.kind]}</p>
+        <Link
+          href={`/admin/servicios/${service.id}/precios`}
+          className={buttonClassName({ variant: "ghost" })}
+        >
+          Precios por local
+        </Link>
       </div>
       <AdminSection title="Datos del servicio">
         <ServiceForm slug={slug} categories={categories} service={service} />

@@ -32,7 +32,7 @@
 - [x] T29 [services] Migración categories, services, extras, durations, location_prices + RLS
 - [x] T30 [services] Admin CRUD de categorías, servicios (bath / special_cut / other) y extras
 - [x] T31 [services] Matriz de duraciones talla×pelo por etapa: tabla desktop / acordeón móvil
-- [ ] T32 [services] Matriz de precios por local + copiar a otros locales + regla de activación
+- [x] T32 [services] Matriz de precios por local + copiar a otros locales + regla de activación
 - [ ] T33 [services] Landing `/` + catálogo público con precios por local
 - [ ] T34 [capacity] ⛔ `docs/capacidad.md`: reglas + escenarios dado/cuando/entonces → revisar con el spa
 - [ ] T35 [capacity] Migración appointments, appointment_pets/items/segments, daily_quota + overrides + RLS

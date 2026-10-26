@@ -983,10 +983,23 @@ export type Database = {
       };
       assign_tenant_admin: { Args: { p_email: string; p_tenant_id: string }; Returns: string };
       claim_customer_profile: { Args: { p_tenant_id: string }; Returns: string };
+      copy_service_prices: {
+        Args: { p_service_id: string; p_source_location_id: string };
+        Returns: number;
+      };
       create_pet_group: { Args: { p_customer_id: string; p_pet_ids: string[] }; Returns: string };
       ensure_customer_profile: {
         Args: { p_full_name: string; p_tenant_id: string; p_whatsapp: string };
         Returns: string;
+      };
+      replace_location_prices: {
+        Args: {
+          p_extra_rows: Json;
+          p_location_id: string;
+          p_service_id: string;
+          p_service_rows: Json;
+        };
+        Returns: undefined;
       };
       replace_service_durations: {
         Args: { p_rows: Json; p_service_id: string };

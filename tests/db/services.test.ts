@@ -320,3 +320,101 @@ describe("replace_service_durations", () => {
     expect(count).toBe(2);
   });
 });
+
+describe("replace_location_prices y copy_service_prices", () => {
+  let secondLocation: string;
+
+  beforeAll(async () => {
+    const { data } = await admin
+      .from("locations")
+      .insert({ tenant_id: tenantA, name: "Sede A2" })
+      .select("id")
+      .single();
+    secondLocation = data!.id;
+  });
+
+  it("reemplaza los precios del servicio y sus extras en un local, en una transacción", async () => {
+    const { error } = await staffA.client.rpc("replace_location_prices", {
+      p_location_id: locationA,
+      p_service_id: bath,
+      p_service_rows: [
+        { size: "S", coat: "short", price_cop: 40000 },
+        { size: "L", coat: "long", price_cop: 70000 },
+      ],
+      p_extra_rows: [{ extra_id: extra, size: "S", coat: "short", price_cop: 6000 }],
+    });
+    expect(error).toBeNull();
+    const { data } = await admin
+      .from("location_service_prices")
+      .select("size, price_cop")
+      .match({ location_id: locationA, service_id: bath })
+      .order("size");
+    expect(data).toEqual([
+      { size: "S", price_cop: 40000 },
+      { size: "L", price_cop: 70000 },
+    ]);
+    const { data: extras } = await admin
+      .from("location_extra_prices")
+      .select("size")
+      .match({ location_id: locationA, extra_id: extra });
+    expect(extras).toEqual([{ size: "S" }]);
+  });
+
+  it("rechaza extras de otro servicio y no cambia nada", async () => {
+    const { data: otherExtra } = await admin
+      .from("extras")
+      .insert({ tenant_id: tenantA, service_id: cut, name: `Extra corte ${suffix}` })
+      .select("id")
+      .single();
+    const { error } = await staffA.client.rpc("replace_location_prices", {
+      p_location_id: locationA,
+      p_service_id: bath,
+      p_service_rows: [],
+      p_extra_rows: [{ extra_id: otherExtra!.id, size: "S", coat: "short", price_cop: 1 }],
+    });
+    expect(error?.message).toMatch(/extra/i);
+    const { count } = await admin
+      .from("location_service_prices")
+      .select("*", { count: "exact", head: true })
+      .match({ location_id: locationA, service_id: bath });
+    expect(count).toBe(2);
+  });
+
+  it("copia los precios del servicio y sus extras a los demás locales del spa", async () => {
+    const { data, error } = await staffA.client.rpc("copy_service_prices", {
+      p_service_id: bath,
+      p_source_location_id: locationA,
+    });
+    expect(error).toBeNull();
+    expect(data).toBe(1);
+    const { data: copied } = await admin
+      .from("location_service_prices")
+      .select("size, price_cop")
+      .match({ location_id: secondLocation, service_id: bath })
+      .order("size");
+    expect(copied).toEqual([
+      { size: "S", price_cop: 40000 },
+      { size: "L", price_cop: 70000 },
+    ]);
+    const { count } = await admin
+      .from("location_extra_prices")
+      .select("*", { count: "exact", head: true })
+      .match({ location_id: secondLocation, extra_id: extra });
+    expect(count).toBe(1);
+  });
+
+  it("el staff de otro spa no puede usarlas", async () => {
+    const replace = await staffB.client.rpc("replace_location_prices", {
+      p_location_id: locationA,
+      p_service_id: bath,
+      p_service_rows: [],
+      p_extra_rows: [],
+    });
+    expect(replace.error).not.toBeNull();
+    const copy = await staffB.client.rpc("copy_service_prices", {
+      p_service_id: bath,
+      p_source_location_id: locationA,
+    });
+    expect(copy.error).not.toBeNull();
+  });
+});

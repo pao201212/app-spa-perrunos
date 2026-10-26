@@ -57,3 +57,32 @@ export async function getServiceDurations(serviceId: string) {
 }
 
 export type ServiceDuration = Awaited<ReturnType<typeof getServiceDurations>>[number];
+
+/** Precios del servicio y de sus extras en un local. */
+export async function getLocationPrices(locationId: string, serviceId: string) {
+  const supabase = await createSupabaseServerClient();
+  const [service, extras] = await Promise.all([
+    supabase
+      .from("location_service_prices")
+      .select("size, coat, price_cop")
+      .match({ location_id: locationId, service_id: serviceId }),
+    supabase
+      .from("location_extra_prices")
+      .select("extra_id, size, coat, price_cop, extras!inner (service_id)")
+      .eq("location_id", locationId)
+      .eq("extras.service_id", serviceId),
+  ]);
+  if (service.error) throw service.error;
+  if (extras.error) throw extras.error;
+  return {
+    service: service.data,
+    extras: extras.data.map(({ extra_id, size, coat, price_cop }) => ({
+      extra_id,
+      size,
+      coat,
+      price_cop,
+    })),
+  };
+}
+
+export type LocationPrices = Awaited<ReturnType<typeof getLocationPrices>>;

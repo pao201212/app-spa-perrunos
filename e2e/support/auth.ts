@@ -227,3 +227,45 @@ export async function createService(
   if (insertError) throw insertError;
   return data.id;
 }
+
+/** Duraciones de baño (40/30/20) para las combinaciones indicadas. */
+export async function seedBathDurations(
+  serviceId: string,
+  combos: { size: string; coat: string }[],
+): Promise<void> {
+  const client = admin();
+  const { data: service, error } = await client
+    .from("services")
+    .select("tenant_id")
+    .eq("id", serviceId)
+    .single();
+  if (error) throw error;
+  const rows = combos.map(({ size, coat }) => ({
+    tenant_id: service.tenant_id,
+    service_id: serviceId,
+    size: size as "M",
+    coat: coat as "short",
+    bath_min: 40,
+    dry_min: 30,
+    finish_min: 20,
+  }));
+  const insert = await client.from("service_durations").insert(rows);
+  if (insert.error) throw insert.error;
+}
+
+export async function createExtra(serviceId: string, name: string): Promise<string> {
+  const client = admin();
+  const { data: service, error } = await client
+    .from("services")
+    .select("tenant_id")
+    .eq("id", serviceId)
+    .single();
+  if (error) throw error;
+  const { data, error: insertError } = await client
+    .from("extras")
+    .insert({ tenant_id: service.tenant_id, service_id: serviceId, name })
+    .select("id")
+    .single();
+  if (insertError) throw insertError;
+  return data.id;
+}
