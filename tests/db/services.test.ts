@@ -269,3 +269,54 @@ describe("precios por local (local × talla × pelo; D8)", () => {
     expect(data ?? []).toEqual([]);
   });
 });
+
+describe("replace_service_durations", () => {
+  it("reemplaza todas las duraciones del servicio en una transacción", async () => {
+    const { error } = await staffA.client.rpc("replace_service_durations", {
+      p_service_id: bath,
+      p_rows: [
+        { size: "S", coat: "short", bath_min: 30, dry_min: 20, finish_min: 15 },
+        { size: "L", coat: "long", bath_min: 60, dry_min: 50, finish_min: 25 },
+      ],
+    });
+    expect(error).toBeNull();
+    const { data } = await admin
+      .from("service_durations")
+      .select("size, coat")
+      .eq("service_id", bath)
+      .order("size");
+    expect(data).toEqual([
+      { size: "S", coat: "short" },
+      { size: "L", coat: "long" },
+    ]);
+  });
+
+  it("si alguna fila es inválida no cambia nada", async () => {
+    const { error } = await staffA.client.rpc("replace_service_durations", {
+      p_service_id: bath,
+      p_rows: [
+        { size: "XS", coat: "short", bath_min: 30, dry_min: 20, finish_min: 15 },
+        { size: "M", coat: "short", bath_min: 30 },
+      ],
+    });
+    expect(error).not.toBeNull();
+    const { count } = await admin
+      .from("service_durations")
+      .select("*", { count: "exact", head: true })
+      .eq("service_id", bath);
+    expect(count).toBe(2);
+  });
+
+  it("el staff de otro spa no puede reemplazarlas", async () => {
+    const { error } = await staffB.client.rpc("replace_service_durations", {
+      p_service_id: bath,
+      p_rows: [],
+    });
+    expect(error?.message).toMatch(/servicio/i);
+    const { count } = await admin
+      .from("service_durations")
+      .select("*", { count: "exact", head: true })
+      .eq("service_id", bath);
+    expect(count).toBe(2);
+  });
+});

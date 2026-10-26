@@ -6,7 +6,8 @@ import { redirect } from "next/navigation";
 import { fieldErrorsFrom, formValues, type FormState } from "@/components/forms/form-state";
 import { tenantStaffContext } from "@/lib/auth/tenant-context";
 
-import { categorySchema, extraSchema, serviceSchema } from "./schema";
+import { parseDurationMatrix } from "./duration-matrix";
+import { categorySchema, extraSchema, serviceSchema, type ServiceKind } from "./schema";
 
 const LIST_PATH = "/admin/servicios";
 const detailPath = (serviceId: string) => `${LIST_PATH}/${serviceId}`;
@@ -130,4 +131,41 @@ export async function toggleExtraAction(
     .update({ is_active: isActive })
     .match({ id: extraId, tenant_id: tenant.id });
   refresh();
+}
+
+export async function saveDurationsAction(
+  slug: string,
+  serviceId: string,
+  kind: ServiceKind,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { supabase } = await tenantStaffContext(slug, detailPath(serviceId));
+  // React reinicia el formulario tras el envío: se devuelve lo escrito para no perderlo.
+  const values = Object.fromEntries(
+    [...formData.entries()]
+      .filter(([key]) => key.startsWith("d."))
+      .map(([key, value]) => [key, String(value)]),
+  );
+  const { rows, errors } = parseDurationMatrix(kind, formData);
+  if (Object.keys(errors).length > 0) {
+    return {
+      status: "error",
+      message: "Revisa las combinaciones marcadas.",
+      fieldErrors: errors,
+      values,
+    };
+  }
+
+  const { error } = await supabase.rpc("replace_service_durations", {
+    p_service_id: serviceId,
+    p_rows: rows,
+  });
+  if (error) return { status: "error", message: "No pudimos guardar las duraciones.", values };
+  refresh();
+  return {
+    status: "success",
+    message: `Duraciones guardadas (${rows.length} ${rows.length === 1 ? "combinación" : "combinaciones"})`,
+    values,
+  };
 }

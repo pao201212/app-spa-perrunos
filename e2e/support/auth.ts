@@ -205,3 +205,25 @@ export async function createCustomerWithPets(
   if (pets.error) throw pets.error;
   return customer.id;
 }
+
+/** Servicio en el spa `slug`; devuelve su id. */
+export async function createService(
+  slug: string,
+  name: string,
+  kind: "bath" | "special_cut" | "other" = "bath",
+): Promise<string> {
+  const client = admin();
+  const { data: tenant, error } = await client
+    .from("tenants")
+    .select("id")
+    .eq("slug", slug)
+    .single();
+  if (error) throw error;
+  const { data, error: insertError } = await client
+    .from("services")
+    .insert({ tenant_id: tenant.id, name, kind, species: "both" })
+    .select("id")
+    .single();
+  if (insertError) throw insertError;
+  return data.id;
+}

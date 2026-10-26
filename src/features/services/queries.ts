@@ -45,3 +45,15 @@ export async function getService(tenantId: string, serviceId: string) {
 export type Category = Awaited<ReturnType<typeof listCategories>>[number];
 export type ServiceSummary = Awaited<ReturnType<typeof listServices>>[number];
 export type ServiceDetail = NonNullable<Awaited<ReturnType<typeof getService>>>;
+
+export async function getServiceDurations(serviceId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("service_durations")
+    .select("size, coat, bath_min, dry_min, finish_min, cut_min")
+    .eq("service_id", serviceId);
+  if (error) throw error;
+  return data;
+}
+
+export type ServiceDuration = Awaited<ReturnType<typeof getServiceDurations>>[number];

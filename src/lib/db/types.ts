@@ -988,6 +988,10 @@ export type Database = {
         Args: { p_full_name: string; p_tenant_id: string; p_whatsapp: string };
         Returns: string;
       };
+      replace_service_durations: {
+        Args: { p_rows: Json; p_service_id: string };
+        Returns: undefined;
+      };
       reset_tenant_breed: { Args: { p_breed_id: string }; Returns: undefined };
       resolve_pet_size: {
         Args: { p_breed_id: string; p_weight_kg?: number };

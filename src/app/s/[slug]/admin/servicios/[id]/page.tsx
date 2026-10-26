@@ -4,9 +4,10 @@ import { z } from "zod";
 
 import { AdminSection } from "@/components/admin/AdminSection";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { DurationMatrixForm } from "@/features/services/components/DurationMatrixForm";
 import { ExtrasEditor } from "@/features/services/components/ExtrasEditor";
 import { ServiceForm } from "@/features/services/components/ServiceForm";
-import { getService, listCategories } from "@/features/services/queries";
+import { getService, getServiceDurations, listCategories } from "@/features/services/queries";
 import { kindDescription } from "@/features/services/schema";
 import { requireTenantStaff } from "@/lib/auth/guards";
 
@@ -23,9 +24,10 @@ export default function ServiceDetailPage({ params }: PageProps<"/s/[slug]/admin
 async function ServiceDetailContent({ slug, id }: { slug: string; id: string }) {
   const { tenant } = await requireTenantStaff(slug, `/admin/servicios/${id}`);
   if (!z.uuid().safeParse(id).success) notFound();
-  const [service, categories] = await Promise.all([
+  const [service, categories, durations] = await Promise.all([
     getService(tenant.id, id),
     listCategories(tenant.id),
+    getServiceDurations(id),
   ]);
   if (!service) notFound();
 
@@ -43,6 +45,17 @@ async function ServiceDetailContent({ slug, id }: { slug: string; id: string }) 
         description="Opciones que el cliente puede sumar a este servicio."
       >
         <ExtrasEditor slug={slug} service={service} />
+      </AdminSection>
+      <AdminSection
+        title="Duraciones"
+        description="Minutos de cada etapa según talla y tipo de pelo. Son iguales en todos los locales."
+      >
+        <DurationMatrixForm
+          slug={slug}
+          serviceId={service.id}
+          kind={service.kind}
+          durations={durations}
+        />
       </AdminSection>
     </AdminShell>
   );
