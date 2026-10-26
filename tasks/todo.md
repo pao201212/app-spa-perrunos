@@ -37,7 +37,7 @@
 - [x] T34 [capacity] `docs/capacidad.md`: reglas + escenarios, validado con el spa (D28–D33)
 - [x] T35 [capacity] Migración: capacity_mode, pet_capacity (especie×talla×pelo), waiting_zones, appointments + RLS
 - [x] T36 [capacity] Locales → Capacidad: matriz por empleado, zonas de espera, avanzada "Próximamente" + E2E
-- [ ] T37 [capacity] `capacity.available_slots` simple: jornadas del Personal, cupo, espacio, entrega + tests S1–S16
+- [x] T37 [capacity] `capacity.available_slots` simple: jornadas del Personal, cupo, espacio, entrega + tests S1–S16
 - [ ] T38 [capacity] `capacity.explain` + paridad con available_slots + vista "¿Por qué no hay cupo?"
 - [ ] T39 [capacity] `capacity.book`: advisory lock, anti-abuso + test concurrencia 10→1
 - [ ] T40 [capacity] `capacity.occupancy` + calendario de ocupación del admin (por talla)

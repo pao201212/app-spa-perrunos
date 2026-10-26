@@ -1300,6 +1300,13 @@ export type Database = {
         Returns: number;
       };
       assign_tenant_admin: { Args: { p_email: string; p_tenant_id: string }; Returns: string };
+      available_slots: {
+        Args: { p_date: string; p_location_id: string; p_pets: Json };
+        Returns: {
+          estimated_ready_at: string;
+          starts_at: string;
+        }[];
+      };
       claim_customer_profile: { Args: { p_tenant_id: string }; Returns: string };
       copy_service_prices: {
         Args: { p_service_id: string; p_source_location_id: string };

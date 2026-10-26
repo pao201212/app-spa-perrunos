@@ -113,6 +113,11 @@ cita.
 **Servicios solos** (p. ej. solo corte de uñas): **no usan cupo** del día ni espacio en el local;
 solo deben terminar antes del cierre.
 
+Supuestos de la implementación (T37), a confirmar con el spa:
+- **Mascotas que vienen juntas** se atienden a la par: la entrega es la de la más larga y todas
+  ocupan espacio hasta esa hora.
+- Las citas **canceladas** o de **no asistió** no usan cupo; las **entregadas** liberan su espacio.
+
 ### 3.5 Escenarios
 
 **Local de ejemplo — "Sede principal"**
