@@ -61,3 +61,21 @@ export async function getCustomerPet(customerId: string, petId: string) {
 }
 
 export type StaffCustomer = NonNullable<Awaited<ReturnType<typeof getCustomerForStaff>>>;
+
+/** Grupos "se bañan juntas" del cliente con los nombres de sus mascotas. */
+export async function listCustomerPetGroups(customerId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("pet_groups")
+    .select("id, pet_group_members (pet_id, pets (name))")
+    .eq("customer_id", customerId)
+    .order("created_at");
+  if (error) throw error;
+  return data.map((group) => ({
+    id: group.id,
+    petIds: group.pet_group_members.map((m) => m.pet_id),
+    names: group.pet_group_members.map((m) => m.pets.name).sort((a, b) => a.localeCompare(b, "es")),
+  }));
+}
+
+export type PetGroup = Awaited<ReturnType<typeof listCustomerPetGroups>>[number];

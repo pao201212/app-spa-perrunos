@@ -7,9 +7,14 @@ import { AdminSection } from "@/components/admin/AdminSection";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Badge, buttonClassName, Card } from "@/components/ui";
 import { updateCustomerAction } from "@/features/customers/admin-actions";
-import { getCustomerForStaff, listCustomerPets } from "@/features/customers/admin-queries";
+import {
+  getCustomerForStaff,
+  listCustomerPetGroups,
+  listCustomerPets,
+} from "@/features/customers/admin-queries";
 import { CustomerAdminForm } from "@/features/customers/components/CustomerAdminForm";
 import styles from "@/features/customers/components/customers.module.css";
+import { PetGroupsEditor } from "@/features/customers/components/PetGroupsEditor";
 import { PetList } from "@/features/customers/components/PetList";
 import { requireTenantStaff } from "@/lib/auth/guards";
 
@@ -28,7 +33,10 @@ async function CustomerDetailContent({ slug, id }: { slug: string; id: string })
   if (!z.uuid().safeParse(id).success) notFound();
   const customer = await getCustomerForStaff(tenant.id, id);
   if (!customer) notFound();
-  const pets = await listCustomerPets(customer.id);
+  const [pets, groups] = await Promise.all([
+    listCustomerPets(customer.id),
+    listCustomerPetGroups(customer.id),
+  ]);
 
   return (
     <AdminShell businessName={tenant.name}>
@@ -68,6 +76,17 @@ async function CustomerDetailContent({ slug, id }: { slug: string; id: string })
         >
           Agregar mascota
         </Link>
+      </AdminSection>
+      <AdminSection
+        title="Se bañan juntas"
+        description="Hermanas que entran a la vez a la tina; cada una usa su propia mesa de secado."
+      >
+        <PetGroupsEditor
+          slug={slug}
+          customerId={customer.id}
+          groups={groups}
+          pets={pets.map(({ id, name }) => ({ id, name }))}
+        />
       </AdminSection>
     </AdminShell>
   );

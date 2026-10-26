@@ -136,3 +136,40 @@ export async function archiveCustomerPetAction(
     .match({ id: petId, customer_id: customerId, tenant_id: tenant.id });
   redirect(detailPath(customerId));
 }
+
+export async function createPetGroupAction(
+  slug: string,
+  customerId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { supabase } = await tenantStaffContext(slug, detailPath(customerId));
+  const petIds = [...new Set(formData.getAll("pet_ids").map(String))];
+  // React reinicia el formulario tras cada envío: se devuelve la selección para conservarla.
+  const values = { pet_ids: petIds.join(",") };
+  if (petIds.length < 2) return { status: "error", message: "Elige al menos dos mascotas", values };
+
+  const { error } = await supabase.rpc("create_pet_group", {
+    p_customer_id: customerId,
+    p_pet_ids: petIds,
+  });
+  if (error?.code === UNIQUE_VIOLATION) {
+    return { status: "error", message: "Alguna de esas mascotas ya está en otro grupo", values };
+  }
+  if (error) return { status: "error", message: "No pudimos crear el grupo.", values };
+  refresh();
+  return { status: "success", message: "Grupo creado" };
+}
+
+export async function deletePetGroupAction(
+  slug: string,
+  customerId: string,
+  groupId: string,
+): Promise<void> {
+  const { tenant, supabase } = await tenantStaffContext(slug, detailPath(customerId));
+  await supabase
+    .from("pet_groups")
+    .delete()
+    .match({ id: groupId, customer_id: customerId, tenant_id: tenant.id });
+  refresh();
+}

@@ -164,3 +164,44 @@ export async function seedLocationConfig(slug: string, locationId: string): Prom
     .insert({ ...base, weekday: 1, opens_at: "08:00", closes_at: "12:30" });
   if (hours.error) throw hours.error;
 }
+
+/** Cliente con mascotas (Pug) en el spa `slug`; devuelve el id del cliente. */
+export async function createCustomerWithPets(
+  slug: string,
+  fullName: string,
+  petNames: string[],
+): Promise<string> {
+  const client = admin();
+  const { data: tenant, error } = await client
+    .from("tenants")
+    .select("id")
+    .eq("slug", slug)
+    .single();
+  if (error) throw error;
+  const { data: customer, error: customerError } = await client
+    .from("customers")
+    .insert({
+      tenant_id: tenant.id,
+      full_name: fullName,
+      whatsapp: `+57 3${Date.now().toString().slice(-9)}`,
+    })
+    .select("id")
+    .single();
+  if (customerError) throw customerError;
+  const { data: breed } = await client
+    .from("tenant_breeds")
+    .select("id")
+    .match({ tenant_id: tenant.id, name: "Pug" })
+    .single();
+  const pets = await client.from("pets").insert(
+    petNames.map((name) => ({
+      tenant_id: tenant.id,
+      customer_id: customer.id,
+      name,
+      species: "dog" as const,
+      breed_id: breed!.id,
+    })),
+  );
+  if (pets.error) throw pets.error;
+  return customer.id;
+}

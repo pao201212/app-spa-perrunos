@@ -403,3 +403,77 @@ describe("pet_groups (se bañan juntas, D10/D23)", () => {
     expect(error?.message).toMatch(/mismo dueño/i);
   });
 });
+
+describe("create_pet_group", () => {
+  async function petsOf(customerId: string) {
+    const { data } = await admin
+      .from("pets")
+      .select("id")
+      .eq("customer_id", customerId)
+      .order("created_at");
+    return data!.map((p) => p.id);
+  }
+
+  it("crea el grupo con sus mascotas en una sola operación", async () => {
+    // Dueño nuevo con dos mascotas, sin grupo previo.
+    const { data: owner } = await admin
+      .from("customers")
+      .insert({ tenant_id: tenantA, full_name: "Dueña de hermanas", whatsapp: "+57 300 777 0000" })
+      .select("id")
+      .single();
+    const pug = await breedId(tenantA, "Pug");
+    await admin.from("pets").insert([
+      {
+        tenant_id: tenantA,
+        customer_id: owner!.id,
+        name: "Hermana 1",
+        species: "dog",
+        breed_id: pug,
+      },
+      {
+        tenant_id: tenantA,
+        customer_id: owner!.id,
+        name: "Hermana 2",
+        species: "dog",
+        breed_id: pug,
+      },
+    ]);
+    const pets = await petsOf(owner!.id);
+
+    const { data: groupId, error } = await staffA.client.rpc("create_pet_group", {
+      p_customer_id: owner!.id,
+      p_pet_ids: pets,
+    });
+    expect(error).toBeNull();
+    const { data: members } = await admin
+      .from("pet_group_members")
+      .select("pet_id")
+      .eq("group_id", groupId as string);
+    expect(members?.map((m) => m.pet_id).sort()).toEqual([...pets].sort());
+
+    // Una mascota no puede estar en dos grupos.
+    const again = await staffA.client.rpc("create_pet_group", {
+      p_customer_id: owner!.id,
+      p_pet_ids: pets,
+    });
+    expect(again.error).not.toBeNull();
+  });
+
+  it("exige al menos dos mascotas", async () => {
+    const pets = await petsOf(customerY);
+    const { error } = await staffA.client.rpc("create_pet_group", {
+      p_customer_id: customerY,
+      p_pet_ids: pets.slice(0, 1),
+    });
+    expect(error?.message).toMatch(/dos mascotas/i);
+  });
+
+  it("solo el staff del spa puede agrupar", async () => {
+    const pets = await petsOf(customerX);
+    const { error } = await clientX.client.rpc("create_pet_group", {
+      p_customer_id: customerX,
+      p_pet_ids: pets,
+    });
+    expect(error).not.toBeNull();
+  });
+});
