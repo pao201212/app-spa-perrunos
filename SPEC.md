@@ -37,8 +37,9 @@
 | D23 | Las mascotas que se bañan juntas **comparten 1 tina**, pero **cada una tiene su propia mesa de secado**. Al terminar el baño deben estar libres **todas** las mesas que necesita el grupo |
 | D25 | (2026-10-26) **La mesa de secado es la misma de los detalles.** Estaciones: **tina** (baño), **mesa** (secado → detalles, sin cambiar de mesa) y **estación de corte** (corte especial del groomer). La etapa "terminado" se llama **detalles**: limpiar orejas, cortar uñas, corte higiénico, perfume, tijera en patas, etc. |
 | D27 | (2026-10-26) **Solo hay dos tipos de estación: tina y mesa.** Cada estación se registra una por una (nombre, tipo). La tina sirve para el baño; la mesa para secado y detalles, y el admin marca las mesas que **también sirven para corte especial**. El corte especial se hace **en la misma mesa** de los detalles: una mascota con corte necesita, desde el secado, una mesa marcada para corte. Reemplaza la "estación de corte" de D25 |
+| D28 | (2026-10-26) **Dos modos de capacidad por local: simple y avanzada.** La **simple** (por defecto) reemplaza el cupo fijo por talla de D24: el admin indica cuántas mascotas de cada talla atiende **un empleado** en un día y cuántos empleados hay cada día de la semana (con cambios por fecha). Cada mascota usa 1/N de una jornada; el día tiene tantas jornadas como empleados. La **avanzada** es el motor por etapas (§5.1–5.2) y solo se activa si el local tiene estaciones, personal con habilidades y turnos, y duraciones. `capacity_mode` pasa a `enum('simple','advanced')` default `'simple'` |
 | D26 | (2026-10-26) **Opcionales sin costo del baño:** el admin crea y quita opcionales por servicio (p. ej. corte higiénico, shampoo especial) e indica si se hacen en la etapa de **baño** o de **detalles**. Al reservar un baño, el cliente llena el listado de opcionales. No cambian el precio |
-| D24 | **Toda la lógica de capacidad vive en un único lugar**, parametrizada en tablas, explicable y fácil de revisar con los dueños de los spas (§5). Debe permitir cambiar, por local, a un modelo simple de **cupo diario: local × talla × día** |
+| D24 | **Toda la lógica de capacidad vive en un único lugar**, parametrizada en tablas, explicable y fácil de revisar con los dueños de los spas (§5). Debe permitir cambiar, por local, a un modelo simple (ver D28, que reemplaza el cupo fijo local × talla × día) |
 
 ### Supuestos (corrígelos antes de aprobar)
 | # | Supuesto |
@@ -159,8 +160,8 @@ Orden de construcción, **Entrega 2:** `agreements`, `self-service`, `payments` 
 
 **`capacity`**
 - Dada una mascota (o un grupo), un servicio, unos extras, un local y una fecha, el sistema devuelve las horas de inicio factibles según el **modo de capacidad del local** (§5).
-- HU-C1: el admin elige por local el modo **detallado** (estaciones + personal + etapas) o el de **cupo diario** (tabla local × talla × día).
-- HU-C2: **calendario de ocupación** por local: el % ocupado de cada día, desglosado por talla (cupo diario) o por estación y personal (detallado).
+- HU-C1: el admin elige por local la capacidad **simple** (empleados del día × mascotas por empleado y talla, D28) o la **avanzada** (estaciones + personal + etapas). La avanzada solo se activa si su configuración está completa.
+- HU-C2: **calendario de ocupación** por local: el % ocupado de cada día, desglosado por talla (simple) o por estación y personal (avanzada).
 - HU-C3: **"¿Por qué no hay cupo?"**: para una fecha y hora, el admin (o Prisma Lab, junto con el dueño) ve qué regla bloqueó cada horario. Por ejemplo: "sin mesa de secado libre a las 10:40", "sin groomer en turno" o "cupo de talla L agotado".
   - CA: los dos modos comparten la misma interfaz SQL; cambiar de modo es un ajuste del local, sin deploy.
 
@@ -268,9 +269,10 @@ locations            id, tenant_id, name, address, whatsapp, is_active,
                      confirmation_mode enum('auto','manual') default 'auto',
                      cancel_window_hours int default 4, max_days_ahead int default 30,
                      bather_continues_drying bool, slot_step_min int default 15,
-                     capacity_mode enum('detailed','daily_quota') default 'detailed'   (D24)
-location_daily_quota tenant_id, location_id, weekday, size, max_pets          -- modo cupo diario
-location_quota_overrides tenant_id, location_id, date, size, max_pets         -- excepciones por fecha
+                     capacity_mode enum('simple','advanced') default 'simple'   (D24, D28)
+location_size_capacity tenant_id, location_id, size, pets_per_staff > 0       -- simple (D28)
+location_staff_count tenant_id, location_id, weekday, staff_count ≥ 0          -- simple
+location_staff_overrides tenant_id, location_id, date, staff_count ≥ 0         -- simple: por fecha
 stations             id, tenant_id, location_id, name, kind enum('tub','table'), for_special_cut bool,
                      sort_order                                                 -- D27
                      -- tub = tina (baño) · table = mesa (secado + detalles; + corte si for_special_cut)
@@ -384,16 +386,18 @@ Entrada: local L, fecha F, mascotas P (1, o un grupo "se bañan juntas"), servic
 - La asignación de personal es **greedy** (el primero disponible por orden estable). El admin puede reasignar después; la reasignación se valida con las mismas reglas.
 - La fuente de verdad es SQL (schema `capacity`). La UI no replica reglas.
 
-### 5.3 Modo `daily_quota` (alternativa simple, D24)
+### 5.3 Capacidad simple (D28)
 ```
-Cupo(L, F, talla) = location_quota_overrides(L, F, talla) ?? location_daily_quota(L, weekday(F), talla)
-Usados(L, F, talla) = nº de mascotas de esa talla en citas no canceladas de L en la fecha F
-Una reserva es válida si, para cada mascota, Usados + 1 ≤ Cupo, y la hora está dentro de
-location_hours y de la malla. No se asignan estaciones ni personal.
-Ocupación(F) = Σ Usados / Σ Cupo, también desglosada por talla.
+Empleados(L, F) = location_staff_overrides(L, F) ?? location_staff_count(L, weekday(F))
+Uso(mascota)    = 1 / location_size_capacity(L, talla)          -- fracción de una jornada
+Usado(L, F)     = Σ Uso de las mascotas en citas no canceladas de L en la fecha F
+Una reserva (todas sus mascotas) es válida si Usado + Σ Uso(nuevas) ≤ Empleados(L, F),
+y la hora está dentro de location_hours y de la malla. No se asignan estaciones ni personal.
+Ocupación(F) = Usado / Empleados, también desglosada por talla.
 ```
-- Sirve para arrancar con un local mientras se valida el modo detallado, o de forma permanente si el dueño lo prefiere.
-- `capacity.explain` en este modo devuelve, p. ej., "cupo talla L: 6/6".
+- Aritmética exacta con fracciones (sin redondeo): se compara Σ (n_talla × MCM / cap_talla) ≤ Empleados × MCM.
+- Si una talla no tiene capacidad configurada, esa talla no se ofrece en el local.
+- `capacity.explain` devuelve `SIN_EMPLEADOS` o `CUPO_LLENO` con lo que queda, p. ej. "quedan ⅙ de jornada".
 
 ---
 
@@ -488,7 +492,7 @@ export async function upsertLocationPrices(input: unknown) {
 |---|---|---|
 | Unit | Vitest | host → slug, talla por peso o raza, malla horaria, esquemas Zod, formato COP |
 | Contrato de temas | Vitest | Tokens obligatorios y contraste AA de los pares texto/fondo |
-| BD | Vitest + Supabase local | **Aislamiento** entre tenants y entre clientes (bloqueante). **Capacidad**, a partir de los escenarios de `docs/capacidad.md`: etapas contiguas baño→secado, espera de detalles en la misma mesa, estaciones, turnos, ausencias, `bather_continues_drying`, grupos (1 tina y N mesas), corte especial en la misma mesa (solo mesas marcadas), cierres, modo `daily_quota` con overrides, y que `explain` coincida con `available_slots`. **Concurrencia:** 10 reservas paralelas al último cupo dan 1 éxito. Vinculación de un cliente invitado al entrar con Google. Triggers anti-abuso |
+| BD | Vitest + Supabase local | **Aislamiento** entre tenants y entre clientes (bloqueante). **Capacidad**, a partir de los escenarios de `docs/capacidad.md`: etapas contiguas baño→secado, espera de detalles en la misma mesa, estaciones, turnos, ausencias, `bather_continues_drying`, grupos (1 tina y N mesas), corte especial en la misma mesa (solo mesas marcadas), cierres, capacidad simple (jornadas por empleado, cambios por fecha, fracciones exactas), y que `explain` coincida con `available_slots`. **Concurrencia:** 10 reservas paralelas al último cupo dan 1 éxito. Vinculación de un cliente invitado al entrar con Google. Triggers anti-abuso |
 | Componentes | Testing Library | Wizard de reserva, matrices de duración y precio, errores accesibles |
 | E2E | Playwright (Pixel 7 + Desktop) | Login (con OAuth simulado en local), reserva completa, cita del admin, cambio de estados, 2 tenants con temas distintos |
 | A11y | axe | 0 violaciones serias o críticas |

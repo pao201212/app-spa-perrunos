@@ -35,16 +35,16 @@
 - [x] T32 [services] Matriz de precios por local + copiar a otros locales + regla de activación
 - [x] T33 [services] Landing `/` + catálogo público con precios por local
 - [ ] T34 [capacity] ⛔ `docs/capacidad.md`: reglas + escenarios dado/cuando/entonces → revisar con el spa
-- [ ] T35 [capacity] Migración appointments, appointment_pets/items/segments, daily_quota + overrides + RLS
-- [ ] T36 [capacity] `capacity.available_slots` modo detailed + tests desde los escenarios de T34
+- [ ] T35 [capacity] Migración appointments, pets/items/segments, capacidad simple (D28) + RLS
+- [ ] T36 [capacity] `capacity.available_slots` modo avanzado + tests desde los escenarios de T34
 - [ ] T37 [capacity] `capacity.explain` (motivo por hora) + test de paridad con available_slots
-- [ ] T38 [capacity] Modo `daily_quota` (+ overrides por fecha) en la misma interfaz + tests
+- [ ] T38 [capacity] Capacidad simple (empleados × mascotas por talla, cambios por fecha) + tests
 - [ ] T39 [capacity] `capacity.book`: advisory lock, asignación greedy, anti-abuso + test concurrencia 10→1
 - [ ] T40 [capacity] `capacity.occupancy` + calendario de ocupación del admin (por talla / estación)
 - [ ] T41 [booking] Wizard cliente: mascota(s) → servicio + extras + opcionales (D26) + corte especial → local → fecha/hora → resumen
 - [ ] T42 [booking] Mis citas: activas, historial y confirmación de recepción
 - [ ] T43 [booking] Cita manual del admin (cliente existente o nuevo) + sobrecupo con confirmación
 - [ ] T44 [booking] Agenda admin: día (móvil), por estación/personal (desktop), estados, reasignar personal
-- [ ] T45 [booking] Vista "¿Por qué no hay cupo?" + selector de modo de capacidad por local
+- [ ] T45 [booking] "¿Por qué no hay cupo?" + Locales → Capacidad (simple/avanzada, valida config)
 - [ ] T46 [cierre] E2E completos + axe 0 serias + Lighthouse móvil ≥90/95 + cobertura 90% capacity/booking
 - [ ] T47 [cierre] ⛔ Deploy Vercel (wildcard + admin.) + Google OAuth producción — pedir confirmación
