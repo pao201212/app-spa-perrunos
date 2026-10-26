@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatFraction, isOverridable, reasonMessage } from "./reasons";
+import { formatFraction, reasonMessage } from "./reasons";
 
 const TZ = "America/Bogota";
 
@@ -62,11 +62,39 @@ describe("reasonMessage", () => {
   });
 });
 
-describe("isOverridable", () => {
-  it("el sobrecupo pasa por alto cupo y espacio, pero no precio, duración ni cierre", () => {
-    expect(isOverridable("CUPO_LLENO")).toBe(true);
-    expect(isOverridable("SIN_ESPACIO")).toBe(true);
-    expect(isOverridable("SIN_PRECIO")).toBe(false);
-    expect(isOverridable("CERRADO")).toBe(false);
+describe("reasonMessage sin detalle", () => {
+  it.each([
+    ["MUY_LEJOS", "Fecha muy lejana"],
+    ["SIN_PRECIO", "Este servicio no tiene precio en este local para esa talla y pelo"],
+    [
+      "SIN_DURACION",
+      "Este servicio no tiene duración para esa talla y pelo (Servicios → Duraciones)",
+    ],
+    ["SIN_EMPLEADOS", "Ese día nadie que bañe tiene turno en este local (Personal → Turnos)"],
+    ["SIN_CAPACIDAD", "Esa combinación no se atiende en este local"],
+    ["CUPO_LLENO", "No queda cupo ese día"],
+    ["SIN_ESPACIO", "El local está lleno a esa hora"],
+    ["FUERA_DE_HORARIO", "Terminaría después del cierre"],
+  ] as const)("%s", (code, text) => {
+    expect(reasonMessage(code, null, TZ)).toBe(text);
+  });
+
+  it("nombra el adicional sin precio y la duración faltante", () => {
+    expect(reasonMessage("SIN_PRECIO", { extra: "Hidratación" }, TZ)).toBe(
+      "Hidratación no tiene precio en este local para esa talla y pelo",
+    );
+    expect(reasonMessage("SIN_DURACION", { service: "Baño" }, TZ)).toBe(
+      "Baño no tiene duración para esa talla y pelo (Servicios → Duraciones)",
+    );
+  });
+
+  it("con una jornada usada habla en singular", () => {
+    expect(
+      reasonMessage(
+        "CUPO_LLENO",
+        { jornadas: { num: 1, den: 1 }, remaining: { num: 0, den: 1 }, needed: { num: 1, den: 6 } },
+        TZ,
+      ),
+    ).toBe("Día lleno: no queda cupo en 1 jornada");
   });
 });

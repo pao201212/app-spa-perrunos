@@ -1342,6 +1342,7 @@ export type Database = {
           code: string;
           detail: Json;
           estimated_ready_at: string;
+          overridable: boolean;
           starts_at: string;
         }[];
       };

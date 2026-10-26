@@ -1,6 +1,6 @@
 "use server";
 
-import { isOverridable, reasonLabel, reasonMessage } from "@/features/capacity/reasons";
+import { reasonLabel, reasonMessage } from "@/features/capacity/reasons";
 import { tenantStaffContext } from "@/lib/auth/tenant-context";
 import { timeInZone } from "@/lib/timezone";
 
@@ -56,7 +56,8 @@ export async function adminLoadSlotsAction(
   for (const row of data) {
     const code = row.code as Parameters<typeof reasonMessage>[0] | null;
     const message = code ? reasonMessage(code, row.detail, tenant.timezone) : null;
-    if (!row.starts_at || (code && !isOverridable(code))) {
+    // Qué motivos admiten sobrecupo lo decide SQL (capacity.overridable).
+    if (!row.starts_at || (code && !row.overridable)) {
       blocked ??= message;
       continue;
     }

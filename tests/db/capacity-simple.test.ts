@@ -312,3 +312,29 @@ describe("explain_slots (T38)", () => {
     expect(error?.code).toBe("42501");
   });
 });
+
+describe("sobrecupo en explain_slots", () => {
+  it("marca qué motivos se pueden pasar por alto (capacity.overridable)", async () => {
+    const location = await setupLocation();
+    await booked(location, MONDAY, "08:00", "09:30", [
+      { size: "L", count: 4 },
+      { size: "M", count: 6 },
+    ]);
+    const { data } = await staff.client.rpc("explain_slots", {
+      p_location_id: location,
+      p_date: MONDAY,
+      p_pets: [dog("M", "short")],
+    });
+    expect(
+      new Set(
+        data!.map((r: { code: string; overridable: boolean }) => `${r.code}:${r.overridable}`),
+      ),
+    ).toEqual(new Set(["CUPO_LLENO:true"]));
+    const { data: unpriced } = await staff.client.rpc("explain_slots", {
+      p_location_id: location,
+      p_date: MONDAY,
+      p_pets: [dog("XXL", "long")],
+    });
+    expect(unpriced![0]).toMatchObject({ code: "SIN_PRECIO", overridable: false });
+  });
+});

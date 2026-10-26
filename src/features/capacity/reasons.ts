@@ -27,18 +27,6 @@ export const REASON_CODES = [
 
 export type ReasonCode = (typeof REASON_CODES)[number];
 
-/** Motivos que el admin puede pasar por alto con sobrecupo (igual que capacity.overridable). */
-export const OVERRIDABLE_CODES: readonly ReasonCode[] = [
-  "PASADO",
-  "SIN_EMPLEADOS",
-  "SIN_CAPACIDAD",
-  "CUPO_LLENO",
-  "SIN_ESPACIO",
-  "FUERA_DE_HORARIO",
-];
-
-export const isOverridable = (code: ReasonCode) => OVERRIDABLE_CODES.includes(code);
-
 export const reasonLabel: Record<ReasonCode, string> = {
   PASADO: "Ya pasó",
   MUY_LEJOS: "Muy lejos",
@@ -118,9 +106,9 @@ export function reasonMessage(code: ReasonCode, detail: unknown, timeZone: strin
     case "CERRADO":
       return d.reason ? `El local cierra este día (${d.reason})` : "El local no abre este día";
     case "SIN_PRECIO":
-      return `${d.service ?? d.extra} no tiene precio en este local para esa talla y pelo`;
+      return `${d.service ?? d.extra ?? "Este servicio"} no tiene precio en este local para esa talla y pelo`;
     case "SIN_DURACION":
-      return `${d.service} no tiene duración para esa talla y pelo (Servicios → Duraciones)`;
+      return `${d.service ?? "Este servicio"} no tiene duración para esa talla y pelo (Servicios → Duraciones)`;
     case "SIN_EMPLEADOS":
       return "Ese día nadie que bañe tiene turno en este local (Personal → Turnos)";
     case "SIN_CAPACIDAD":
