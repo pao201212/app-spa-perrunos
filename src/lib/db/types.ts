@@ -23,6 +23,201 @@ export type Database = {
   };
   public: {
     Tables: {
+      appointment_items: {
+        Row: {
+          appointment_id: string;
+          extra_id: string | null;
+          id: string;
+          item_type: Database["public"]["Enums"]["appointment_item_type"];
+          name: string;
+          option_id: string | null;
+          pet_id: string;
+          price_cop: number;
+          service_id: string | null;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          appointment_id: string;
+          extra_id?: string | null;
+          id?: string;
+          item_type: Database["public"]["Enums"]["appointment_item_type"];
+          name: string;
+          option_id?: string | null;
+          pet_id: string;
+          price_cop: number;
+          service_id?: string | null;
+          tenant_id: string;
+        };
+        Update: {
+          appointment_id?: string;
+          extra_id?: string | null;
+          id?: string;
+          item_type?: Database["public"]["Enums"]["appointment_item_type"];
+          name?: string;
+          option_id?: string | null;
+          pet_id?: string;
+          price_cop?: number;
+          service_id?: string | null;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "appointment_items_tenant_id_appointment_id_pet_id_fkey";
+            columns: ["tenant_id", "appointment_id", "pet_id"];
+            isOneToOne: false;
+            referencedRelation: "appointment_pets";
+            referencedColumns: ["tenant_id", "appointment_id", "pet_id"];
+          },
+          {
+            foreignKeyName: "appointment_items_tenant_id_extra_id_fkey";
+            columns: ["tenant_id", "extra_id"];
+            isOneToOne: false;
+            referencedRelation: "extras";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "appointment_items_tenant_id_option_id_fkey";
+            columns: ["tenant_id", "option_id"];
+            isOneToOne: false;
+            referencedRelation: "service_options";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "appointment_items_tenant_id_service_id_fkey";
+            columns: ["tenant_id", "service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      appointment_pets: {
+        Row: {
+          appointment_id: string;
+          coat: Database["public"]["Enums"]["coat_type"];
+          pet_id: string;
+          quota_divisor: number | null;
+          size: Database["public"]["Enums"]["pet_size"];
+          species: Database["public"]["Enums"]["pet_species"];
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          appointment_id: string;
+          coat: Database["public"]["Enums"]["coat_type"];
+          pet_id: string;
+          quota_divisor?: number | null;
+          size: Database["public"]["Enums"]["pet_size"];
+          species: Database["public"]["Enums"]["pet_species"];
+          tenant_id: string;
+        };
+        Update: {
+          appointment_id?: string;
+          coat?: Database["public"]["Enums"]["coat_type"];
+          pet_id?: string;
+          quota_divisor?: number | null;
+          size?: Database["public"]["Enums"]["pet_size"];
+          species?: Database["public"]["Enums"]["pet_species"];
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "appointment_pets_tenant_id_appointment_id_fkey";
+            columns: ["tenant_id", "appointment_id"];
+            isOneToOne: false;
+            referencedRelation: "appointments";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "appointment_pets_tenant_id_pet_id_fkey";
+            columns: ["tenant_id", "pet_id"];
+            isOneToOne: false;
+            referencedRelation: "pets";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      appointments: {
+        Row: {
+          client_confirmed_at: string | null;
+          code: string;
+          created_at: string;
+          created_by: string | null;
+          customer_id: string;
+          estimated_ready_at: string;
+          id: string;
+          location_id: string;
+          notes: string | null;
+          overbooked: boolean;
+          pet_group_id: string | null;
+          source: Database["public"]["Enums"]["appointment_source"];
+          starts_at: string;
+          status: Database["public"]["Enums"]["appointment_status"];
+          tenant_id: string;
+          total_cop: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          client_confirmed_at?: string | null;
+          code?: string;
+          created_at?: string;
+          created_by?: string | null;
+          customer_id: string;
+          estimated_ready_at: string;
+          id?: string;
+          location_id: string;
+          notes?: string | null;
+          overbooked?: boolean;
+          pet_group_id?: string | null;
+          source: Database["public"]["Enums"]["appointment_source"];
+          starts_at: string;
+          status: Database["public"]["Enums"]["appointment_status"];
+          tenant_id: string;
+          total_cop: number;
+        };
+        Update: {
+          client_confirmed_at?: string | null;
+          code?: string;
+          created_at?: string;
+          created_by?: string | null;
+          customer_id?: string;
+          estimated_ready_at?: string;
+          id?: string;
+          location_id?: string;
+          notes?: string | null;
+          overbooked?: boolean;
+          pet_group_id?: string | null;
+          source?: Database["public"]["Enums"]["appointment_source"];
+          starts_at?: string;
+          status?: Database["public"]["Enums"]["appointment_status"];
+          tenant_id?: string;
+          total_cop?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "appointments_tenant_id_customer_id_fkey";
+            columns: ["tenant_id", "customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "appointments_tenant_id_location_id_fkey";
+            columns: ["tenant_id", "location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "appointments_tenant_id_pet_group_id_fkey";
+            columns: ["tenant_id", "pet_group_id"];
+            isOneToOne: false;
+            referencedRelation: "pet_groups";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
       customers: {
         Row: {
           created_at: string;
@@ -241,6 +436,42 @@ export type Database = {
           },
         ];
       };
+      location_pet_capacity: {
+        Row: {
+          coat: Database["public"]["Enums"]["coat_type"];
+          location_id: string;
+          pets_per_staff: number;
+          size: Database["public"]["Enums"]["pet_size"];
+          species: Database["public"]["Enums"]["pet_species"];
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          coat: Database["public"]["Enums"]["coat_type"];
+          location_id: string;
+          pets_per_staff: number;
+          size: Database["public"]["Enums"]["pet_size"];
+          species: Database["public"]["Enums"]["pet_species"];
+          tenant_id: string;
+        };
+        Update: {
+          coat?: Database["public"]["Enums"]["coat_type"];
+          location_id?: string;
+          pets_per_staff?: number;
+          size?: Database["public"]["Enums"]["pet_size"];
+          species?: Database["public"]["Enums"]["pet_species"];
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "location_pet_capacity_tenant_id_location_id_fkey";
+            columns: ["tenant_id", "location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
       location_service_prices: {
         Row: {
           coat: Database["public"]["Enums"]["coat_type"];
@@ -280,6 +511,42 @@ export type Database = {
             columns: ["tenant_id", "service_id"];
             isOneToOne: false;
             referencedRelation: "services";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      location_waiting_zones: {
+        Row: {
+          created_at: string;
+          id: string;
+          location_id: string;
+          name: string;
+          seats: number;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          location_id: string;
+          name: string;
+          seats: number;
+          tenant_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          location_id?: string;
+          name?: string;
+          seats?: number;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "location_waiting_zones_tenant_id_location_id_fkey";
+            columns: ["tenant_id", "location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
             referencedColumns: ["tenant_id", "id"];
           },
         ];
@@ -1071,7 +1338,18 @@ export type Database = {
       };
     };
     Enums: {
-      capacity_mode: "detailed" | "daily_quota";
+      appointment_item_type: "service" | "extra" | "option";
+      appointment_source: "web" | "admin";
+      appointment_status:
+        | "pending"
+        | "scheduled"
+        | "received"
+        | "in_progress"
+        | "ready"
+        | "delivered"
+        | "cancelled"
+        | "no_show";
+      capacity_mode: "advanced" | "simple";
       coat_type: "short" | "medium" | "long";
       confirmation_mode: "auto" | "manual";
       membership_role: "owner" | "admin" | "reception";
@@ -1197,7 +1475,19 @@ export const Constants = {
   },
   public: {
     Enums: {
-      capacity_mode: ["detailed", "daily_quota"],
+      appointment_item_type: ["service", "extra", "option"],
+      appointment_source: ["web", "admin"],
+      appointment_status: [
+        "pending",
+        "scheduled",
+        "received",
+        "in_progress",
+        "ready",
+        "delivered",
+        "cancelled",
+        "no_show",
+      ],
+      capacity_mode: ["advanced", "simple"],
       coat_type: ["short", "medium", "long"],
       confirmation_mode: ["auto", "manual"],
       membership_role: ["owner", "admin", "reception"],

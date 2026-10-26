@@ -313,16 +313,18 @@ location_prices      tenant_id, location_id, item_type enum('service','extra'), 
                      size, coat, price_cop int ≥ 0                       PK compuesta
 
 -- Citas
-appointments         id, tenant_id, location_id, customer_id, pet_group_id null, code,
+appointments         id, tenant_id, location_id, customer_id, pet_group_id null, code (6 car.),
                      status enum('pending','scheduled','received','in_progress','ready',
                                  'delivered','cancelled','no_show'),
                      starts_at, estimated_ready_at, total_cop (congelado), source enum('web','admin'),
-                     overbooked bool, client_confirmed_at, created_by, created_at
-appointment_pets     tenant_id, appointment_id, pet_id, size, coat           -- congelados
-appointment_items    tenant_id, appointment_id, pet_id, item_type, item_id, price_cop
+                     overbooked bool, client_confirmed_at, notes, created_by, created_at
+                     -- sin insert por API (capacity.book); el staff solo cambia status, entrega y notas
+appointment_pets     tenant_id, appointment_id, pet_id, species, size, coat,  -- congelados
+                     quota_divisor null (pets_per_staff al reservar; null = sin baño, T35)
+appointment_items    id, tenant_id, appointment_id, pet_id, item_type enum('service','extra','option'),
+                     service_id | extra_id | option_id, name, price_cop (option = 0)
+-- Capacidad avanzada (Próximamente)
 appointment_segments id, tenant_id, appointment_id, stage, station_id, staff_id, starts_at, ends_at
-                     index (tenant_id, station_id, starts_at)
-                     index (tenant_id, staff_id, starts_at)
 
 -- Entrega 2
 customer_agreements  id, tenant_id, customer_id, service_id, price_cop (total fijo), valid_until null

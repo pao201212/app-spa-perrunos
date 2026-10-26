@@ -219,6 +219,46 @@ async function seedTenantData(tenantId: string) {
     const { error: insertError } = await admin.from(table).insert(row);
     if (insertError) throw insertError;
   }
+
+  const { data: appointment, error: appointmentError } = await admin
+    .from("appointments")
+    .insert({
+      ...base,
+      customer_id: customer.id,
+      status: "scheduled",
+      starts_at: "2026-12-21T13:00:00Z",
+      estimated_ready_at: "2026-12-21T15:00:00Z",
+      total_cop: 50000,
+      source: "admin",
+    })
+    .select("id")
+    .single();
+  if (appointmentError) throw appointmentError;
+  const appointmentBase = { tenant_id: tenantId, appointment_id: appointment.id, pet_id: pet.id };
+  for (const [table, row] of [
+    [
+      "location_pet_capacity",
+      { ...base, species: "dog", size: "M", coat: "short", pets_per_staff: 6 },
+    ],
+    ["location_waiting_zones", { ...base, name: "Sala de espera", seats: 4 }],
+    [
+      "appointment_pets",
+      { ...appointmentBase, species: species!.species, size: "M", coat: "short", quota_divisor: 6 },
+    ],
+    [
+      "appointment_items",
+      {
+        ...appointmentBase,
+        item_type: "service",
+        service_id: service.id,
+        name: "Baño aislamiento",
+        price_cop: 50000,
+      },
+    ],
+  ] as const) {
+    const { error: insertError } = await admin.from(table).insert(row);
+    if (insertError) throw insertError;
+  }
 }
 
 afterAll(async () => {

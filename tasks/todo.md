@@ -35,7 +35,7 @@
 - [x] T32 [services] Matriz de precios por local + copiar a otros locales + regla de activación
 - [x] T33 [services] Landing `/` + catálogo público con precios por local
 - [x] T34 [capacity] `docs/capacidad.md`: reglas + escenarios, validado con el spa (D28–D33)
-- [ ] T35 [capacity] Migración: capacity_mode, pet_capacity (especie×talla×pelo), waiting_zones, appointments + RLS
+- [x] T35 [capacity] Migración: capacity_mode, pet_capacity (especie×talla×pelo), waiting_zones, appointments + RLS
 - [ ] T36 [capacity] Locales → Capacidad: matriz por empleado, zonas de espera, avanzada "Próximamente" + E2E
 - [ ] T37 [capacity] `capacity.available_slots` simple: jornadas del Personal, cupo, espacio, entrega + tests S1–S16
 - [ ] T38 [capacity] `capacity.explain` + paridad con available_slots + vista "¿Por qué no hay cupo?"

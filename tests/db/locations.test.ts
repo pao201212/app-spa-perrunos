@@ -69,7 +69,7 @@ describe("locations", () => {
       max_days_ahead: 30,
       bather_continues_drying: true,
       slot_step_min: 15,
-      capacity_mode: "detailed",
+      capacity_mode: "simple",
       is_active: true,
     });
   });
