@@ -40,6 +40,10 @@
 | D28 | (2026-10-26) **Dos modos de capacidad por local: simple y avanzada.** La **simple** (por defecto) reemplaza el cupo fijo por talla de D24: el admin indica cuántas mascotas de cada talla atiende **un empleado** en un día y cuántos empleados hay cada día de la semana (con cambios por fecha). Cada mascota usa 1/N de una jornada; el día tiene tantas jornadas como empleados. La **avanzada** es el motor por etapas (§5.1–5.2) y solo se activa si el local tiene estaciones, personal con habilidades y turnos, y duraciones. `capacity_mode` pasa a `enum('simple','advanced')` default `'simple'` |
 | D29 | (2026-10-26) En **los dos modos** el cliente ve las **horas disponibles** con su **hora de entrega**. En la capacidad simple la entrega es **aproximada** (llegada + duración del servicio según talla y pelo, sin contar el almuerzo) y no se ofrecen horas cuya entrega quedaría después del cierre |
 | D26 | (2026-10-26) **Opcionales sin costo del baño:** el admin crea y quita opcionales por servicio (p. ej. corte higiénico, shampoo especial) e indica si se hacen en la etapa de **baño** o de **detalles**. Al reservar un baño, el cliente llena el listado de opcionales. No cambian el precio |
+| D30 | (2026-10-26) **Entrega 1 solo habilita la capacidad simple.** La avanzada (§5.2) aparece en Locales → Capacidad como **"Próximamente"** y se definirá con el spa. Ya decidido para ella: tras el secado la mascota baja a un **área de descanso** y la mesa se libera; espera máx. **30 min** para detalles; primera persona libre; a veces **2 personas secan** a una mascota; el groomer normalmente no hace detalles |
+| D31 | (2026-10-26) **Capacidad por empleado por especie × talla × pelo**, configurada por el admin en cada local. Una combinación vacía no se ofrece en ese local (`SIN_CAPACIDAD`) |
+| D32 | (2026-10-26) **Las jornadas del día salen del módulo Personal** (reemplaza los empleados escritos a mano de D28): cada empleado con habilidad `bath`, con turno ese día en el local, aporta `horas de turno (menos ausencias) / horas que abre el local`, máximo 1 |
+| D33 | (2026-10-26) **Zonas de espera por local** (nombre, puestos; puede no tener). A ninguna hora puede haber más mascotas en el local (de la llegada a la entrega aproximada) que empleados `bath` en turno a esa hora + puestos de las zonas (`SIN_ESPACIO`). Los servicios solos (sin baño) no usan cupo ni espacio. Baño + corte especial cuenta como 1 baño de su talla |
 | D24 | **Toda la lógica de capacidad vive en un único lugar**, parametrizada en tablas, explicable y fácil de revisar con los dueños de los spas (§5). Debe permitir cambiar, por local, a un modelo simple (ver D28, que reemplaza el cupo fijo local × talla × día) |
 
 ### Supuestos (corrígelos antes de aprobar)
@@ -161,7 +165,7 @@ Orden de construcción, **Entrega 2:** `agreements`, `self-service`, `payments` 
 
 **`capacity`**
 - Dada una mascota (o un grupo), un servicio, unos extras, un local y una fecha, el sistema devuelve las horas de inicio factibles según el **modo de capacidad del local** (§5).
-- HU-C1: el admin elige por local la capacidad **simple** (empleados del día × mascotas por empleado y talla, D28) o la **avanzada** (estaciones + personal + etapas). La avanzada solo se activa si su configuración está completa.
+- HU-C1: en **Locales → Capacidad** el admin llena cuántas mascotas atiende un empleado al día por especie × talla × pelo (D31) y las zonas de espera (D33). La capacidad **avanzada** se ve como "Próximamente" (D30).
 - HU-C2: **calendario de ocupación** por local: el % ocupado de cada día, desglosado por talla (simple) o por estación y personal (avanzada).
 - HU-C3: **"¿Por qué no hay cupo?"**: para una fecha y hora, el admin (o Prisma Lab, junto con el dueño) ve qué regla bloqueó cada horario. Por ejemplo: "sin mesa de secado libre a las 10:40", "sin groomer en turno" o "cupo de talla L agotado".
   - CA: los dos modos comparten la misma interfaz SQL; cambiar de modo es un ajuste del local, sin deploy.
@@ -271,9 +275,8 @@ locations            id, tenant_id, name, address, whatsapp, is_active,
                      cancel_window_hours int default 4, max_days_ahead int default 30,
                      bather_continues_drying bool, slot_step_min int default 15,
                      capacity_mode enum('simple','advanced') default 'simple'   (D24, D28)
-location_size_capacity tenant_id, location_id, size, pets_per_staff > 0       -- simple (D28)
-location_staff_count tenant_id, location_id, weekday, staff_count ≥ 0          -- simple
-location_staff_overrides tenant_id, location_id, date, staff_count ≥ 0         -- simple: por fecha
+location_pet_capacity tenant_id, location_id, species, size, coat, pets_per_staff > 0  -- simple (D31)
+location_waiting_zones tenant_id, location_id, name, seats > 0                 -- simple (D33)
 stations             id, tenant_id, location_id, name, kind enum('tub','table'), for_special_cut bool,
                      sort_order                                                 -- D27
                      -- tub = tina (baño) · table = mesa (secado + detalles; + corte si for_special_cut)
@@ -355,7 +358,7 @@ loyalty_ledger       id, tenant_id, customer_id, appointment_id, kind enum('earn
 - **Sin constantes ocultas:** todo umbral, duración o conteo sale de tablas de configuración. Un cambio que pidan los dueños es un cambio de datos, no de código.
 - **`docs/capacidad.md`** describe cada regla en lenguaje de negocio, con escenarios del tipo "dado / cuando / entonces" para revisarlos con los dueños. **Los mismos escenarios** son fixtures de `tests/db/capacity.*`, así que el documento y el comportamiento no pueden divergir.
 
-### 5.2 Modo `detailed` (por defecto)
+### 5.2 Capacidad avanzada — Próximamente (D30; no se construye en la Entrega 1)
 
 ```
 Entrada: local L, fecha F, mascotas P (1, o un grupo "se bañan juntas"), servicio de baño,
@@ -387,22 +390,25 @@ Entrada: local L, fecha F, mascotas P (1, o un grupo "se bañan juntas"), servic
 - La asignación de personal es **greedy** (el primero disponible por orden estable). El admin puede reasignar después; la reasignación se valida con las mismas reglas.
 - La fuente de verdad es SQL (schema `capacity`). La UI no replica reglas.
 
-### 5.3 Capacidad simple (D28)
+### 5.3 Capacidad simple (D28–D33) — la única activa en la Entrega 1
 ```
-Empleados(L, F) = location_staff_overrides(L, F) ?? location_staff_count(L, weekday(F))
-Uso(mascota)    = 1 / location_size_capacity(L, talla)          -- fracción de una jornada
-Usado(L, F)     = Σ Uso de las mascotas en citas no canceladas de L en la fecha F
-Una reserva (todas sus mascotas) es válida si Usado + Σ Uso(nuevas) ≤ Empleados(L, F),
-y la hora está dentro de location_hours y de la malla. No se asignan estaciones ni personal.
-Ocupación(F) = Usado / Empleados, también desglosada por talla.
+Jornadas(L, F)  = Σ por staff con skill 'bath' y turno en L el weekday(F):
+                  min(1, (horas de turno − horas de ausencia) / horas que abre L ese día)
+Uso(mascota)    = 1 / location_pet_capacity(L, especie, talla, pelo)   -- null → SIN_CAPACIDAD
+Usado(L, F)     = Σ Uso de las mascotas con baño en citas no canceladas de L en F
+Cupo:     Usado + Σ Uso(nuevas) ≤ Jornadas(L, F)                         -- si no, CUPO_LLENO
+Estadía:  [t, estimated_ready_at)
+Espacio:  ∀ instante de la estadía, mascotas presentes + nuevas ≤
+          staff 'bath' en turno en ese instante + Σ seats de location_waiting_zones(L) -- SIN_ESPACIO
+Entrega:  estimated_ready_at = t + duración, sin contar los cierres entre tramos;
+          ≤ cierre del día                                                -- FUERA_DE_HORARIO
+duración = Σ etapas de service_durations (talla × pelo) + corte especial + extras
 ```
-- Aritmética exacta con fracciones (sin redondeo): se compara Σ (n_talla × MCM / cap_talla) ≤ Empleados × MCM.
-- Si una talla no tiene capacidad configurada, esa talla no se ofrece en el local.
-- **Horas y entrega (D29):** si el día tiene cupo, se ofrecen las horas t de la malla con
-  `estimated_ready_at = t + duración` ≤ cierre del día, donde duración = Σ etapas de
-  service_durations (talla × pelo) + corte especial + extras, y los cierres entre tramos
-  (almuerzo) no cuentan. Es aproximada: no mira las demás citas; el admin puede ajustarla.
-- `capacity.explain` devuelve `SIN_EMPLEADOS` o `CUPO_LLENO` con lo que queda, p. ej. "quedan ⅙ de jornada".
+- Aritmética exacta con fracciones (sin redondeo).
+- No se asignan estaciones ni personal. La entrega es aproximada (sin margen, D29); el admin puede ajustarla.
+- Servicios solos (sin baño): no usan cupo ni espacio; solo deben terminar antes del cierre.
+- `capacity.explain` devuelve `SIN_EMPLEADOS`, `SIN_CAPACIDAD`, `CUPO_LLENO`, `SIN_ESPACIO` o `FUERA_DE_HORARIO` con el detalle, p. ej. "quedan ⅙ de jornada".
+- Ocupación(F) = Usado / Jornadas, también desglosada por talla.
 
 ---
 
@@ -546,7 +552,7 @@ Cobertura: **90 %** en `capacity` y `booking`, 70 % global.
 ## 11. Criterios de éxito (Entrega 1)
 
 1. Un cliente entra con Google, registra una mascota (con raza o como criollo) y reserva un baño desde un móvil en ≤ 5 pasos.
-2. Las horas ofrecidas respetan las estaciones, los turnos y la contigüidad baño→secado. El test de concurrencia pasa.
+2. Las horas ofrecidas respetan la capacidad simple (jornadas del Personal, espacio en el local y entrega antes del cierre) según los escenarios de `docs/capacidad.md`. El test de concurrencia pasa.
 3. El admin configura 2 locales con precios distintos y lo verifica en el wizard.
 4. Dos tenants con temas distintos funcionan en paralelo con datos 100 % aislados (tests RLS en verde).
 5. Lighthouse móvil en `/` y `/reservar`: Performance ≥ 90 y Accessibility ≥ 95.
@@ -556,4 +562,4 @@ Cobertura: **90 %** en `capacity` y `booking`, 70 % global.
 
 ## 12. Preguntas abiertas
 
-Todas resueltas el 2026-10-25 (D18–D24); D25 y D26 agregadas el 2026-10-26. Los supuestos S1, S2, S4, S6 y S7 siguen vigentes y se validarán con Spa Perrunos y Gatunos usando `docs/capacidad.md` y la vista "¿Por qué no hay cupo?".
+Todas resueltas el 2026-10-25 (D18–D24); D25–D33 agregadas el 2026-10-26 con las respuestas del spa (`docs/capacidad.md` §5). Los supuestos S1, S2, S4, S6 y S7 siguen vigentes y se validarán con Spa Perrunos y Gatunos usando `docs/capacidad.md` y la vista "¿Por qué no hay cupo?".
