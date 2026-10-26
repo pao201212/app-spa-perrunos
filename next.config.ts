@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   // Subdominios locales de los spas: {slug}.localhost y admin.localhost.
   allowedDevOrigins: ["*.localhost"],
+  experimental: {
+    // Fotos de mascotas (máx. 3 MB tras reducirlas en el navegador) + margen del multipart.
+    serverActions: { bodySizeLimit: "4mb" },
+  },
 };
 
 export default nextConfig;

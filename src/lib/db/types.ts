@@ -364,7 +364,7 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           breed_id: string;
-          coat: Database["public"]["Enums"]["coat_type"];
+          coat?: Database["public"]["Enums"]["coat_type"];
           created_at?: string;
           customer_id: string;
           gender?: Database["public"]["Enums"]["pet_gender"] | null;
@@ -373,7 +373,7 @@ export type Database = {
           name: string;
           notes?: string | null;
           photo_path?: string | null;
-          size: Database["public"]["Enums"]["pet_size"];
+          size?: Database["public"]["Enums"]["pet_size"];
           size_locked?: boolean;
           species: Database["public"]["Enums"]["pet_species"];
           tenant_id: string;

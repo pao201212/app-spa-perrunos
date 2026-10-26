@@ -38,4 +38,11 @@ export const copy = {
   platform: {
     title: "Consola Prisma Lab",
   },
+  customer: {
+    navLabel: "Mi cuenta",
+    nav: {
+      pets: "Mascotas",
+      profile: "Perfil",
+    },
+  },
 } as const;

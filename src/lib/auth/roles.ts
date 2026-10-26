@@ -5,6 +5,8 @@ export type ViewerTenant = { slug: string; name: string };
 export type Viewer = {
   userId: string;
   email: string | undefined;
+  /** Nombre de la cuenta de Google, para prellenar el perfil. */
+  name?: string;
   isSuperAdmin: boolean;
   /** Spas donde el usuario es staff (membresía activa). */
   tenants: ViewerTenant[];

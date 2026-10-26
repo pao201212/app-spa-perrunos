@@ -26,7 +26,14 @@ export async function loadViewer(supabase: SupabaseClient<Database>, user: User)
     .map(({ slug, name }) => ({ slug, name }))
     .sort((a, b) => a.name.localeCompare(b.name, "es"));
 
-  return { userId: user.id, email: user.email, isSuperAdmin: superAdmin.data !== null, tenants };
+  const metadata = user.user_metadata as { full_name?: string; name?: string } | undefined;
+  return {
+    userId: user.id,
+    email: user.email,
+    name: metadata?.full_name ?? metadata?.name,
+    isSuperAdmin: superAdmin.data !== null,
+    tenants,
+  };
 }
 
 /** Usuario de la petición actual con sus roles, o null si no hay sesión. Memoizado por petición. */
