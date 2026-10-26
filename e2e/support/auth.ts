@@ -402,3 +402,15 @@ export async function countAppointments(locationId: string): Promise<number> {
   if (error) throw error;
   return count ?? 0;
 }
+
+/** Cambia el estado de todas las citas de un local (como lo haría el spa). */
+export async function setAppointmentsStatus(
+  locationId: string,
+  status: "scheduled" | "received" | "delivered" | "cancelled",
+): Promise<void> {
+  const { error } = await admin()
+    .from("appointments")
+    .update({ status })
+    .eq("location_id", locationId);
+  if (error) throw error;
+}

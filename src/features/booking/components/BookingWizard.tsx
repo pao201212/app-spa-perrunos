@@ -144,8 +144,8 @@ export function BookingWizard({ slug, pets, catalog, today }: Props) {
         <p>
           Código de tu cita: <span className={styles.code}>{result.code}</span>
         </p>
-        <Link href="/" className={buttonClassName({ variant: "ghost" })}>
-          Volver al inicio
+        <Link href="/citas" className={buttonClassName()}>
+          Ver mis citas
         </Link>
       </Card>
     );

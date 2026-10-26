@@ -398,3 +398,25 @@ describe("appointments", () => {
     expect(error?.code).toBe("23503");
   });
 });
+
+describe("confirm_reception (HU-B5)", () => {
+  it("el cliente confirma una sola vez y solo cuando el spa ya recibió a la mascota", async () => {
+    await admin.from("appointments").update({ status: "scheduled" }).eq("id", appointmentX);
+    const early = await clientX.client.rpc("confirm_reception", { p_appointment_id: appointmentX });
+    expect(early.error?.code).toBe("22023");
+
+    await admin.from("appointments").update({ status: "received" }).eq("id", appointmentX);
+    const first = await clientX.client.rpc("confirm_reception", { p_appointment_id: appointmentX });
+    expect(first.error).toBeNull();
+    const again = await clientX.client.rpc("confirm_reception", { p_appointment_id: appointmentX });
+    expect(again.data).toBe(first.data);
+  });
+
+  it("nadie confirma citas ajenas", async () => {
+    await admin.from("appointments").update({ status: "received" }).eq("id", appointmentY);
+    for (const client of [clientX.client, staffA.client]) {
+      const { error } = await client.rpc("confirm_reception", { p_appointment_id: appointmentY });
+      expect(error?.code).toBe("P0002");
+    }
+  });
+});

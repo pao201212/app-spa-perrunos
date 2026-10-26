@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarPlus, PawPrint, UserRound, type LucideIcon } from "lucide-react";
+import { CalendarCheck, CalendarPlus, PawPrint, UserRound, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -11,6 +11,7 @@ import styles from "./CustomerShell.module.css";
 
 const ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/reservar", label: copy.customer.nav.book, icon: CalendarPlus },
+  { href: "/citas", label: copy.customer.nav.appointments, icon: CalendarCheck },
   { href: "/mascotas", label: copy.customer.nav.pets, icon: PawPrint },
   { href: "/perfil", label: copy.customer.nav.profile, icon: UserRound },
 ];

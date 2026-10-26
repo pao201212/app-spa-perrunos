@@ -1326,6 +1326,7 @@ export type Database = {
         }[];
       };
       claim_customer_profile: { Args: { p_tenant_id: string }; Returns: string };
+      confirm_reception: { Args: { p_appointment_id: string }; Returns: string };
       copy_service_prices: {
         Args: { p_service_id: string; p_source_location_id: string };
         Returns: number;
