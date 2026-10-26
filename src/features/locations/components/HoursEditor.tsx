@@ -17,6 +17,8 @@ export function HoursEditor({ slug, location }: { slug: string; location: Locati
     addHourRangeAction.bind(null, slug, location.id),
     initialFormState,
   );
+  // React reinicia el formulario tras cada envío: el select se remonta con el último día usado.
+  const lastWeekday = state.values?.weekday ?? "1";
   const rangesFor = (weekday: number) =>
     location.location_hours
       .filter((h) => h.weekday === weekday)
@@ -64,7 +66,8 @@ export function HoursEditor({ slug, location }: { slug: string; location: Locati
           <Select
             label="Día"
             name="weekday"
-            defaultValue={state.values?.weekday ?? "1"}
+            key={`weekday-${lastWeekday}`}
+            defaultValue={lastWeekday}
             error={state.fieldErrors?.weekday}
           >
             {WEEKDAYS_MONDAY_FIRST.map((weekday) => (

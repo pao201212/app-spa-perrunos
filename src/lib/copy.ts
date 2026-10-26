@@ -32,6 +32,7 @@ export const copy = {
       home: "Inicio",
       locations: "Locales",
       breeds: "Razas",
+      staff: "Personal",
     },
   },
   platform: {
