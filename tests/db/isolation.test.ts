@@ -23,7 +23,13 @@ const PLATFORM_TABLES = new Set(["tenants", "platform_admins", "global_breeds"])
  * Tablas por tenant con lectura pública (lo que el cliente ve al reservar). Se excluyen de las pruebas
  * de lectura, pero siguen sujetas a las de escritura. Agregar aquí requiere justificarlo.
  */
-const PUBLIC_TENANT_TABLES = new Set(["locations", "location_hours", "location_closures"]);
+const PUBLIC_TENANT_TABLES = new Set([
+  "locations",
+  "location_hours",
+  "location_closures",
+  "tenant_breeds",
+  "size_thresholds",
+]);
 
 let tenantA: string;
 let tenantB: string;

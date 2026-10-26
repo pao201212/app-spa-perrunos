@@ -256,6 +256,94 @@ export type Database = {
         };
         Relationships: [];
       };
+      size_thresholds: {
+        Row: {
+          max_kg: number;
+          size: Database["public"]["Enums"]["pet_size"];
+          species: Database["public"]["Enums"]["pet_species"];
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          max_kg: number;
+          size: Database["public"]["Enums"]["pet_size"];
+          species: Database["public"]["Enums"]["pet_species"];
+          tenant_id: string;
+        };
+        Update: {
+          max_kg?: number;
+          size?: Database["public"]["Enums"]["pet_size"];
+          species?: Database["public"]["Enums"]["pet_species"];
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "size_thresholds_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tenant_breeds: {
+        Row: {
+          coat: Database["public"]["Enums"]["coat_type"];
+          created_at: string;
+          global_breed_id: string | null;
+          id: string;
+          is_active: boolean;
+          is_customized: boolean;
+          is_mixed: boolean;
+          name: string;
+          size: Database["public"]["Enums"]["pet_size"];
+          species: Database["public"]["Enums"]["pet_species"];
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          coat: Database["public"]["Enums"]["coat_type"];
+          created_at?: string;
+          global_breed_id?: string | null;
+          id?: string;
+          is_active?: boolean;
+          is_customized?: boolean;
+          is_mixed?: boolean;
+          name: string;
+          size: Database["public"]["Enums"]["pet_size"];
+          species: Database["public"]["Enums"]["pet_species"];
+          tenant_id: string;
+        };
+        Update: {
+          coat?: Database["public"]["Enums"]["coat_type"];
+          created_at?: string;
+          global_breed_id?: string | null;
+          id?: string;
+          is_active?: boolean;
+          is_customized?: boolean;
+          is_mixed?: boolean;
+          name?: string;
+          size?: Database["public"]["Enums"]["pet_size"];
+          species?: Database["public"]["Enums"]["pet_species"];
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tenant_breeds_global_breed_id_fkey";
+            columns: ["global_breed_id"];
+            isOneToOne: false;
+            referencedRelation: "global_breeds";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tenant_breeds_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       tenant_invites: {
         Row: {
           created_at: string;
@@ -330,6 +418,10 @@ export type Database = {
         Returns: number;
       };
       assign_tenant_admin: { Args: { p_email: string; p_tenant_id: string }; Returns: string };
+      resolve_pet_size: {
+        Args: { p_breed_id: string; p_weight_kg?: number };
+        Returns: Database["public"]["Enums"]["pet_size"];
+      };
       tenant_staff: {
         Args: { p_tenant_id: string };
         Returns: {
