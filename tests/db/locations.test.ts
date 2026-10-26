@@ -130,37 +130,70 @@ describe("locations", () => {
   });
 });
 
-describe("location_stations", () => {
-  it("guarda el número de estaciones por tipo", async () => {
-    const { error } = await staffA.client.from("location_stations").insert([
-      { tenant_id: tenantA, location_id: locationA, station: "bath", count: 2 },
-      { tenant_id: tenantA, location_id: locationA, station: "dry", count: 3 },
-      { tenant_id: tenantA, location_id: locationA, station: "cut", count: 1 },
+describe("stations (tinas y mesas, D27)", () => {
+  it("guarda tinas y mesas, una por una", async () => {
+    const { error } = await staffA.client.from("stations").insert([
+      {
+        tenant_id: tenantA,
+        location_id: locationA,
+        name: "Tina 1",
+        kind: "tub",
+        for_special_cut: false,
+      },
+      {
+        tenant_id: tenantA,
+        location_id: locationA,
+        name: "Mesa 1",
+        kind: "table",
+        for_special_cut: false,
+      },
+      {
+        tenant_id: tenantA,
+        location_id: locationA,
+        name: "Mesa 2",
+        kind: "table",
+        for_special_cut: true,
+      },
     ]);
     expect(error).toBeNull();
   });
 
+  it("una tina no puede ser de corte especial", async () => {
+    const { error } = await admin.from("stations").insert({
+      tenant_id: tenantA,
+      location_id: locationA,
+      name: "Tina rara",
+      kind: "tub",
+      for_special_cut: true,
+    });
+    expect(error?.code).toBe("23514");
+  });
+
+  it("no repite nombres en el mismo local (sin importar mayúsculas)", async () => {
+    const { error } = await admin.from("stations").insert({
+      tenant_id: tenantA,
+      location_id: locationA,
+      name: "tina 1",
+      kind: "tub",
+      for_special_cut: false,
+    });
+    expect(error?.code).toBe("23505");
+  });
+
   it("no permite referenciar un local de otro spa (FK compuesta con tenant_id)", async () => {
-    const { error } = await admin
-      .from("location_stations")
-      .insert({ tenant_id: tenantA, location_id: locationB, station: "bath", count: 1 });
+    const { error } = await admin.from("stations").insert({
+      tenant_id: tenantA,
+      location_id: locationB,
+      name: "Tina X",
+      kind: "tub",
+      for_special_cut: false,
+    });
     expect(error?.code).toBe("23503");
   });
 
   it("es interna: anon no la ve", async () => {
-    const { data } = await anonClient()
-      .from("location_stations")
-      .select("*")
-      .eq("location_id", locationA);
+    const { data } = await anonClient().from("stations").select("*").eq("location_id", locationA);
     expect(data ?? []).toEqual([]);
-  });
-
-  it("no admite conteos negativos", async () => {
-    const { error } = await admin
-      .from("location_stations")
-      .update({ count: -1 })
-      .match({ location_id: locationA, station: "bath" });
-    expect(error).not.toBeNull();
   });
 });
 

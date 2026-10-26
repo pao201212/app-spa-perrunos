@@ -56,10 +56,31 @@ test("crea un local y configura reservas, estaciones, horario y cierres", async 
     await expectStatus(page, "Reservas", "Ajustes guardados");
 
     const stations = page.getByRole("region", { name: "Estaciones" });
-    await stations.getByLabel("Estaciones de baño").fill("3");
-    await stations.getByLabel("Mesas de secado").fill("4");
-    await stations.getByRole("button", { name: "Guardar estaciones" }).click();
-    await expectStatus(page, "Estaciones", "Estaciones guardadas");
+    await stations.getByLabel("Tipo").selectOption("tub");
+    await stations.getByRole("button", { name: "Agregar estación" }).click();
+    await expectStatus(page, "Estaciones", "Tina 1 agregada");
+    await stations.getByLabel("Tipo").selectOption("table");
+    await stations.getByLabel("También sirve para corte especial").check();
+    await stations.getByRole("button", { name: "Agregar estación" }).click();
+    await expectStatus(page, "Estaciones", "Mesa 1 agregada");
+    await expect(stations.getByRole("listitem")).toHaveText([
+      /Tina 1.*Baño/,
+      /Mesa 1.*Secado y detalles.*Corte especial/,
+    ]);
+
+    // Editar: la Mesa 1 deja de ser de corte y se renombra.
+    await stations.getByRole("button", { name: "Editar Mesa 1" }).click();
+    const edit = stations.getByRole("listitem").filter({ hasText: "Mesa 1" });
+    await edit.getByLabel("Nombre").fill("Mesa grande");
+    await edit.getByLabel("También sirve para corte especial").uncheck();
+    await edit.getByRole("button", { name: "Guardar estación" }).click();
+    await expect(stations.getByRole("listitem").nth(1)).toHaveText(
+      /Mesa grande.*Secado y detalles/,
+    );
+    await expect(stations.getByRole("listitem").nth(1)).not.toContainText("Corte especial");
+
+    await stations.getByRole("button", { name: "Quitar Tina 1" }).click();
+    await expect(stations.getByRole("listitem")).toHaveCount(1);
 
     const hours = page.getByRole("region", { name: "Horario" });
     await hours.getByLabel("Día").selectOption("1");
@@ -89,9 +110,9 @@ test("crea un local y configura reservas, estaciones, horario y cierres", async 
     await expect(
       page.getByRole("region", { name: "Reservas" }).getByLabel("Confirmación de reservas"),
     ).toHaveValue("manual");
-    await expect(
-      page.getByRole("region", { name: "Estaciones" }).getByLabel("Mesas de secado"),
-    ).toHaveValue("4");
+    await expect(page.getByRole("region", { name: "Estaciones" }).getByRole("listitem")).toHaveText(
+      [/Mesa grande.*Secado y detalles/],
+    );
   } finally {
     await deleteLocationByName(name);
   }

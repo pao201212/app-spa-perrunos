@@ -39,11 +39,35 @@ export const bookingSettingsSchema = z.object({
   bather_continues_drying: checkbox,
 });
 
-export const stationsSchema = z.object({
-  bath: intField(0, 50, "Entre 0 y 50"),
-  dry: intField(0, 50, "Entre 0 y 50"),
-  cut: intField(0, 50, "Entre 0 y 50"),
-});
+/** Tina (baño) o mesa (secado y detalles; puede servir también para corte especial). D27. */
+export const STATION_KINDS = ["tub", "table"] as const;
+export type StationKind = (typeof STATION_KINDS)[number];
+export const stationKindLabel: Record<StationKind, string> = { tub: "Tina", table: "Mesa" };
+
+export const stationSchema = z
+  .object({
+    // Vacío: el servidor propone "Tina N" o "Mesa N".
+    name: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() === "" ? null : value),
+      z.string().trim().max(40, "Máximo 40 caracteres").nullable().optional().default(null),
+    ),
+    kind: z.enum(STATION_KINDS, "Elige si es tina o mesa"),
+    for_special_cut: checkbox,
+  })
+  .transform((station) => ({
+    ...station,
+    // La tina solo sirve para bañar.
+    for_special_cut: station.kind === "table" && station.for_special_cut,
+  }));
+
+/** Primer "Tina N" / "Mesa N" que no esté usado en el local. */
+export function nextStationName(kind: StationKind, takenNames: string[]): string {
+  const taken = new Set(takenNames.map((name) => name.trim().toLowerCase()));
+  for (let n = 1; ; n++) {
+    const name = `${stationKindLabel[kind]} ${n}`;
+    if (!taken.has(name.toLowerCase())) return name;
+  }
+}
 
 const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Usa el formato HH:MM");
 

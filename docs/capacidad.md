@@ -1,8 +1,10 @@
 # Capacidad y disponibilidad de horarios
 
-> **Estado: BORRADOR v2 para validar con Spa Perrunos y Gatunos** (T34, 2026-10-26)
+> **Estado: BORRADOR v3 para validar con Spa Perrunos y Gatunos** (T34, 2026-10-26)
 > v2: la mesa de secado es la misma de los detalles; "terminado" pasa a llamarse **detalles**;
 > opcionales sin costo del baño (SPEC D25, D26).
+> v3: solo hay tinas y mesas; el corte especial se hace en la misma mesa, si está marcada para
+> corte (SPEC D27).
 >
 > Este documento explica, en lenguaje de negocio, **cómo decide el sistema qué horarios ofrecer**.
 > Cada escenario de la sección 4 se convertirá en una prueba automática: si una regla cambia,
@@ -18,13 +20,13 @@
      Por eso solo se empieza a bañar si al terminar habrá una mesa libre.
    - Los **detalles se hacen en la misma mesa del secado**. Pueden **esperar** a que haya una
      persona libre, pero mientras tanto la mascota **sigue ocupando su mesa**.
-2. **Hay tres tipos de estación:**
+2. **Hay dos tipos de estación**, y cada una se registra una por una (Tina 1, Mesa 2…):
 
    | Estación | Para qué |
    |---|---|
    | **Tina** | Baño |
    | **Mesa** | Secado y detalles (la misma mesa) |
-   | **Estación de corte** | Corte especial del groomer |
+   | **Mesa marcada "corte especial"** | Además, corte especial del groomer |
 
 3. **Cada etapa necesita una persona** con la habilidad correcta (baña, seca, detalles o corte
    especial), que esté en turno y no esté atendiendo a otra mascota.
@@ -34,7 +36,8 @@
    al reservar el baño. Cada uno indica si se hace **en el baño** o **en los detalles**, para que el
    personal lo sepa. **No cambian el precio ni el tiempo.** ⚠️ Pregunta 2
 6. **El corte especial** (groomer) es un servicio adicional: se hace **después de los detalles**, en
-   la **estación de corte**.
+   la **misma mesa**. Por eso, una mascota con corte necesita desde el secado una **mesa marcada
+   para corte especial**, y la ocupa hasta que termina el corte.
 7. **Mascotas que se bañan juntas** (hermanas del mismo dueño): comparten **una tina**, pero cada
    una necesita **su propia persona** en baño y secado, y **su propia mesa**.
    Los detalles y el corte van mascota por mascota.
@@ -45,7 +48,7 @@
 
 | Dónde | Qué | Ejemplo |
 |---|---|---|
-| Locales → Estaciones | Tinas, mesas (secado y detalles) y estaciones de corte | 2 · 2 · 1 |
+| Locales → Estaciones | Tinas y mesas; qué mesas sirven también para corte especial | Tina 1, Tina 2, Mesa 1 (corte), Mesa 2 |
 | Locales → Horario | Tramos de atención por día | L–V 08:00–12:30 y 13:00–18:00 |
 | Locales → Días de cierre | Festivos, vacaciones | 25 de diciembre |
 | Locales → Reservas | Intervalo de horarios, días máximos, quién baña seca | cada 15 min · 30 días · sí |
@@ -69,7 +72,7 @@ Cada regla tiene un **código**. Cuando un horario no está disponible, la vista
 | `SIN_MESA` | No hay mesa libre **justo** al terminar el baño. La mesa queda ocupada hasta que terminen los detalles. | "Sin mesa libre a las 10:40" |
 | `SIN_SECADOR` | No hay persona con "seca" libre para el secado. | "Sin persona libre para secar a las 10:40" |
 | `SIN_DETALLES` | En lo que queda del día no hay persona con "detalles" libre. | "Nadie libre para los detalles antes del cierre" |
-| `SIN_ESTACION_CORTE` | No hay estación de corte libre para el corte especial. | "Estación de corte ocupada hasta el cierre" |
+| `SIN_MESA_CORTE` | Lleva corte especial y no hay una mesa **marcada para corte** libre justo al terminar el baño. | "Sin mesa para corte especial libre a las 08:40" |
 | `SIN_GROOMER` | El corte especial necesita a alguien con "corte especial" en turno ese día. | "No hay groomer el lunes" |
 | `SIN_DURACION` | El servicio no tiene duración para esa talla y pelo (no se ofrece). | "Baño no disponible para Gigante · Largo" |
 | `SIN_PRECIO` | El local no tiene precio para esa combinación (no se ofrece allí). | "No disponible en Sede Norte" |
@@ -92,7 +95,8 @@ Cada regla tiene un **código**. Cuando un horario no está disponible, la vista
 ## 4. Escenarios
 
 **Local de ejemplo — "Sede principal"**
-- Estaciones: **2 tinas**, **2 mesas** (secado y detalles), **1 estación de corte**.
+- Estaciones: **Tina 1**, **Tina 2**, **Mesa 1** (secado y detalles + **corte especial**) y
+  **Mesa 2** (secado y detalles).
 - Horario: lunes a viernes **08:00–12:30** y **13:00–18:00**; sábado **08:00–13:00**.
 - Intervalo de horarios: 15 min. "Quien baña también seca": **sí**.
 - Personal:
@@ -112,7 +116,7 @@ Cada regla tiene un **código**. Cuando un horario no está disponible, la vista
 | E6 | Lola y Pepa (hermanas, Mediano corto) se bañan juntas, agenda vacía | Piden Baño a las 08:00 | Disponible. **1 tina**, **2 personas** en baño (Ana y Beto), **2 mesas** en secado 08:40–09:10. Detalles uno tras otro (solo Ana los hace): Lola 09:10–09:30 y Pepa 09:30–09:50. La mesa de Pepa queda ocupada hasta 09:50. Entrega **09:50** |
 | E7 | Una mesa ocupada de 08:30 a 09:30 | Lola y Pepa piden Baño a las 08:00 | **No disponible:** `SIN_MESA` (necesitan 2 mesas libres a las 08:40) |
 | E8 | Lunes (Caro no trabaja) | Max pide **Baño + Corte de raza** | **No disponible en todo el día:** `SIN_GROOMER` "No hay groomer el lunes" |
-| E9 | Sábado, agenda vacía | Max pide Baño + Corte de raza a las 08:00 | Disponible. Baño 08:00–08:40, secado 08:40–09:10, detalles 09:10–09:30 (mesa), **corte 09:30–10:30** (Caro, estación de corte). Entrega **10:30** |
+| E9 | Sábado, agenda vacía | Max pide Baño + Corte de raza a las 08:00 | Disponible. Baño 08:00–08:40, secado 08:40–09:10, detalles 09:10–09:30 y **corte 09:30–10:30** (Caro), todo en la **Mesa 1**, ocupada de 08:40 a 10:30. Entrega **10:30** |
 | E10 | Lunes | Max pide Baño a las **11:45** | **No disponible:** `FUERA_DE_HORARIO` (el secado terminaría 12:55 y el tramo cierra a las 12:30). El último inicio de la mañana es **11:15**: baño 11:15–11:55, secado 11:55–12:25; los detalles esperan y se hacen 13:00–13:20 (Max sigue en su mesa). Entrega **13:20**. ⚠️ Preguntas 1 y 3 |
 | E11 | Ana de vacaciones el lunes | Max pide Baño a las 08:00 | **No disponible:** `SIN_DETALLES` (Beto no hace detalles y Caro no trabaja el lunes) |
 | E12 | 25 de diciembre marcado como cierre | Cualquier reserva ese día | **No disponible:** `CERRADO` |
@@ -121,6 +125,7 @@ Cada regla tiene un **código**. Cuando un horario no está disponible, la vista
 | E15 | Max pide Baño con los opcionales "Shampoo hipoalergénico" (baño) y "Corte higiénico" (detalles) | Se crea la cita | Mismo precio y horario que E1. La agenda muestra el shampoo en la etapa de baño y el corte higiénico en la de detalles |
 | E16 | Queda **1** tina libre a las 08:00 y dos clientes reservan a la vez | Ambos confirman | **Solo una** cita se crea; la otra persona ve "Ese horario acaba de ocuparse" |
 | E17 | Agenda llena a las 08:00 | El admin crea una cita a las 08:00 y confirma el sobrecupo | La cita se crea marcada como **sobrecupo** |
+| E18 | Sábado; la Mesa 1 (la única de corte) está ocupada de 08:30 a 10:00; la Mesa 2 está libre | Max pide Baño + Corte de raza a las 08:00 | **No disponible:** `SIN_MESA_CORTE` "a las 08:40" (la Mesa 2 no sirve para corte). Baño solo, sin corte, sí está disponible en la Mesa 2 |
 
 ## 5. Modo "cupo diario" (alternativa simple)
 

@@ -30,7 +30,7 @@ export async function getLocationDetail(tenantId: string, locationId: string) {
     .select(
       `id, name, address, whatsapp, is_active, confirmation_mode, cancel_window_hours, max_days_ahead,
        slot_step_min, bather_continues_drying,
-       location_stations (station, count),
+       stations (id, name, kind, for_special_cut, sort_order),
        location_hours (id, weekday, opens_at, closes_at),
        location_closures (id, date, reason)`,
     )

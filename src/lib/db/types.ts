@@ -284,36 +284,6 @@ export type Database = {
           },
         ];
       };
-      location_stations: {
-        Row: {
-          count: number;
-          location_id: string;
-          station: Database["public"]["Enums"]["station_type"];
-          tenant_id: string;
-        };
-        ComputedFields: never;
-        Insert: {
-          count: number;
-          location_id: string;
-          station: Database["public"]["Enums"]["station_type"];
-          tenant_id: string;
-        };
-        Update: {
-          count?: number;
-          location_id?: string;
-          station?: Database["public"]["Enums"]["station_type"];
-          tenant_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "location_stations_tenant_id_location_id_fkey";
-            columns: ["tenant_id", "location_id"];
-            isOneToOne: false;
-            referencedRelation: "locations";
-            referencedColumns: ["tenant_id", "id"];
-          },
-        ];
-      };
       locations: {
         Row: {
           address: string | null;
@@ -889,6 +859,48 @@ export type Database = {
           },
         ];
       };
+      stations: {
+        Row: {
+          created_at: string;
+          for_special_cut: boolean;
+          id: string;
+          kind: Database["public"]["Enums"]["station_kind"];
+          location_id: string;
+          name: string;
+          sort_order: number;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          for_special_cut?: boolean;
+          id?: string;
+          kind: Database["public"]["Enums"]["station_kind"];
+          location_id: string;
+          name: string;
+          sort_order?: number;
+          tenant_id: string;
+        };
+        Update: {
+          created_at?: string;
+          for_special_cut?: boolean;
+          id?: string;
+          kind?: Database["public"]["Enums"]["station_kind"];
+          location_id?: string;
+          name?: string;
+          sort_order?: number;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "stations_tenant_id_location_id_fkey";
+            columns: ["tenant_id", "location_id"];
+            isOneToOne: false;
+            referencedRelation: "locations";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
       tenant_breeds: {
         Row: {
           coat: Database["public"]["Enums"]["coat_type"];
@@ -1070,7 +1082,7 @@ export type Database = {
       service_kind: "bath" | "special_cut" | "other";
       service_species: "dog" | "cat" | "both";
       staff_skill: "bath" | "dry" | "details" | "special_cut";
-      station_type: "bath" | "dry" | "cut";
+      station_kind: "tub" | "table";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -1196,7 +1208,7 @@ export const Constants = {
       service_kind: ["bath", "special_cut", "other"],
       service_species: ["dog", "cat", "both"],
       staff_skill: ["bath", "dry", "details", "special_cut"],
-      station_type: ["bath", "dry", "cut"],
+      station_kind: ["tub", "table"],
     },
   },
 } as const;

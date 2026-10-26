@@ -6,7 +6,8 @@ import {
   closureSchema,
   hourRangeSchema,
   locationDetailsSchema,
-  stationsSchema,
+  nextStationName,
+  stationSchema,
 } from "./schema";
 
 describe("locationDetailsSchema", () => {
@@ -60,14 +61,31 @@ describe("bookingSettingsSchema", () => {
   });
 });
 
-describe("stationsSchema", () => {
-  it("acepta conteos de 0 a 50", () => {
-    expect(stationsSchema.parse({ bath: "2", dry: "3", cut: "0" })).toEqual({
-      bath: 2,
-      dry: 3,
-      cut: 0,
+describe("stationSchema", () => {
+  it("acepta una mesa que también sirve para corte especial", () => {
+    expect(
+      stationSchema.parse({ name: " Mesa grande ", kind: "table", for_special_cut: "on" }),
+    ).toEqual({ name: "Mesa grande", kind: "table", for_special_cut: true });
+  });
+
+  it("deja el nombre vacío para proponerlo y la tina nunca es de corte", () => {
+    expect(stationSchema.parse({ name: "", kind: "tub", for_special_cut: "on" })).toEqual({
+      name: null,
+      kind: "tub",
+      for_special_cut: false,
     });
-    expect(stationsSchema.safeParse({ bath: "51", dry: "1", cut: "1" }).success).toBe(false);
+  });
+
+  it("exige elegir tina o mesa", () => {
+    expect(stationSchema.safeParse({ name: "X", kind: "cut" }).success).toBe(false);
+  });
+});
+
+describe("nextStationName", () => {
+  it("propone el primer número libre del tipo, sin importar mayúsculas", () => {
+    expect(nextStationName("table", [])).toBe("Mesa 1");
+    expect(nextStationName("table", ["mesa 1", "Mesa 3", "Tina 2"])).toBe("Mesa 2");
+    expect(nextStationName("tub", ["Tina 1", "Tina 2"])).toBe("Tina 3");
   });
 });
 

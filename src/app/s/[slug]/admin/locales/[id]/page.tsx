@@ -9,7 +9,7 @@ import { BookingSettingsForm } from "@/features/locations/components/BookingSett
 import { ClosuresEditor } from "@/features/locations/components/ClosuresEditor";
 import { HoursEditor } from "@/features/locations/components/HoursEditor";
 import { LocationDetailsForm } from "@/features/locations/components/LocationDetailsForm";
-import { StationsForm } from "@/features/locations/components/StationsForm";
+import { StationsEditor } from "@/features/locations/components/StationsEditor";
 import { countLocations, getLocationDetail } from "@/features/locations/queries";
 import { requireTenantStaff } from "@/lib/auth/guards";
 
@@ -46,9 +46,9 @@ async function LocationDetailContent({ slug, id }: { slug: string; id: string })
       </AdminSection>
       <AdminSection
         title="Estaciones"
-        description="Cuántas mascotas pueden estar a la vez en cada etapa."
+        description="Tinas para el baño y mesas para el secado y los detalles. Marca las mesas donde también se hace corte especial."
       >
-        <StationsForm slug={slug} location={location} />
+        <StationsEditor slug={slug} location={location} />
       </AdminSection>
       <AdminSection
         title="Horario"

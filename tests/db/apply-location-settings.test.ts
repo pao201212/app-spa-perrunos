@@ -68,11 +68,11 @@ beforeAll(async () => {
     tenant_id: tenantId,
     location_id: locationId,
   });
-  await admin.from("location_stations").insert([
-    { ...base(source), station: "bath", count: 3 },
-    { ...base(source), station: "dry", count: 4 },
-    { ...base(source), station: "cut", count: 2 },
-    { ...base(targets[0]), station: "bath", count: 1 },
+  await admin.from("stations").insert([
+    { ...base(source), name: "Tina 1", kind: "tub", for_special_cut: false, sort_order: 1 },
+    { ...base(source), name: "Mesa 1", kind: "table", for_special_cut: true, sort_order: 1 },
+    { ...base(source), name: "Mesa 2", kind: "table", for_special_cut: false, sort_order: 2 },
+    { ...base(targets[0]), name: "Tina vieja", kind: "tub", for_special_cut: false, sort_order: 1 },
   ]);
   await admin.from("location_hours").insert([
     { ...base(source), weekday: 1, opens_at: "08:00", closes_at: "12:00" },
@@ -118,14 +118,15 @@ describe("apply_location_settings", () => {
 
     for (const target of targets) {
       const { data: stations } = await admin
-        .from("location_stations")
-        .select("station, count")
+        .from("stations")
+        .select("name, kind, for_special_cut")
         .eq("location_id", target)
-        .order("station");
+        .order("name");
+      // La lista anterior ("Tina vieja") se reemplaza.
       expect(stations).toEqual([
-        { station: "bath", count: 3 },
-        { station: "dry", count: 4 },
-        { station: "cut", count: 2 },
+        { name: "Mesa 1", kind: "table", for_special_cut: true },
+        { name: "Mesa 2", kind: "table", for_special_cut: false },
+        { name: "Tina 1", kind: "tub", for_special_cut: false },
       ]);
       const { data: hours } = await admin
         .from("location_hours")

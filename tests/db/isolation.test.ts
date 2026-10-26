@@ -88,7 +88,7 @@ async function seedTenantData(tenantId: string) {
   if (error) throw error;
   const base = { tenant_id: tenantId, location_id: location.id };
   for (const [table, row] of [
-    ["location_stations", { ...base, station: "bath", count: 1 }],
+    ["stations", { ...base, name: "Tina 1", kind: "tub" }],
     ["location_hours", { ...base, weekday: 1, opens_at: "08:00", closes_at: "12:00" }],
     ["location_closures", { ...base, date: "2026-12-25" }],
     ["tenant_invites", { tenant_id: tenantId, email: `invitado-${tenantId}@test.prismalab.local` }],

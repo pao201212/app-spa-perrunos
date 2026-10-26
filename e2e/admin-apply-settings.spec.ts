@@ -51,8 +51,12 @@ test("aplica estaciones y horario de un local a los demás, con confirmación", 
 
   await page.goto(at(`/admin/locales/${otherId}`));
   const stations = page.getByRole("region", { name: "Estaciones" });
-  await expect(stations.getByLabel("Estaciones de baño")).toHaveValue("2");
-  await expect(stations.getByLabel("Estaciones de corte")).toHaveValue("1");
+  await expect(stations.getByRole("listitem")).toHaveText([
+    /Tina 1.*Baño/,
+    /Tina 2.*Baño/,
+    /Mesa 1.*Secado y detalles.*Corte especial/,
+    /Mesa 2.*Secado y detalles/,
+  ]);
   const hours = page.getByRole("region", { name: "Horario" });
   await expect(hours.getByRole("listitem").filter({ hasText: "Lunes" })).toContainText(
     "08:00 – 12:30",

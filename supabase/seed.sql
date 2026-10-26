@@ -16,10 +16,13 @@ with spa as (
   on conflict do nothing
   returning id, tenant_id
 ), stations as (
-  insert into public.location_stations (tenant_id, location_id, station, count)
-  select s.tenant_id, s.id, st.station::public.station_type, st.count
+  insert into public.stations (tenant_id, location_id, name, kind, for_special_cut, sort_order)
+  select s.tenant_id, s.id, st.name, st.kind::public.station_kind, st.for_special_cut, st.sort_order
   from sede s
-  cross join (values ('bath', 2), ('dry', 2), ('cut', 1)) as st (station, count)
+  cross join (
+    values ('Tina 1', 'tub', false, 1), ('Tina 2', 'tub', false, 2),
+           ('Mesa 1', 'table', true, 1), ('Mesa 2', 'table', false, 2)
+  ) as st (name, kind, for_special_cut, sort_order)
 )
 insert into public.location_hours (tenant_id, location_id, weekday, opens_at, closes_at)
 select s.tenant_id, s.id, h.weekday, h.opens_at::time, h.closes_at::time

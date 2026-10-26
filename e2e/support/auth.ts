@@ -143,7 +143,7 @@ export async function createTenant(slug: string, name: string): Promise<string> 
   return data.id;
 }
 
-/** Estaciones (2/2/1) y horario de lunes 08:00-12:30 en un local. */
+/** Estaciones (2 tinas, 2 mesas, una con corte) y horario de lunes 08:00-12:30 en un local. */
 export async function seedLocationConfig(slug: string, locationId: string): Promise<void> {
   const client = admin();
   const { data: tenant, error } = await client
@@ -153,10 +153,11 @@ export async function seedLocationConfig(slug: string, locationId: string): Prom
     .single();
   if (error) throw error;
   const base = { tenant_id: tenant.id, location_id: locationId };
-  const stations = await client.from("location_stations").insert([
-    { ...base, station: "bath", count: 2 },
-    { ...base, station: "dry", count: 2 },
-    { ...base, station: "cut", count: 1 },
+  const stations = await client.from("stations").insert([
+    { ...base, name: "Tina 1", kind: "tub", for_special_cut: false },
+    { ...base, name: "Tina 2", kind: "tub", for_special_cut: false },
+    { ...base, name: "Mesa 1", kind: "table", for_special_cut: true },
+    { ...base, name: "Mesa 2", kind: "table", for_special_cut: false },
   ]);
   if (stations.error) throw stations.error;
   const hours = await client

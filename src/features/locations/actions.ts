@@ -12,7 +12,8 @@ import {
   closureSchema,
   hourRangeSchema,
   locationDetailsSchema,
-  stationsSchema,
+  nextStationName,
+  stationSchema,
 } from "./schema";
 
 const UNIQUE_VIOLATION = "23505";
@@ -97,30 +98,72 @@ export async function updateBookingSettingsAction(
   return { status: "success", message: "Ajustes guardados" };
 }
 
-export async function updateStationsAction(
+const DUPLICATE_STATION = { name: "Ya hay una estación con ese nombre en este local" };
+
+/** Crea (stationId null) o edita una estación; sin nombre, propone "Tina N" o "Mesa N". */
+export async function saveStationAction(
   slug: string,
   locationId: string,
+  stationId: string | null,
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
   const { tenant, supabase } = await tenantStaffContext(slug, detailPath(locationId));
-  const values = formValues(formData, ["bath", "dry", "cut"]);
-  const parsed = stationsSchema.safeParse(values);
+  const values = formValues(formData, ["name", "kind", "for_special_cut"]);
+  const parsed = stationSchema.safeParse(values);
   if (!parsed.success)
     return { status: "error", fieldErrors: fieldErrorsFrom(parsed.error.issues), values };
 
-  const rows = (["bath", "dry", "cut"] as const).map((station) => ({
-    tenant_id: tenant.id,
-    location_id: locationId,
-    station,
-    count: parsed.data[station],
-  }));
+  let { name } = parsed.data;
+  if (!name) {
+    const { data: others } = await supabase
+      .from("stations")
+      .select("id, name")
+      .match({ location_id: locationId, tenant_id: tenant.id });
+    const taken = (others ?? []).filter((s) => s.id !== stationId).map((s) => s.name);
+    name = nextStationName(parsed.data.kind, taken);
+  }
+  const row = { ...parsed.data, name };
+
+  if (stationId) {
+    const { error } = await supabase
+      .from("stations")
+      .update(row)
+      .match({ id: stationId, tenant_id: tenant.id });
+    if (error?.code === UNIQUE_VIOLATION)
+      return { status: "error", fieldErrors: DUPLICATE_STATION, values };
+    if (error) return { status: "error", message: "No pudimos guardar la estación.", values };
+    refresh();
+    return { status: "success", message: "Estación guardada" };
+  }
+
+  const { count } = await supabase
+    .from("stations")
+    .select("id", { count: "exact", head: true })
+    .eq("location_id", locationId);
   const { error } = await supabase
-    .from("location_stations")
-    .upsert(rows, { onConflict: "location_id,station" });
-  if (error) return { status: "error", message: "No pudimos guardar las estaciones.", values };
+    .from("stations")
+    .insert({ ...row, tenant_id: tenant.id, location_id: locationId, sort_order: count ?? 0 });
+  if (error?.code === UNIQUE_VIOLATION)
+    return { status: "error", fieldErrors: DUPLICATE_STATION, values };
+  if (error) return { status: "error", message: "No pudimos agregar la estación.", values };
   refresh();
-  return { status: "success", message: "Estaciones guardadas" };
+  // Se conserva el tipo elegido para agregar varias seguidas.
+  return {
+    status: "success",
+    message: `${name} agregada`,
+    values: { kind: row.kind, for_special_cut: row.for_special_cut ? "on" : "" },
+  };
+}
+
+export async function removeStationAction(
+  slug: string,
+  locationId: string,
+  stationId: string,
+): Promise<void> {
+  const { tenant, supabase } = await tenantStaffContext(slug, detailPath(locationId));
+  await supabase.from("stations").delete().match({ id: stationId, tenant_id: tenant.id });
+  refresh();
 }
 
 export async function addHourRangeAction(
