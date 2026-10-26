@@ -1317,6 +1317,15 @@ export type Database = {
         Args: { p_full_name: string; p_tenant_id: string; p_whatsapp: string };
         Returns: string;
       };
+      explain_slots: {
+        Args: { p_date: string; p_location_id: string; p_pets: Json };
+        Returns: {
+          code: string;
+          detail: Json;
+          estimated_ready_at: string;
+          starts_at: string;
+        }[];
+      };
       replace_location_pet_capacity: {
         Args: { p_location_id: string; p_rows: Json };
         Returns: undefined;

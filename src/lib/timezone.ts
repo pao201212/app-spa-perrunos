@@ -27,3 +27,13 @@ export function formatInZone(iso: string, timeZone: string): string {
     "",
   );
 }
+
+/** Fecha de hoy (YYYY-MM-DD) en la zona horaria del spa. */
+export function todayInZone(timeZone: string, now: Date = new Date()): string {
+  return format(new TZDate(now, timeZone), "yyyy-MM-dd");
+}
+
+/** ISO en UTC → "08:00" en la hora del spa. */
+export function timeInZone(iso: string, timeZone: string): string {
+  return format(new TZDate(iso, timeZone), "HH:mm");
+}

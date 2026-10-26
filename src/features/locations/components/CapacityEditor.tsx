@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
+import Link from "next/link";
 import { useActionState, useState } from "react";
 
 import { initialFormState } from "@/components/forms/form-state";
@@ -52,6 +53,11 @@ export function CapacityEditor({ slug, location }: { slug: string; location: Loc
         </li>
       </ul>
       <CapacityMatrixForm slug={slug} location={location} />
+      <p>
+        <Link href={`/admin/locales/${location.id}/disponibilidad`}>
+          ¿Por qué no hay cupo? Ver las horas de un día
+        </Link>
+      </p>
     </div>
   );
 }

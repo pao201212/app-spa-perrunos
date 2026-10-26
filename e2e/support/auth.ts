@@ -270,3 +270,37 @@ export async function createExtra(serviceId: string, name: string): Promise<stri
   if (insertError) throw insertError;
   return data.id;
 }
+
+/**
+ * Capacidad simple mínima para un baño mediano corto: precio, 6 por empleado al día y una
+ * bañadora con turno el lunes 08:00-12:30 (el horario lo pone seedLocationConfig).
+ */
+export async function seedSimpleCapacity(locationId: string, serviceId: string): Promise<void> {
+  const client = admin();
+  const { data: location, error } = await client
+    .from("locations")
+    .select("tenant_id")
+    .eq("id", locationId)
+    .single();
+  if (error) throw error;
+  const base = { tenant_id: location.tenant_id, location_id: locationId };
+  const combo = { size: "M" as const, coat: "short" as const };
+  const { data: staff, error: staffError } = await client
+    .from("staff")
+    .insert({ tenant_id: location.tenant_id, name: `Bañadora ${locationId.slice(0, 6)}` })
+    .select("id")
+    .single();
+  if (staffError) throw staffError;
+  for (const [table, row] of [
+    ["location_service_prices", { ...base, ...combo, service_id: serviceId, price_cop: 45000 }],
+    ["location_pet_capacity", { ...base, ...combo, species: "dog", pets_per_staff: 6 }],
+    ["staff_skills", { tenant_id: location.tenant_id, staff_id: staff.id, skill: "bath" }],
+    [
+      "staff_shifts",
+      { ...base, staff_id: staff.id, weekday: 1, starts_at: "08:00", ends_at: "12:30" },
+    ],
+  ] as const) {
+    const insert = await client.from(table).insert(row);
+    if (insert.error) throw insert.error;
+  }
+}

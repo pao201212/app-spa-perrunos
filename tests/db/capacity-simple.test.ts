@@ -41,6 +41,7 @@ type Evaluation = {
 
 let tenantId: string;
 let customer: TestUser;
+let staff: TestUser;
 let customerId: string;
 let petPool: string[];
 let bath: string;
@@ -293,7 +294,13 @@ beforeAll(async () => {
       .single(),
   );
   tenantId = tenant.id;
-  customer = await createTestUser("cliente-capacidad");
+  [customer, staff] = await Promise.all([
+    createTestUser("cliente-capacidad"),
+    createTestUser("staff-capacidad"),
+  ]);
+  await must(
+    admin.from("memberships").insert({ tenant_id: tenantId, user_id: staff.id, role: "admin" }),
+  );
   customerId = (
     await must(
       admin
@@ -389,7 +396,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await admin.from("tenants").delete().eq("id", tenantId);
-  await deleteTestUsers([customer].filter(Boolean));
+  await deleteTestUsers([customer, staff].filter(Boolean));
   await sql.end();
 });
 
@@ -615,5 +622,60 @@ describe("otras reglas", () => {
       p_pets: [dog("M", "short")],
     });
     expect(hidden.error?.code).toBe("P0002");
+  });
+});
+
+describe("explain_slots (T38)", () => {
+  async function explained(locationId: string, date: string, request: Pet[]) {
+    const data = await must(
+      staff.client.rpc("explain_slots", {
+        p_location_id: locationId,
+        p_date: date,
+        p_pets: request,
+      }),
+    );
+    return data as (Slot & { code: string | null; detail: unknown })[];
+  }
+
+  it("paridad: las horas sin motivo son exactamente las de available_slots", async () => {
+    const location = await setupLocation({ beto: "half" });
+    await booked(location, MONDAY, "10:00", "11:30", [{ size: "M", count: 6 }]);
+    await booked(location, MONDAY, "13:00", "14:30", [{ size: "L", count: 1 }]);
+    const codes = new Set<string>();
+    for (const request of [
+      [dog("M", "short")],
+      pets(2, dog("L", "short")),
+      [dog("S", "long", [bath, breedCut])],
+      [dog("M", "short", [nailCut])],
+    ]) {
+      const rows = await explained(location, MONDAY, request);
+      const free = rows
+        .filter((r) => r.code === null)
+        .map((r) => `${local(r.starts_at)}→${local(r.estimated_ready_at)}`);
+      expect(free, JSON.stringify(request)).toEqual(await slots(location, MONDAY, request));
+      for (const row of rows) if (row.code) codes.add(row.code);
+    }
+    // La prueba no es trivial: hubo horas con y sin motivo.
+    expect(codes).toEqual(new Set(["SIN_ESPACIO", "CUPO_LLENO", "FUERA_DE_HORARIO"]));
+  });
+
+  it("explica cada hora del día con su código", async () => {
+    const location = await setupLocation();
+    await booked(location, MONDAY, "10:00", "11:30", [{ size: "M", count: 6 }]);
+    const rows = await explained(location, MONDAY, [dog("M", "short")]);
+    const byTime = new Map(rows.map((r) => [local(r.starts_at), r.code]));
+    expect(byTime.get("08:00")).toBeNull();
+    expect(byTime.get("10:00")).toBe("SIN_ESPACIO");
+    expect(byTime.get("15:45")).toBe("FUERA_DE_HORARIO");
+  });
+
+  it("solo el staff del spa lo consulta", async () => {
+    const location = await setupLocation();
+    const { error } = await customer.client.rpc("explain_slots", {
+      p_location_id: location,
+      p_date: MONDAY,
+      p_pets: [dog("M", "short")],
+    });
+    expect(error?.code).toBe("42501");
   });
 });

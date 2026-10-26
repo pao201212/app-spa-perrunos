@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { formatInZone, utcToZonedInput, zonedInputToUtc } from "./timezone";
+import {
+  formatInZone,
+  timeInZone,
+  todayInZone,
+  utcToZonedInput,
+  zonedInputToUtc,
+} from "./timezone";
 
 describe("conversión entre hora local del spa y UTC", () => {
   it("convierte un datetime-local de Bogotá (UTC-5) a UTC", () => {
@@ -24,5 +30,13 @@ describe("conversión entre hora local del spa y UTC", () => {
     expect(formatInZone("2026-12-24T13:00:00.000Z", "America/Bogota")).toBe(
       "jue 24 dic 2026, 08:00",
     );
+  });
+});
+
+describe("todayInZone y timeInZone", () => {
+  it("usa la fecha y la hora del spa, no la del servidor", () => {
+    const lateNight = new Date("2026-11-03T03:30:00Z"); // 22:30 del 2 nov en Bogotá
+    expect(todayInZone("America/Bogota", lateNight)).toBe("2026-11-02");
+    expect(timeInZone("2026-11-03T03:30:00Z", "America/Bogota")).toBe("22:30");
   });
 });
