@@ -1,5 +1,7 @@
 .shell {
   --nav-height: 4.25rem;
+  /* Alto de lo que queda fijo abajo: los CTA fijos (p. ej. el wizard) se apoyan encima. */
+  --bottom-bar: var(--nav-height);
 
   min-height: 100dvh;
 }
@@ -85,6 +87,8 @@
 /* Escritorio: navegación lateral */
 @media (min-width: 1024px) {
   .shell {
+    --bottom-bar: 0px;
+
     display: grid;
     grid-template-columns: 14rem 1fr;
     grid-template-rows: auto 1fr;

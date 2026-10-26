@@ -154,11 +154,29 @@
   font-weight: 700;
 }
 
+/* CTA fijo inferior en móvil, sobre la barra de navegación (SPEC §10). */
 .actions {
+  position: sticky;
+  bottom: calc(var(--bottom-bar, 0px) + env(safe-area-inset-bottom));
+  z-index: 5;
   display: flex;
   flex-wrap: wrap-reverse;
   justify-content: space-between;
   gap: var(--space-3);
+  margin-inline: calc(-1 * var(--page-gutter));
+  padding: var(--space-3) var(--page-gutter);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+@media (min-width: 1024px) {
+  .actions {
+    position: static;
+    margin-inline: 0;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+  }
 }
 
 .textarea {

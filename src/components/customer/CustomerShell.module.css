@@ -1,5 +1,7 @@
 .shell {
   --nav-height: 4.25rem;
+  /* Alto de lo que queda fijo abajo: los CTA fijos (p. ej. el wizard) se apoyan encima. */
+  --bottom-bar: var(--nav-height);
 
   min-height: 100dvh;
 }
@@ -79,6 +81,10 @@
 }
 
 @media (min-width: 768px) {
+  .shell {
+    --bottom-bar: 0px;
+  }
+
   .nav {
     position: static;
     padding: 0;
