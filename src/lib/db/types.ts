@@ -69,6 +69,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      tenant_invites: {
+        Row: {
+          created_at: string;
+          email: string;
+          invited_by: string | null;
+          role: Database["public"]["Enums"]["membership_role"];
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          email: string;
+          invited_by?: string | null;
+          role?: Database["public"]["Enums"]["membership_role"];
+          tenant_id: string;
+        };
+        Update: {
+          created_at?: string;
+          email?: string;
+          invited_by?: string | null;
+          role?: Database["public"]["Enums"]["membership_role"];
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tenant_invites_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       tenants: {
         Row: {
           created_at: string;
@@ -105,7 +138,15 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      assign_tenant_admin: { Args: { p_email: string; p_tenant_id: string }; Returns: string };
+      tenant_staff: {
+        Args: { p_tenant_id: string };
+        Returns: {
+          email: string;
+          role: Database["public"]["Enums"]["membership_role"];
+          status: string;
+        }[];
+      };
     };
     Enums: {
       membership_role: "owner" | "admin" | "reception";

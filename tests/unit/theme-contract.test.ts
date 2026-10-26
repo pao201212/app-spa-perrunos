@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { contrastRatio } from "@/lib/theming/contrast";
 import { parseThemeTokens, resolveToken } from "@/lib/theming/tokens";
 
-import { listTenantSlugs } from "../../scripts/sync-tenant-assets";
+import { listTenantSlugs } from "../../scripts/sync-tenant-assets.mjs";
 
 const TENANTS_DIR = "tenants";
 const readTheme = (slug: string) => readFileSync(join(TENANTS_DIR, slug, "theme.css"), "utf8");

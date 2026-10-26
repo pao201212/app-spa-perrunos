@@ -19,7 +19,7 @@
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local > src/lib/db/types.ts && prettier --write src/lib/db/types.ts",
     "test:db": "vitest run --config vitest.db.config.mts",
-    "sync:tenants": "node scripts/sync-tenant-assets.ts",
+    "sync:tenants": "node scripts/sync-tenant-assets.mts",
     "predev": "npm run sync:tenants",
     "prebuild": "npm run sync:tenants"
   },

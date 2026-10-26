@@ -96,3 +96,12 @@ export async function grantSuperAdmin(user: E2EUser): Promise<void> {
   const { error } = await admin().from("platform_admins").insert({ user_id: user.id });
   if (error) throw error;
 }
+
+/** Limpieza: borra un spa creado durante un test (en cascada borra membresías e invitaciones). */
+export async function deleteTenantBySlug(slug: string): Promise<void> {
+  await admin().from("tenants").delete().eq("slug", slug);
+}
+
+export async function deleteInvite(email: string): Promise<void> {
+  await admin().from("tenant_invites").delete().eq("email", email);
+}

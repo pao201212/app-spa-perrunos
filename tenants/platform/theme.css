@@ -5,7 +5,7 @@
   --brand-logo: url("/tenants/platform/assets/logo.svg"); /* sobre fondos claros */
   --brand-logo-on-dark: url("/tenants/platform/assets/logo-on-dark.svg"); /* sobre fondos oscuros */
   --brand-hero: url("/tenants/platform/assets/hero.svg"); /* ilustración de landing / login */
-  --brand-logo-ratio: 16 / 10;
+  --brand-logo-ratio: 2 / 1;
 
   /* Color — nombres semánticos; nunca usar nombres de color en componentes */
   --color-primary: #3b6fd8;

@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { listTenantSlugs, syncTenantAssets } from "../../scripts/sync-tenant-assets";
+import { listTenantSlugs, syncTenantAssets } from "../../scripts/sync-tenant-assets.mjs";
 
 let src: string;
 let out: string;

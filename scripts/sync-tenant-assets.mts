@@ -1,5 +1,5 @@
 // Copia tenants/{slug}/ (theme.css + assets/) a public/tenants/{slug}/ para servirlos estáticos.
-// Se ejecuta antes de `dev` y `build`. Uso: node scripts/sync-tenant-assets.ts
+// Se ejecuta antes de `dev` y `build`. Uso: node scripts/sync-tenant-assets.mts
 import { cpSync, existsSync, readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 

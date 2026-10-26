@@ -36,11 +36,11 @@ describe("routeRequest", () => {
   it("reescribe admin.* a la consola de plataforma", async () => {
     expect(
       await routeRequest(
-        { host: "admin.localhost:3000", pathname: "/tenants", search: "" },
+        { host: "admin.localhost:3000", pathname: "/spas", search: "" },
         root,
         exists,
       ),
-    ).toEqual({ type: "rewrite", path: "/platform/tenants" });
+    ).toEqual({ type: "rewrite", path: "/platform/spas" });
   });
 
   it("devuelve 404 para hosts desconocidos", async () => {

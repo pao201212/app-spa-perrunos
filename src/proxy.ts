@@ -40,5 +40,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // Excluye todo /_next (estáticos, imágenes, HMR) y los assets públicos de los temas.
+  // /tenants/ queda reservado para los temas: ninguna ruta de la app puede empezar así.
   matcher: ["/((?!_next/|favicon.ico|tenants/|api/health).*)"],
 };
