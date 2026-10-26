@@ -45,6 +45,7 @@ export const copy = {
   customer: {
     navLabel: "Mi cuenta",
     nav: {
+      book: "Reservar",
       pets: "Mascotas",
       profile: "Perfil",
     },

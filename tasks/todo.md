@@ -41,7 +41,7 @@
 - [x] T38 [capacity] `capacity.explain` + paridad con available_slots + vista "¿Por qué no hay cupo?"
 - [x] T39 [capacity] `capacity.book`: advisory lock, anti-abuso + test concurrencia 10→1
 - [x] T40 [capacity] `capacity.occupancy` + calendario de ocupación del admin (por talla)
-- [ ] T41 [booking] Wizard cliente: mascota(s) → servicio + extras + opcionales + corte especial → local → hora con entrega → resumen
+- [x] T41 [booking] Wizard cliente: mascota(s) → servicio + extras + opcionales + corte especial → local → hora con entrega → resumen
 - [ ] T42 [booking] Mis citas: activas, historial y confirmación de recepción
 - [ ] T43 [booking] Cita manual del admin (cliente existente o nuevo) + sobrecupo con confirmación
 - [ ] T44 [booking] Agenda admin: día (móvil) y semana (desktop), estados, ajustar hora de entrega

@@ -311,6 +311,7 @@ export async function seedBathAppointment(
   customerId: string,
   startsAt: string,
   readyAt: string,
+  quotaDivisor = 6,
 ): Promise<void> {
   const client = admin();
   const { data: location, error } = await client
@@ -346,8 +347,58 @@ export async function seedBathAppointment(
     species: "dog" as const,
     size: "M" as const,
     coat: "short" as const,
-    quota_divisor: 6,
+    quota_divisor: quotaDivisor,
   }));
   const insertPets = await client.from("appointment_pets").insert(rows);
   if (insertPets.error) throw insertPets.error;
+}
+
+/** Perfil de cliente vinculado a `user` con perros medianos de pelo corto; devuelve su id. */
+export async function createOwnCustomer(
+  slug: string,
+  user: E2EUser,
+  petNames: string[],
+): Promise<string> {
+  const client = admin();
+  const { data: tenant, error } = await client
+    .from("tenants")
+    .select("id")
+    .eq("slug", slug)
+    .single();
+  if (error) throw error;
+  const { data: customer, error: customerError } = await client
+    .from("customers")
+    .insert({ tenant_id: tenant.id, user_id: user.id, full_name: "Cliente E2E", email: user.email })
+    .select("id")
+    .single();
+  if (customerError) throw customerError;
+  const { data: breed } = await client
+    .from("tenant_breeds")
+    .select("id")
+    .match({ tenant_id: tenant.id, name: "Pug" })
+    .single();
+  const pets = await client.from("pets").insert(
+    petNames.map((name) => ({
+      tenant_id: tenant.id,
+      customer_id: customer.id,
+      name,
+      species: "dog" as const,
+      breed_id: breed!.id,
+      size: "M" as const,
+      coat: "short" as const,
+      size_locked: true,
+    })),
+  );
+  if (pets.error) throw pets.error;
+  return customer.id;
+}
+
+/** Citas creadas en un local (para verificar reservas desde la UI). */
+export async function countAppointments(locationId: string): Promise<number> {
+  const { count, error } = await admin()
+    .from("appointments")
+    .select("id", { count: "exact", head: true })
+    .eq("location_id", locationId);
+  if (error) throw error;
+  return count ?? 0;
 }
