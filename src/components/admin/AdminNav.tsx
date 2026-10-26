@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, MapPin, PawPrint, Users, type LucideIcon } from "lucide-react";
+import { Contact, Home, MapPin, PawPrint, Users, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -14,6 +14,7 @@ type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean 
 const ITEMS: NavItem[] = [
   { href: "/admin", label: copy.admin.nav.home, icon: Home, exact: true },
   { href: "/admin/locales", label: copy.admin.nav.locations, icon: MapPin },
+  { href: "/admin/clientes", label: copy.admin.nav.customers, icon: Contact },
   { href: "/admin/personal", label: copy.admin.nav.staff, icon: Users },
   { href: "/admin/razas", label: copy.admin.nav.breeds, icon: PawPrint },
 ];

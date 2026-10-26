@@ -4,17 +4,13 @@ import { useState } from "react";
 
 import { Button, Dialog } from "@/components/ui";
 
-import { archivePetAction } from "../actions";
-
-export function ArchivePetButton({
-  slug,
-  petId,
-  petName,
-}: {
-  slug: string;
-  petId: string;
+type Props = {
+  /** Server Action ya enlazada (cliente o staff). */
+  action: () => Promise<void>;
   petName: string;
-}) {
+};
+
+export function ArchivePetButton({ action, petName }: Props) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -30,7 +26,7 @@ export function ArchivePetButton({
             <Button variant="ghost" onClick={() => setOpen(false)}>
               Cancelar
             </Button>
-            <form action={archivePetAction.bind(null, slug, petId)}>
+            <form action={action}>
               <Button type="submit" variant="danger">
                 Quitar
               </Button>
@@ -38,7 +34,7 @@ export function ArchivePetButton({
           </>
         }
       >
-        <p>Dejará de aparecer en tu lista. El spa conserva su historial de citas.</p>
+        <p>Dejará de aparecer en la lista. El spa conserva su historial de citas.</p>
       </Dialog>
     </>
   );

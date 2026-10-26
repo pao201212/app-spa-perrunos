@@ -4,8 +4,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const PHOTO_BUCKET = "tenant-files";
 const SIGNED_URL_SECONDS = 60 * 60;
-const PET_COLUMNS =
-  "id, name, species, gender, breed_id, weight_kg, size, coat, photo_path, tenant_breeds (name, is_mixed)";
+export const PET_COLUMNS =
+  "id, name, species, gender, breed_id, weight_kg, size, coat, size_locked, photo_path, tenant_breeds (name, is_mixed)";
 
 export async function listOwnPets(customerId: string) {
   const supabase = await createSupabaseServerClient();
@@ -43,7 +43,7 @@ export async function listBreedOptions(tenantId: string) {
 }
 
 /** Las fotos viven en un bucket privado: se muestran con URLs firmadas de corta duración. */
-async function withPhotoUrls<T extends { photo_path: string | null }>(pets: T[]) {
+export async function withPhotoUrls<T extends { photo_path: string | null }>(pets: T[]) {
   const paths = pets.map((pet) => pet.photo_path).filter((path): path is string => !!path);
   if (paths.length === 0) return pets.map((pet) => ({ ...pet, photoUrl: null as string | null }));
 

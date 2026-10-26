@@ -7,7 +7,14 @@ import { coatLabel, sizeLabel } from "@/lib/pets/labels";
 import type { OwnPet } from "../queries";
 import styles from "./customers.module.css";
 
-export function PetList({ pets }: { pets: OwnPet[] }) {
+/** `editHref` arma el enlace de edición (área del cliente o panel del spa). */
+export function PetList({
+  pets,
+  editHref,
+}: {
+  pets: OwnPet[];
+  editHref: (petId: string) => string;
+}) {
   return (
     <ul className={styles.pets}>
       {pets.map((pet) => (
@@ -26,9 +33,10 @@ export function PetList({ pets }: { pets: OwnPet[] }) {
               <strong className={styles.petName}>{pet.name}</strong>
               <span className={styles.muted}>
                 {pet.tenant_breeds.name} · {sizeLabel[pet.size]} · {coatLabel[pet.coat]}
+                {pet.size_locked && " · fijada"}
               </span>
             </div>
-            <Link href={`/mascotas/${pet.id}`} className={styles.edit}>
+            <Link href={editHref(pet.id)} className={styles.edit}>
               Editar<span className="visually-hidden"> {pet.name}</span>
             </Link>
           </Card>

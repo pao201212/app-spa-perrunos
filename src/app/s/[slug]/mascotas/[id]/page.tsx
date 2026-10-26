@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { CustomerShell } from "@/components/customer/CustomerShell";
 import { Card } from "@/components/ui";
+import { archivePetAction, savePetAction } from "@/features/customers/actions";
 import { ArchivePetButton } from "@/features/customers/components/ArchivePetButton";
 import styles from "@/features/customers/components/customers.module.css";
 import { PetForm } from "@/features/customers/components/PetForm";
@@ -37,9 +38,9 @@ async function EditPetContent({ slug, id }: { slug: string; id: string }) {
         <img src={pet.photoUrl} alt={`Foto de ${pet.name}`} className={styles.currentPhoto} />
       )}
       <Card>
-        <PetForm slug={slug} breeds={breeds} pet={pet} />
+        <PetForm action={savePetAction.bind(null, slug, pet.id)} breeds={breeds} pet={pet} />
       </Card>
-      <ArchivePetButton slug={slug} petId={pet.id} petName={pet.name} />
+      <ArchivePetButton action={archivePetAction.bind(null, slug, pet.id)} petName={pet.name} />
     </CustomerShell>
   );
 }

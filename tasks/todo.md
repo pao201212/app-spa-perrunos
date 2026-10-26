@@ -27,7 +27,7 @@
 - [x] T24 [staff] Admin de personal: habilidades, locales, turnos semanales, ausencias
 - [x] T25 [customers] Migración customers, pets, pet_groups + RLS cliente/staff + tests (cliente X ≠ Y)
 - [x] T26 [customers] Perfil cliente (nombre, WhatsApp) + CRUD mascotas (raza/criollo, peso, pelo, foto privada)
-- [ ] T27 [customers] Admin: buscar/inscribir clientes y mascotas + vinculación por correo al entrar con Google
+- [x] T27 [customers] Admin: buscar/inscribir clientes y mascotas + vinculación por correo al entrar con Google
 - [ ] T28 [customers] Admin: grupos "se bañan juntas"
 - [ ] T29 [services] Migración categories, services, extras, durations, location_prices + RLS
 - [ ] T30 [services] Admin CRUD de categorías, servicios (bath / special_cut / other) y extras

@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { CustomerShell } from "@/components/customer/CustomerShell";
 import { Card } from "@/components/ui";
+import { savePetAction } from "@/features/customers/actions";
 import { PetForm } from "@/features/customers/components/PetForm";
 import { listBreedOptions } from "@/features/customers/queries";
 import { requireCustomer } from "@/lib/auth/customer";
@@ -26,7 +27,7 @@ async function NewPetContent({ slug }: { slug: string }) {
     <CustomerShell businessName={tenant.name}>
       <h1>Nueva mascota</h1>
       <Card>
-        <PetForm slug={slug} breeds={breeds} />
+        <PetForm action={savePetAction.bind(null, slug, null)} breeds={breeds} />
       </Card>
     </CustomerShell>
   );

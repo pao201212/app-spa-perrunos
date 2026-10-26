@@ -1,0 +1,74 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { z } from "zod";
+
+import { AdminSection } from "@/components/admin/AdminSection";
+import { AdminShell } from "@/components/admin/AdminShell";
+import { Badge, buttonClassName, Card } from "@/components/ui";
+import { updateCustomerAction } from "@/features/customers/admin-actions";
+import { getCustomerForStaff, listCustomerPets } from "@/features/customers/admin-queries";
+import { CustomerAdminForm } from "@/features/customers/components/CustomerAdminForm";
+import styles from "@/features/customers/components/customers.module.css";
+import { PetList } from "@/features/customers/components/PetList";
+import { requireTenantStaff } from "@/lib/auth/guards";
+
+export default function CustomerDetailPage({ params }: PageProps<"/s/[slug]/admin/clientes/[id]">) {
+  return (
+    <Suspense fallback={null}>
+      {params.then(({ slug, id }) => (
+        <CustomerDetailContent slug={slug} id={id} />
+      ))}
+    </Suspense>
+  );
+}
+
+async function CustomerDetailContent({ slug, id }: { slug: string; id: string }) {
+  const { tenant } = await requireTenantStaff(slug, `/admin/clientes/${id}`);
+  if (!z.uuid().safeParse(id).success) notFound();
+  const customer = await getCustomerForStaff(tenant.id, id);
+  if (!customer) notFound();
+  const pets = await listCustomerPets(customer.id);
+
+  return (
+    <AdminShell businessName={tenant.name}>
+      <div>
+        <h1>{customer.full_name}</h1>
+        {customer.user_id ? (
+          <Badge tone="success">Con cuenta</Badge>
+        ) : (
+          <p className={styles.muted}>
+            <Badge tone="warning">Sin cuenta</Badge>{" "}
+            {customer.email
+              ? `Se vinculará cuando ingrese con ${customer.email}.`
+              : "Agrega su correo para que pueda ingresar y ver sus citas."}
+          </p>
+        )}
+      </div>
+      <AdminSection title="Datos">
+        <CustomerAdminForm
+          action={updateCustomerAction.bind(null, slug, customer.id)}
+          customer={customer}
+        />
+      </AdminSection>
+      <AdminSection title="Mascotas">
+        {pets.length === 0 ? (
+          <Card>
+            <p>Este cliente no tiene mascotas registradas.</p>
+          </Card>
+        ) : (
+          <PetList
+            pets={pets}
+            editHref={(petId) => `/admin/clientes/${customer.id}/mascotas/${petId}`}
+          />
+        )}
+        <Link
+          href={`/admin/clientes/${customer.id}/mascotas/nueva`}
+          className={buttonClassName({ variant: "ghost" })}
+        >
+          Agregar mascota
+        </Link>
+      </AdminSection>
+    </AdminShell>
+  );
+}

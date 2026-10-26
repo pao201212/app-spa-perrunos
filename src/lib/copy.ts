@@ -33,6 +33,7 @@ export const copy = {
       locations: "Locales",
       breeds: "Razas",
       staff: "Personal",
+      customers: "Clientes",
     },
   },
   platform: {

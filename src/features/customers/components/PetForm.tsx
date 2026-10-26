@@ -2,28 +2,40 @@
 
 import { useActionState, useMemo, useState, type ChangeEvent } from "react";
 
-import { initialFormState } from "@/components/forms/form-state";
+import { initialFormState, type FormState } from "@/components/forms/form-state";
 import formStyles from "@/components/forms/forms.module.css";
 import { FormStatus } from "@/components/forms/FormStatus";
 import { Button, Input, Select } from "@/components/ui";
-import { COAT_TYPES, coatLabel, SPECIES, speciesLabel, type Species } from "@/lib/pets/labels";
+import {
+  COAT_TYPES,
+  coatLabel,
+  PET_SIZES,
+  sizeLabel,
+  SPECIES,
+  speciesLabel,
+  type Species,
+} from "@/lib/pets/labels";
 
-import { savePetAction } from "../actions";
 import { compressImage } from "../compress-image";
 import type { BreedOption, OwnPet } from "../queries";
 import styles from "./customers.module.css";
 
-type Props = { slug: string; breeds: BreedOption[]; pet?: OwnPet };
+type Props = {
+  /** Server Action ya enlazada (cliente o staff). */
+  action: (state: FormState, formData: FormData) => Promise<FormState>;
+  breeds: BreedOption[];
+  pet?: OwnPet;
+  /** Solo staff: permite fijar talla y pelo a mano. */
+  allowOverride?: boolean;
+};
 
-export function PetForm({ slug, breeds, pet }: Props) {
-  const [state, action, pending] = useActionState(
-    savePetAction.bind(null, slug, pet?.id ?? null),
-    initialFormState,
-  );
+export function PetForm({ action, breeds, pet, allowOverride = false }: Props) {
+  const [state, formAction, pending] = useActionState(action, initialFormState);
   const [species, setSpecies] = useState<Species>(
     (state.values?.species as Species) ?? pet?.species ?? "dog",
   );
   const [breedId, setBreedId] = useState(state.values?.breed_id ?? pet?.breed_id ?? "");
+  const [locked, setLocked] = useState(pet?.size_locked ?? false);
 
   const options = useMemo(() => breeds.filter((b) => b.species === species), [breeds, species]);
   const isMixed = options.find((b) => b.id === breedId)?.is_mixed ?? false;
@@ -42,7 +54,7 @@ export function PetForm({ slug, breeds, pet }: Props) {
   }
 
   return (
-    <form action={action} className={formStyles.form} noValidate>
+    <form action={formAction} className={formStyles.form} noValidate>
       <Input
         label="Nombre"
         name="name"
@@ -119,6 +131,40 @@ export function PetForm({ slug, breeds, pet }: Props) {
           <option value="male">Macho</option>
         </Select>
       </div>
+
+      {allowOverride && (
+        <fieldset className={styles.override}>
+          <legend className="visually-hidden">Talla y pelo manuales</legend>
+          <label className={styles.checkbox}>
+            <input
+              type="checkbox"
+              name="size_locked"
+              checked={locked}
+              onChange={(event) => setLocked(event.target.checked)}
+            />
+            Fijar talla y pelo a mano (ignora raza y peso)
+          </label>
+          {locked && (
+            <div className={styles.grid2}>
+              <Select label="Talla fija" name="locked_size" defaultValue={pet?.size ?? "M"}>
+                {PET_SIZES.map((size) => (
+                  <option key={size} value={size}>
+                    {sizeLabel[size]}
+                  </option>
+                ))}
+              </Select>
+              <Select label="Pelo fijo" name="locked_coat" defaultValue={pet?.coat ?? "short"}>
+                {COAT_TYPES.map((coat) => (
+                  <option key={coat} value={coat}>
+                    {coatLabel[coat]}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          )}
+        </fieldset>
+      )}
+
       <Input
         label="Foto"
         name="photo"

@@ -131,6 +131,70 @@ describe("ensure_customer_profile", () => {
   });
 });
 
+describe("claim_customer_profile (vinculación automática al entrar, D13)", () => {
+  it("vincula el perfil inscrito por el admin con el correo de la cuenta, sin pedir datos", async () => {
+    const newcomer = await createTestUser("recien-llegado");
+    try {
+      const { data: preRegistered } = await staffA.client
+        .from("customers")
+        .insert({ tenant_id: tenantA, full_name: "Inscrita en mostrador", email: newcomer.email })
+        .select("id")
+        .single();
+      const { data, error } = await newcomer.client.rpc("claim_customer_profile", {
+        p_tenant_id: tenantA,
+      });
+      expect(error).toBeNull();
+      expect(data).toBe(preRegistered!.id);
+      const { data: row } = await admin
+        .from("customers")
+        .select("user_id")
+        .eq("id", preRegistered!.id)
+        .single();
+      expect(row).toEqual({ user_id: newcomer.id });
+    } finally {
+      await deleteTestUsers([newcomer]);
+    }
+  });
+
+  it("es idempotente: llamadas repetidas o simultáneas devuelven el perfil ya vinculado", async () => {
+    const twice = await createTestUser("doble-clic");
+    try {
+      const { data: preRegistered } = await staffA.client
+        .from("customers")
+        .insert({ tenant_id: tenantA, full_name: "Doble", email: twice.email })
+        .select("id")
+        .single();
+      const results = await Promise.all([
+        twice.client.rpc("claim_customer_profile", { p_tenant_id: tenantA }),
+        twice.client.rpc("claim_customer_profile", { p_tenant_id: tenantA }),
+      ]);
+      expect(results.map((r) => r.data)).toEqual([preRegistered!.id, preRegistered!.id]);
+      const again = await twice.client.rpc("claim_customer_profile", { p_tenant_id: tenantA });
+      expect(again.data).toBe(preRegistered!.id);
+    } finally {
+      await deleteTestUsers([twice]);
+    }
+  });
+
+  it("devuelve null si no hay un perfil que vincular (y no crea nada)", async () => {
+    const stranger = await createTestUser("sin-perfil");
+    try {
+      const { data, error } = await stranger.client.rpc("claim_customer_profile", {
+        p_tenant_id: tenantB,
+      });
+      expect(error).toBeNull();
+      expect(data).toBeNull();
+      const { count } = await admin
+        .from("customers")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", stranger.id);
+      expect(count).toBe(0);
+    } finally {
+      await deleteTestUsers([stranger]);
+    }
+  });
+});
+
 describe("customers: privacidad", () => {
   beforeAll(async () => {
     const { data } = await clientY.client.rpc("ensure_customer_profile", {
@@ -145,7 +209,7 @@ describe("customers: privacidad", () => {
     const own = await clientX.client.from("customers").select("id").eq("tenant_id", tenantA);
     expect(own.data).toEqual([{ id: customerX }]);
     const asStaff = await staffA.client.from("customers").select("id").eq("tenant_id", tenantA);
-    expect(asStaff.data?.length).toBe(3);
+    expect(asStaff.data?.map((c) => c.id)).toEqual(expect.arrayContaining([customerX, customerY]));
   });
 
   it("el cliente edita su nombre y WhatsApp, pero no su correo ni su usuario", async () => {

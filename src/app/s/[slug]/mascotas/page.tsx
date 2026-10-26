@@ -38,7 +38,7 @@ async function PetsContent({ slug }: { slug: string }) {
           <p>Aún no tienes mascotas registradas. Agrega la primera para poder reservar.</p>
         </Card>
       ) : (
-        <PetList pets={pets} />
+        <PetList pets={pets} editHref={(petId) => `/mascotas/${petId}`} />
       )}
     </CustomerShell>
   );

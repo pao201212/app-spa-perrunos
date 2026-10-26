@@ -733,6 +733,7 @@ export type Database = {
         Returns: number;
       };
       assign_tenant_admin: { Args: { p_email: string; p_tenant_id: string }; Returns: string };
+      claim_customer_profile: { Args: { p_tenant_id: string }; Returns: string };
       ensure_customer_profile: {
         Args: { p_full_name: string; p_tenant_id: string; p_whatsapp: string };
         Returns: string;
