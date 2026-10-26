@@ -30,7 +30,7 @@ export default defineConfig({
     // para iterar rápido; en dev, React tiene un error intermitente de Performance.measure al prefetchear.
     command: process.env.E2E_DEV
       ? `npm run dev -- -p ${PORT}`
-      : `npm run build && npm run start -- -p ${PORT}`,
+      : `NEXT_DIST_DIR=.next-e2e npm run build && NEXT_DIST_DIR=.next-e2e npm run start -- -p ${PORT}`,
     url: `http://localhost:${PORT}/api/health`,
     reuseExistingServer: !isCI,
     timeout: 300_000,

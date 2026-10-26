@@ -4,7 +4,7 @@ const token = (prefix) => `/^var\\(--${prefix}[a-z0-9-]*\\)$/`;
 
 /** @type {import("stylelint").Config} */
 const config = {
-  ignoreFiles: [".next/**", "node_modules/**", "public/**", "coverage/**"],
+  ignoreFiles: [".next/**", ".next-e2e/**", "node_modules/**", "public/**", "coverage/**"],
   rules: {
     "color-no-hex": true,
     "color-named": "never",
