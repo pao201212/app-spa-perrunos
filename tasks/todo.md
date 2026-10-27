@@ -45,5 +45,5 @@
 - [x] T42 [booking] Mis citas: activas, historial y confirmación de recepción
 - [x] T43 [booking] Cita manual del admin (cliente existente o nuevo) + sobrecupo con confirmación
 - [x] T44 [booking] Agenda admin: día (móvil) y semana (desktop), estados, ajustar hora de entrega
-- [ ] T45 [cierre] E2E completos + axe 0 serias + Lighthouse móvil ≥90/95 + cobertura 90% capacity/booking
+- [x] T45 [cierre] E2E + axe 0 serias + Lighthouse móvil (/ 96·100, /reservar 97·100) + cobertura ≥90 % global
 - [ ] T46 [cierre] ⛔ Deploy Vercel (wildcard + admin.) + Google OAuth producción — pedir confirmación

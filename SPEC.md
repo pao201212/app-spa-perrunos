@@ -510,7 +510,7 @@ export async function upsertLocationPrices(input: unknown) {
 | E2E | Playwright (Pixel 7 + Desktop) | Login (con OAuth simulado en local), reserva completa, cita del admin, cambio de estados, 2 tenants con temas distintos |
 | A11y | axe | 0 violaciones serias o críticas |
 
-Cobertura: **90 %** en `capacity` y `booking`, 70 % global.
+Cobertura unitaria: **90 %** global y en `capacity` y `booking`, en sentencias, ramas, funciones y líneas (umbral en `vitest.config.mts`; antes 70 % global, subido con Prisma Lab el 2026-10-26).
 
 ---
 
