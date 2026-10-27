@@ -50,7 +50,7 @@ async function CustomerDetailContent({ slug, id }: { slug: string; id: string })
         {customer.user_id ? (
           <Badge tone="success">Con cuenta</Badge>
         ) : (
-          <p className={styles.muted}>
+          <p className={`${styles.muted} break-anywhere`}>
             <Badge tone="warning">Sin cuenta</Badge>{" "}
             {customer.email
               ? `Se vinculará cuando ingrese con ${customer.email}.`

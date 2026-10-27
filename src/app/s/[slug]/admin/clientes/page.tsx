@@ -62,7 +62,7 @@ async function CustomersContent({ slug, query }: { slug: string; query: string }
                   <Link href={`/admin/clientes/${customer.id}`} className={styles.petName}>
                     {customer.full_name}
                   </Link>
-                  <span className={styles.muted}>
+                  <span className={`${styles.muted} break-anywhere`}>
                     {[customer.whatsapp, customer.email].filter(Boolean).join(" · ")}
                   </span>
                 </div>

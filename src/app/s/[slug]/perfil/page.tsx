@@ -35,7 +35,7 @@ async function ProfileContent({ slug, next }: { slug: string; next: string | nul
       <h1>{customer ? "Mi perfil" : "Completa tu perfil"}</h1>
       {!customer && <p>Antes de continuar, cuéntanos cómo contactarte.</p>}
       <Card>
-        <p>
+        <p className="break-anywhere">
           Correo: <strong>{viewer.email}</strong>
         </p>
         <ProfileForm

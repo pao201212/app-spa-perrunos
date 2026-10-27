@@ -114,7 +114,7 @@ async function CustomerPicker({ tenantId, q }: { tenantId: string; q: string }) 
               <Card className={styles.petCard}>
                 <div className={styles.petInfo}>
                   <strong className={styles.petName}>{c.full_name}</strong>
-                  <span className={styles.muted}>
+                  <span className={`${styles.muted} break-anywhere`}>
                     {[c.whatsapp, c.email].filter(Boolean).join(" · ")}
                   </span>
                 </div>

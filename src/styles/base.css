@@ -143,3 +143,8 @@ a {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* Correos y otros textos sin espacios: se parten si no caben (sin scroll horizontal a 320px). */
+.break-anywhere {
+  overflow-wrap: anywhere;
+}

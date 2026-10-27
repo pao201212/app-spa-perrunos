@@ -33,7 +33,7 @@ async function LoginContent({ next, failed }: { next?: string; failed: boolean }
   if (user) {
     return (
       <>
-        <p>
+        <p className="break-anywhere">
           {copy.auth.signedInAs} <strong>{user.email}</strong>
         </p>
         <SignOutButton />

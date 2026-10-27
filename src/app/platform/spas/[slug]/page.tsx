@@ -44,7 +44,7 @@ async function TenantDetail({ slug }: { slug: string }) {
             <ul className={styles.staffList}>
               {staff.map((member) => (
                 <li key={member.email} className={styles.staffItem}>
-                  <span>{member.email}</span>
+                  <span className="break-anywhere">{member.email}</span>
                   <Badge tone={member.status === "active" ? "success" : "warning"}>
                     {member.status === "active" ? "Activo" : "Invitación pendiente"}
                   </Badge>
