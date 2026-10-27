@@ -1,0 +1,148 @@
+.grid2 {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .grid2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.pets {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.petCard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.photo,
+.photoPlaceholder {
+  flex: none;
+  width: 4rem;
+  height: 4rem;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+}
+
+.photoPlaceholder {
+  display: grid;
+  place-items: center;
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+}
+
+.petInfo {
+  display: grid;
+  flex: 1 1 10rem;
+  gap: var(--space-1);
+}
+
+.petName {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+}
+
+.muted {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.edit {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-target);
+  margin-inline-start: auto;
+  padding-inline: var(--space-3);
+  color: var(--color-primary-strong);
+  font-weight: 700;
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.currentPhoto {
+  width: 8rem;
+  height: 8rem;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+}
+
+.override {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--tap-target);
+  font-weight: 600;
+}
+
+.checkbox input {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--color-primary-strong);
+}
+
+.search {
+  display: grid;
+  gap: var(--space-3);
+}
+
+@media (min-width: 768px) {
+  .search {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.groupList {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.groupRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  padding-block: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.legend {
+  margin-bottom: var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}

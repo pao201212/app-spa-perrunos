@@ -1,0 +1,115 @@
+.shell {
+  --nav-height: 4.25rem;
+  /* Alto de lo que queda fijo abajo: los CTA fijos (p. ej. el wizard) se apoyan encima. */
+  --bottom-bar: var(--nav-height);
+
+  min-height: 100dvh;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--page-gutter);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.home {
+  display: inline-flex;
+  min-height: var(--tap-target);
+  align-items: center;
+  --logo-height: 2.5rem;
+}
+
+.main {
+  display: grid;
+  gap: var(--space-6);
+  align-content: start;
+  width: 100%;
+  max-width: 48rem;
+  margin-inline: auto;
+  padding: var(--space-6) var(--page-gutter)
+    calc(var(--nav-height) + var(--space-8) + env(safe-area-inset-bottom));
+}
+
+/* Móvil: barra inferior fija, al alcance del pulgar */
+.nav {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 20;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.navList {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.navList > li {
+  flex: 1;
+}
+
+.navLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: var(--nav-height);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.navIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.navActive {
+  color: var(--color-primary-strong);
+}
+
+@media (min-width: 768px) {
+  .shell {
+    --bottom-bar: 0px;
+  }
+
+  .nav {
+    position: static;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .navList {
+    gap: var(--space-1);
+  }
+
+  .navLink {
+    flex-direction: row;
+    gap: var(--space-2);
+    min-height: var(--tap-target);
+    padding-inline: var(--space-4);
+    border-radius: var(--radius-pill);
+    font-size: var(--text-base);
+  }
+
+  .navActive {
+    background: var(--color-surface-muted);
+  }
+
+  .main {
+    padding-bottom: var(--space-12);
+  }
+}

@@ -1,0 +1,10 @@
+.logo {
+  display: block;
+  height: var(--logo-height, 3rem);
+  aspect-ratio: var(--brand-logo-ratio);
+  background: var(--brand-logo) center / contain no-repeat;
+}
+
+.onDark {
+  background-image: var(--brand-logo-on-dark);
+}
