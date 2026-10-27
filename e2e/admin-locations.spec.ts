@@ -123,7 +123,8 @@ test("los locales no tienen scroll horizontal a 320px", async ({ page, isMobile 
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto(demo("/admin/locales"));
   await page.getByRole("link", { name: "Sede principal" }).click();
-  await page.locator("h1").waitFor();
+  // Tras navegar en cliente, la página anterior sigue oculta en el DOM (Activity) con su h1.
+  await page.getByRole("heading", { level: 1, name: "Sede principal" }).waitFor();
   for (const path of ["/admin", "/admin/locales", page.url().replace(demo(""), "")]) {
     await page.goto(demo(path));
     await page.locator("h1").waitFor();
