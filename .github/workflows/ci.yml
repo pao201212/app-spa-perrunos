@@ -23,7 +23,7 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run format:check
-      - run: npm test
+      - run: npm run test:coverage # exige el 90 % (vitest.config.mts)
 
   db:
     name: Tests de base de datos (RLS, capacidad)
