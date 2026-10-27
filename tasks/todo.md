@@ -47,3 +47,4 @@
 - [x] T44 [booking] Agenda admin: día (móvil) y semana (desktop), estados, ajustar hora de entrega
 - [x] T45 [cierre] E2E + axe 0 serias + Lighthouse móvil (/ 96·100, /reservar 97·100) + cobertura ≥90 % global
 - [ ] T46 [cierre] ⛔ Deploy Vercel (wildcard + admin.) + Google OAuth producción — pedir confirmación
+- [ ] T47 [ci] Acelerar CI: timeouts, Supabase sin servicios no usados, 4 workers E2E, caché de Chromium y build

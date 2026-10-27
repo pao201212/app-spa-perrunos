@@ -12,6 +12,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
+  // Los runners de GitHub para repos públicos tienen 4 vCPU.
+  workers: isCI ? 4 : undefined,
   reporter: isCI ? "github" : "list",
   use: {
     // Los spas se resuelven por subdominio; Chromium resuelve *.localhost a 127.0.0.1.

@@ -5,6 +5,9 @@ on:
   push:
     branches: [main]
 
+env:
+  SUPABASE_EXCLUDE: realtime,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -13,6 +16,7 @@ jobs:
   checks:
     name: Lint, tipos y tests unitarios
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -28,6 +32,7 @@ jobs:
   db:
     name: Tests de base de datos (RLS, capacidad)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -35,7 +40,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npx supabase start
+      # Solo db, auth, API y storage: el resto de servicios no se usa en las pruebas.
+      - run: npx supabase start -x $SUPABASE_EXCLUDE
       - name: Exportar credenciales locales de Supabase
         run: |
           eval "$(npx supabase status -o env)"
@@ -50,6 +56,7 @@ jobs:
   e2e:
     name: E2E (Pixel 7 + Desktop)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -57,7 +64,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npx supabase start
+      # Solo db, auth, API y storage: el resto de servicios no se usa en las pruebas.
+      - run: npx supabase start -x $SUPABASE_EXCLUDE
       - name: Exportar credenciales locales de Supabase
         run: |
           eval "$(npx supabase status -o env)"
@@ -67,7 +75,20 @@ jobs:
             echo "SUPABASE_SECRET_KEY=${SECRET_KEY:-$SERVICE_ROLE_KEY}"
             echo "SUPABASE_DB_URL=$DB_URL"
           } >> "$GITHUB_ENV"
+      - name: Caché de Chromium (Playwright)
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Caché del build de Next.js
+        uses: actions/cache@v6
+        with:
+          path: .next-e2e/cache
+          key: next-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**') }}
+          restore-keys: next-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+      # Si apt se cuelga, que falle rápido en vez de esperar horas.
       - run: npx playwright install --with-deps chromium
+        timeout-minutes: 4
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v7
         if: failure()
